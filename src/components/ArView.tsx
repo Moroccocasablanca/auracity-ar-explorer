@@ -210,8 +210,8 @@ export function ArView() {
       {/* Center reticle */}
       <Crosshair className="pointer-events-none absolute left-1/2 top-[66%] size-5 -translate-x-1/2 -translate-y-1/2 text-primary/60" />
 
-      {notice && (
-        <div className="glass absolute inset-x-4 top-28 mx-auto max-w-sm rounded-xl px-3 py-2 text-center text-xs text-muted-foreground">
+      {notice && !selectedItem && (
+        <div className="glass pointer-events-none absolute inset-x-4 bottom-24 mx-auto max-w-sm rounded-xl px-3 py-2 text-center text-xs text-muted-foreground">
           {notice}
         </div>
       )}
