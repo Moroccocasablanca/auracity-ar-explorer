@@ -1,11 +1,14 @@
-import { useMemo, useState } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { lazy, Suspense, useCallback, useMemo, useState } from "react";
+import { ClientOnly, createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { ChevronRight } from "lucide-react";
+import { Bell, ChevronRight } from "lucide-react";
+import { useProximityAlerts } from "@/components/ProximityWatcher";
 import { distanceM, formatDistance } from "@/lib/geo";
 import { kindKey, useI18n } from "@/lib/i18n";
 import { useLocation } from "@/lib/location";
 import { KINDS, nodesQuery, tagline, type NodeKind } from "@/lib/nodes";
+
+const BraMap = lazy(() => import("@/components/BraMap"));
 
 export const Route = createFileRoute("/explore")({
   head: () => ({
@@ -38,6 +41,9 @@ function Explore() {
       .map((n) => ({ n, d: pos ? distanceM(pos, n) : null }))
       .sort((a, b) => (a.d != null && b.d != null ? a.d - b.d : a.n.name.localeCompare(b.n.name)));
   }, [nodes, kind, pos]);
+  const filtered = useMemo(() => list.map((x) => x.n), [list]);
+  const kindLabel = useCallback((k: string) => t(kindKey(k)), [t]);
+  const alerts = useProximityAlerts();
 
   return (
     <div className="grid-backdrop min-h-screen px-4 pb-32 pt-10">
@@ -45,6 +51,7 @@ function Explore() {
         <p className="mono-label">Bra · Piemonte</p>
         <h1 className="mt-1 text-4xl font-bold">{t("explore.title")}</h1>
         <p className="mt-2 text-muted-foreground">{t("explore.sub")}</p>
+        <p className="mono-label mt-2">{t("explore.count", { n: nodes.length })}</p>
 
         <div className="-mx-4 mt-6 flex gap-2 overflow-x-auto px-4 pb-1">
           {(["all", ...KINDS] as const).map((k) => (
@@ -63,6 +70,25 @@ function Explore() {
           ))}
         </div>
 
+        <div className="glass mt-4 h-[52vh] min-h-80 overflow-hidden rounded-2xl">
+          <ClientOnly fallback={<div className="h-full w-full animate-pulse bg-card/60" />}>
+            <Suspense fallback={<div className="h-full w-full animate-pulse bg-card/60" />}>
+              <BraMap nodes={filtered} pos={pos} kindLabel={kindLabel} />
+            </Suspense>
+          </ClientOnly>
+        </div>
+
+        {alerts.supported && !alerts.enabled && (
+          <button
+            type="button"
+            onClick={alerts.enable}
+            className="glass mt-3 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm"
+          >
+            <Bell className="size-4 shrink-0 text-primary" />
+            <span className="flex-1">{t("prox.enable")}</span>
+          </button>
+        )}
+
         <ul className="mt-6 space-y-3">
           {list.map(({ n, d }) => (
             <li key={n.id} className={`kind-${n.kind}`}>
@@ -71,7 +97,11 @@ function Explore() {
                 params={{ slug: n.slug }}
                 className="glass group flex items-center gap-4 rounded-2xl p-4 transition-colors hover:bg-accent/40"
               >
-                <span className="kind-dot size-3 shrink-0 rounded-full" />
+                {n.image_url ? (
+                  <img src={n.image_url} alt="" loading="lazy" className="size-12 shrink-0 rounded-xl object-cover" />
+                ) : (
+                  <span className="kind-dot size-3 shrink-0 rounded-full" />
+                )}
                 <div className="min-w-0 flex-1">
                   <p className="mono-label !text-[0.58rem]" style={{ color: "var(--kind)" }}>
                     {t(kindKey(n.kind))}
