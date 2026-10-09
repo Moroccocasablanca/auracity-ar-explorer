@@ -84,7 +84,7 @@ export const postReview = createServerFn({ method: "POST" })
 
     const { data: node } = await supabaseAdmin
       .from("nodes")
-      .select("id, kind, lat, lng, radius_m, hours")
+      .select("id, kind, subscribed, lat, lng, radius_m, hours")
       .eq("id", data.nodeId)
       .maybeSingle();
     if (!node) return { ok: false, error: "not_found" };
