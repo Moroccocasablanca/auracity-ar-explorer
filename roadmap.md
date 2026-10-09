@@ -12,3 +12,7 @@
 - [x] Lingue automatiche: es, fr, de, ar, ro, sq, hi
 - [x] Sicurezza: punti parlanti solo lontano dalla carreggiata; avviso "guarda dove cammini" prima/durante la fotocamera; pausa AR se si cammina veloci
 - [x] Registrazione: conferma 18+ e uso responsabile del telefono obbligatori
+
+- [x] Guida di Bra in chat (Claude)
+- [ ] Monumenti: storia più ricca + nuovi monumenti storici
+- [ ] Più contenuti divertenti per bambini e adulti
