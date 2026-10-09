@@ -8,6 +8,8 @@
    - Sulla mappa gli oggetti parlanti hanno un'icona animata e un contatore "da scoprire / scoperti" (una piccola collezione personale salvata sul telefono).
    - Più punti giardino: Zizzola, giardini di Piazza Caduti, parco della stazione, aiuole davanti alle scuole (solo panchine/alberi, mai edifici).
    - Monumenti, chiese, moschee, case e scuole restano solo informativi, non modificabili.
+   - **Dal vivo con la fotocamera**: quando inquadri l'oggetto nella vista AR, sopra di lui compare la faccina animata che muove la bocca e inizia a parlare da sola. Monumento: racconta la sua storia. Albero/panchina: legge l'ultimo messaggio lasciato (battute, racconti, strofe di canzoni).
+   - **Sulla mappa aperta**: gli oggetti parlanti vicini a te hanno la faccina che si muove; toccandoli parlano subito senza aprire un'altra pagina.
 
 2. **Messaggi solo divertenti e sicuri**
    - Il filtro blocca: insulti, molestie, numeri di telefono, email, indirizzi, profili social, e **appuntamenti/raduni** ("ci vediamo alle 18", "troviamoci in piazza").
