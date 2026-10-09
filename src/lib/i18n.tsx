@@ -421,7 +421,7 @@ export function translate(lang: Lang, key: TKey, vars?: Record<string, string | 
 /** Picks the first supported language from the phone's preferred list. */
 export function detectLang(preferred: readonly string[]): Lang {
   for (const p of preferred) {
-    const code = p.toLowerCase().split("-")[0];
+    const code = p.toLowerCase().split("-")[0] ?? "";
     if ((LANGS as readonly string[]).includes(code)) return code as Lang;
   }
   return "en";
