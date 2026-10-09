@@ -10,7 +10,7 @@
 <!-- LOVABLE:END -->
 
 ## AURACITY architecture
-- Public reads (nodes, messages, reviews) go through the browser Supabase client with anon SELECT policies; all writes go through `src/lib/auracity.functions.ts` server functions using supabaseAdmin, because presence, opening hours, receipts and moderation must be enforced server-side.
+- Public node reads use the browser client; message/review reads use narrow public RPC projections without author names or user IDs, because identity must not leak through direct table reads. Content writes use server functions enforcing presence, hours, receipts and moderation.
 - Venue menus refresh automatically via `refreshMenu` (once per Rome day, claimed atomically) reading `nodes.menu_source_url` with AI in `src/lib/menu.server.ts`; owners never upload menus manually.
 - Bench messages require a signed-in user (`postBenchMessage` with requireSupabaseAuth); audio playback uses on-device speech (`src/lib/speech.ts`) to avoid per-listen AI cost.
 - Account type (visitor vs business) lives in `public.profiles`, created by the `handle_new_user` trigger; users can only edit `display_name`, so `account_type`/`business_status` changes stay server-side and any future business privileges must check `business_status`, never client data.
@@ -20,3 +20,6 @@
 - Shared geo/opening-hours logic is in `src/lib/geo.ts` and is used by both client and server so rules cannot drift.
 - UI strings live in the dictionary in `src/lib/i18n.tsx` (IT/EN); never hardcode user-facing text in components.
 - GPS/heading state is global in `LocationProvider` (root) so AR, Explore and node pages share one position.
+- Map appearance uses SunCalc solar position at Bra with a persisted manual override and a live timer, because device timezone and fixed hours are not reliable daylight indicators.
+- Garden interaction eligibility is explicit on nodes and enforced in both shared node rules and a database trigger, because ordinary benches and protected places must not inherit playful messaging privileges.
+- Friend identities are returned only by an authenticated RPC after invitation acceptance; public content never returns account identifiers, because mutual consent must precede disclosure.

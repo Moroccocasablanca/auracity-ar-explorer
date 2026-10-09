@@ -18,6 +18,7 @@ export const Route = createFileRoute("/business")({
           "Local businesses subscribe to manage their AR avatar, publish menus and run proximity campaigns with verified reviews.",
       },
       { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: Business,

@@ -29,6 +29,27 @@
       "when": 1791568111514,
       "tag": "0003_node_images",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791573925575,
+      "tag": "0004_garden_objects_and_identity_privacy",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1791574043136,
+      "tag": "0005_mutual_friend_invites",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1791574131236,
+      "tag": "0006_lock_friend_rpc_anonymous_access",
+      "breakpoints": true
     }
   ]
 }

@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      friend_invites: {
+        Row: {
+          accepted_at: string | null
+          created_at: string
+          id: string
+          receiver_id: string | null
+          sender_id: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          created_at?: string
+          id?: string
+          receiver_id?: string | null
+          sender_id: string
+        }
+        Update: {
+          accepted_at?: string | null
+          created_at?: string
+          id?: string
+          receiver_id?: string | null
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "friend_invites_receiver_id_fkey"
+            columns: ["receiver_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "friend_invites_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       messages: {
         Row: {
           author: string
@@ -56,6 +95,7 @@ export type Database = {
           created_at: string
           description_en: string
           description_it: string
+          garden_interactive: boolean
           history_en: string
           history_it: string
           hours: Json | null
@@ -84,6 +124,7 @@ export type Database = {
           created_at?: string
           description_en?: string
           description_it?: string
+          garden_interactive?: boolean
           history_en?: string
           history_it?: string
           hours?: Json | null
@@ -112,6 +153,7 @@ export type Database = {
           created_at?: string
           description_en?: string
           description_it?: string
+          garden_interactive?: boolean
           history_en?: string
           history_it?: string
           hours?: Json | null
@@ -229,7 +271,33 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      accept_friend_invite: { Args: { invite_code: string }; Returns: boolean }
+      accepted_friends: {
+        Args: never
+        Returns: {
+          display_name: string
+          friend_id: string
+        }[]
+      }
+      public_node_messages: {
+        Args: { p_node_id: string }
+        Returns: {
+          body: string
+          created_at: string
+          id: string
+          node_id: string
+        }[]
+      }
+      public_node_reviews: {
+        Args: { p_node_id: string }
+        Returns: {
+          body: string
+          created_at: string
+          id: string
+          node_id: string
+          rating: number
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

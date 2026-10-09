@@ -1,7 +1,9 @@
 import { lazy, Suspense, useCallback, useMemo, useState } from "react";
 import { ClientOnly, createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Bell, ChevronRight } from "lucide-react";
+import { Bell, ChevronRight, Crosshair, MapPin } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { MapAppearanceControl, useMapAppearance } from "@/components/MapAppearanceControl";
 import { useProximityAlerts } from "@/components/ProximityWatcher";
 import { distanceM, formatDistance } from "@/lib/geo";
 import { kindKey, useI18n } from "@/lib/i18n";
@@ -24,6 +26,7 @@ export const Route = createFileRoute("/explore")({
         content: "Browse every street, monument and business of Bra mapped as an AURACITY augmented-reality node.",
       },
       { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: Explore,
@@ -31,7 +34,10 @@ export const Route = createFileRoute("/explore")({
 
 function Explore() {
   const { t, lang } = useI18n();
-  const { pos } = useLocation();
+  const loc = useLocation();
+  const { pos } = loc;
+  const { mode, appearance, selectMode } = useMapAppearance();
+  const [recenter, setRecenter] = useState(0);
   const { data: nodes = [] } = useQuery(nodesQuery);
   const [kind, setKind] = useState<NodeKind | "all">("all");
 
@@ -47,7 +53,7 @@ function Explore() {
 
   return (
     <div className="grid-backdrop min-h-screen px-4 pb-32 pt-10">
-      <div className="mx-auto max-w-xl">
+      <div className="mx-auto max-w-5xl">
         <p className="mono-label">Bra · Piemonte</p>
         <h1 className="mt-1 text-4xl font-bold">{t("explore.title")}</h1>
         <p className="mt-2 text-muted-foreground">{t("explore.sub")}</p>
@@ -70,12 +76,20 @@ function Explore() {
           ))}
         </div>
 
-        <div className="glass mt-4 h-[52vh] min-h-80 overflow-hidden rounded-2xl">
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
+          <MapAppearanceControl mode={mode} onChange={selectMode} />
+          <Button size="icon" variant="outline" title={t("map.locate")} aria-label={t("map.locate")} onClick={() => {
+            if (!loc.active) void loc.start();
+            setRecenter((v) => v + 1);
+          }}><Crosshair /></Button>
+        </div>
+        <div className="relative mt-3 h-[58dvh] min-h-80 overflow-hidden rounded-lg border border-border">
           <ClientOnly fallback={<div className="h-full w-full animate-pulse bg-card/60" />}>
             <Suspense fallback={<div className="h-full w-full animate-pulse bg-card/60" />}>
-              <BraMap nodes={filtered} pos={pos} kindLabel={kindLabel} />
+              <BraMap nodes={filtered} pos={pos} kindLabel={kindLabel} appearance={appearance} recenter={recenter} />
             </Suspense>
           </ClientOnly>
+          <span className="pointer-events-none absolute bottom-6 left-3 z-[500] inline-flex items-center gap-1 rounded-md bg-card px-2 py-1 text-xs text-foreground"><MapPin className="size-3" />Bra · {t(appearance === "day" ? "map.day" : "map.night")}</span>
         </div>
 
         {alerts.supported && !alerts.enabled && (
