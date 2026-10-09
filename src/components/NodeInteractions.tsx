@@ -8,7 +8,7 @@ import { postBenchMessage, postMessage, postReview, type ActionResult } from "@/
 import { useSession } from "@/lib/auth";
 import { ListenButton } from "./ListenButton";
 import { distanceM, isOpenNow } from "@/lib/geo";
-import { useI18n } from "@/lib/i18n";
+import { LOCALE_TAG, useI18n, type Lang } from "@/lib/i18n";
 import { useLocation } from "@/lib/location";
 import { messagesQuery, nodeHours, reviewsQuery, type NodeRow } from "@/lib/nodes";
 import { QrScanner, canScanQr } from "./QrScanner";
@@ -73,8 +73,8 @@ const inputCls =
 const btnCls =
   "inline-flex h-11 items-center justify-center gap-2 rounded-full bg-primary px-6 text-sm font-semibold text-primary-foreground transition-transform active:scale-95 disabled:opacity-40 disabled:active:scale-100";
 
-function timeAgo(iso: string, lang: string) {
-  return new Date(iso).toLocaleString(lang === "it" ? "it-IT" : "en-GB", {
+function timeAgo(iso: string, lang: Lang) {
+  return new Date(iso).toLocaleString(LOCALE_TAG[lang], {
     day: "2-digit",
     month: "short",
     hour: "2-digit",
@@ -127,6 +127,7 @@ export function MessageBoard({ node }: { node: NodeRow }) {
         </div>
       )}
       <div className="space-y-2">
+        {isBench && <p className="text-xs text-muted-foreground">{t("garden.rules")}</p>}
         <input
           className={inputCls}
           placeholder={t("form.name")}
@@ -169,7 +170,7 @@ export function MessageBoard({ node }: { node: NodeRow }) {
             </div>
             <div className="mt-1 flex items-start gap-2">
               <p className="flex-1 text-sm text-foreground/90">{m.body}</p>
-              <ListenButton compact text={m.body} />
+              <ListenButton compact text={m.body} voice={{ nodeId: node.id, source: "message", messageId: m.id }} />
             </div>
           </li>
         ))}
