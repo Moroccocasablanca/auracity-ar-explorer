@@ -230,3 +230,12 @@
 @media (prefers-reduced-motion: reduce) {
   .aura-pin::before, .animate-aura-pulse, .animate-aura-scan { animation: none; }
 }
+.garden-character { position: relative; flex: 0 0 88px; width: 88px; height: 100px; }
+.garden-face { position: absolute; left: 28px; top: 36px; width: 32px; display: flex; justify-content: space-between; flex-wrap: wrap; }
+.garden-eye { width: 10px; height: 13px; border-radius: 50%; background: var(--foreground); border: 3px solid var(--background); }
+.garden-mouth { width: 14px; height: 5px; border-radius: 0 0 8px 8px; background: var(--background); margin: 5px auto 0; }
+.garden-character.is-speaking { animation: garden-sway 1.2s ease-in-out infinite; }
+.is-speaking .garden-mouth { animation: garden-talk .25s ease-in-out infinite alternate; }
+@keyframes garden-sway { 50% { transform: rotate(5deg); } }
+@keyframes garden-talk { to { height: 12px; } }
+@media (prefers-reduced-motion: reduce) { .garden-character.is-speaking, .is-speaking .garden-mouth { animation: none; } }
