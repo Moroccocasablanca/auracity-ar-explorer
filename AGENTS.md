@@ -28,3 +28,4 @@
 
 - Public read-only MCP server in `src/lib/mcp/` uses only the anon client and public RPCs, because external assistants may read intentionally public place data but never account data or writes.
 - The Bra guide chat (`/guide` + `src/routes/api/guide.ts`) uses Claude via native gateway /v1/messages with read-only anon tools over `nodes`, no stored history, because it must answer from app data without exposing user data.
+- Venues carry `nodes.subscribed`; only subscribed venues get prominent pins, proximity alerts, auto-menu reading and reviews (enforced server-side), because those are the paid features. Unsubscribed venues are imported from OpenStreetMap (`osm_id`).

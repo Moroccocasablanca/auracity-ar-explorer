@@ -16,3 +16,4 @@
 - [x] Guida di Bra in chat (Claude)
 - [ ] Monumenti: storia più ricca + nuovi monumenti storici
 - [ ] Più contenuti divertenti per bambini e adulti
+- [x] Tutti i locali di Bra sulla mappa (OpenStreetMap), abbonati in evidenza
