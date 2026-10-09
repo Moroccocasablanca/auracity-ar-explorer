@@ -7,6 +7,11 @@
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
 export default defineConfig({
+  // Pre-bundle these up front so the dev server never re-optimizes mid-session
+  // (a late re-optimization can load a second React copy and blank the screen).
+  vite: {
+    optimizeDeps: { include: ["sonner", "lucide-react"] },
+  },
   tanstackStart: {
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
     // nitro/vite builds from this

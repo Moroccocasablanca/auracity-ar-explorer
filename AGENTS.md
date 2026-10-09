@@ -8,3 +8,10 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+## AURACITY architecture
+- Public reads (nodes, messages, reviews) go through the browser Supabase client with anon SELECT policies; all writes go through `src/lib/auracity.functions.ts` server functions using supabaseAdmin, because presence, opening hours, receipts and moderation must be enforced server-side.
+- Content moderation lives in `src/lib/moderation.server.ts` (pattern checks + Lovable AI Gateway); it fails closed when the gateway is unavailable.
+- Shared geo/opening-hours logic is in `src/lib/geo.ts` and is used by both client and server so rules cannot drift.
+- UI strings live in the dictionary in `src/lib/i18n.tsx` (IT/EN); never hardcode user-facing text in components.
+- GPS/heading state is global in `LocationProvider` (root) so AR, Explore and node pages share one position.
