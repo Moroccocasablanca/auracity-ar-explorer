@@ -5,7 +5,7 @@ import { ArrowLeft, Clock, MapPin, Tag } from "lucide-react";
 import { MessageBoard, PresenceBanner, ReviewBoard, usePresence } from "@/components/NodeInteractions";
 import { isOpenNow, formatDistance } from "@/lib/geo";
 import { useI18n } from "@/lib/i18n";
-import { description, nodeHours, nodeMenu, nodesQuery, promo, tagline } from "@/lib/nodes";
+import { description, nodeHours, nodeMenu, nodesQuery, promo, tagline, type NodeRow } from "@/lib/nodes";
 
 export const Route = createFileRoute("/node/$slug")({
   head: ({ params }) => {
@@ -25,7 +25,7 @@ export const Route = createFileRoute("/node/$slug")({
 
 function NodePage() {
   const { slug } = Route.useParams();
-  const { t, lang } = useI18n();
+  const { t } = useI18n();
   const { data: nodes = [], isLoading } = useQuery(nodesQuery);
   const node = nodes.find((n) => n.slug === slug);
   const [tab, setTab] = useState<"messages" | "reviews">("messages");
@@ -49,7 +49,7 @@ function NodeDetail({
   tab,
   setTab,
 }: {
-  node: NonNullable<ReturnType<typeof useNode>>;
+  node: NodeRow;
   tab: "messages" | "reviews";
   setTab: (t: "messages" | "reviews") => void;
 }) {
@@ -141,9 +141,4 @@ function NodeDetail({
       </section>
     </div>
   );
-}
-
-// Helper type only
-function useNode() {
-  return useQuery(nodesQuery).data?.[0];
 }
