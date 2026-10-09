@@ -88,6 +88,50 @@ export type Database = {
           },
         ]
       }
+      node_translations: {
+        Row: {
+          created_at: string
+          description: string
+          history: string
+          lang: string
+          name: string
+          node_id: string
+          promo: string | null
+          source_hash: string
+          tagline: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string
+          history?: string
+          lang: string
+          name?: string
+          node_id: string
+          promo?: string | null
+          source_hash?: string
+          tagline?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          history?: string
+          lang?: string
+          name?: string
+          node_id?: string
+          promo?: string | null
+          source_hash?: string
+          tagline?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "node_translations_node_id_fkey"
+            columns: ["node_id"]
+            isOneToOne: false
+            referencedRelation: "nodes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       nodes: {
         Row: {
           address: string
@@ -265,6 +309,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      voice_cache: {
+        Row: {
+          created_at: string
+          key: string
+          path: string
+        }
+        Insert: {
+          created_at?: string
+          key: string
+          path: string
+        }
+        Update: {
+          created_at?: string
+          key?: string
+          path?: string
+        }
+        Relationships: []
       }
     }
     Views: {

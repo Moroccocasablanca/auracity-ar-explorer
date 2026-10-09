@@ -1,7 +1,12 @@
 import type React from "react";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { locales } from "./locales";
 
-export type Lang = "it" | "en";
+export const LANGS = ["it", "en", "es", "fr", "de", "ar", "ro", "sq", "hi"] as const;
+export type Lang = (typeof LANGS)[number];
+export const LANG_NAMES: Record<Lang, string> = {
+  it: "Italiano", en: "English", es: "Español", fr: "Français", de: "Deutsch", ar: "العربية", ro: "Română", sq: "Shqip", hi: "हिन्दी",
+};
 
 const dict = {
   it: {
@@ -337,12 +342,90 @@ const dict = {
     "safety.1": "Real-time LLM filter: no insults, hate or sensitive data.",
     "safety.2": "Physical presence required within 30 m of the node.",
     "safety.3": "Reviews paused outside business opening hours.",
+    "kind.tree": "Tree",
+    "err.meetup": "No meetups or appointments: leave a fun message, a story or a song.",
+    "lang.label": "Language",
+    "garden.latest": "Latest message",
+    "garden.older": "Earlier messages",
+    "garden.talk": "Make me talk",
+    "garden.found": "Talking objects discovered: {n} of {t}",
+    "garden.new": "{name} woke up and wants to talk!",
+    "garden.rules": "Fun messages only: jokes, everyday stories, songs, an invitation to eat. No insults, phone numbers or meetups.",
+    "audio.female": "Woman",
+    "audio.male": "Man",
+    "audio.device": "Phone voice",
+    "safety.cam.title": "Before opening the camera",
+    "safety.cam.1": "Stop in a safe spot: in a garden, next to a bench, never by the road.",
+    "safety.cam.2": "Look where you walk: never use the camera while crossing or among cars and bikes.",
+    "safety.cam.3": "Children always with an adult. Your life matters more than any game.",
+    "safety.cam.ok": "Got it, I'm in a safe spot",
+    "safety.cam.cancel": "Not now",
+    "safety.banner": "Look where you walk · stay away from the road",
+    "safety.paused": "You seem to be moving fast: AR paused. Stop in a safe spot to continue.",
+    "auth.adult": "I am at least 18 years old and will use my phone responsibly: at the right moment and place, watching where I walk and away from the road.",
   },
 } as const;
 
-export type TKey = keyof (typeof dict)["it"];
+const itExtra = {
+  "kind.tree": "Albero",
+  "err.meetup": "Niente appuntamenti o raduni: lascia un messaggio divertente, un racconto o una canzone.",
+  "lang.label": "Lingua",
+  "garden.latest": "Ultimo messaggio",
+  "garden.older": "Messaggi precedenti",
+  "garden.talk": "Fammi parlare",
+  "garden.found": "Oggetti parlanti scoperti: {n} su {t}",
+  "garden.new": "{name} si è svegliato e vuole parlarti!",
+  "garden.rules": "Solo messaggi divertenti: battute, racconti di tutti i giorni, canzoni, un invito a mangiare. Niente insulti, numeri di telefono o appuntamenti.",
+  "audio.female": "Donna",
+  "audio.male": "Uomo",
+  "audio.device": "Voce del telefono",
+  "safety.cam.title": "Prima di aprire la fotocamera",
+  "safety.cam.1": "Fermati in un posto sicuro: in un giardino, vicino a una panchina, mai sulla strada.",
+  "safety.cam.2": "Guarda dove cammini: non usare la fotocamera mentre attraversi o tra auto e bici.",
+  "safety.cam.3": "I bambini sempre con un adulto. La tua vita vale più di qualsiasi gioco.",
+  "safety.cam.ok": "Ho capito, sono in un posto sicuro",
+  "safety.cam.cancel": "Non ora",
+  "safety.banner": "Guarda dove cammini · lontano dalla strada",
+  "safety.paused": "Sembra che ti stia muovendo veloce: AR in pausa. Fermati in un posto sicuro per continuare.",
+  "auth.adult": "Ho almeno 18 anni e userò il telefono in modo responsabile: nel momento e nel posto giusto, guardando dove cammino e lontano dalla strada.",
+} satisfies Partial<Record<keyof (typeof dict)["en"], string>>;
+
+export type TKey = keyof (typeof dict)["en"];
+
+type Table = Partial<Record<TKey, string>>;
+const tables: Record<Lang, Table> = {
+  it: { ...dict.it, ...itExtra },
+  en: dict.en,
+  es: locales.es,
+  fr: locales.fr,
+  de: locales.de,
+  ar: locales.ar,
+  ro: locales.ro,
+  sq: locales.sq,
+  hi: locales.hi,
+};
 
 export const kindKey = (k: string) => `kind.${k}` as TKey;
+
+/** BCP-47 tag for dates and speech. */
+export const LOCALE_TAG: Record<Lang, string> = {
+  it: "it-IT", en: "en-GB", es: "es-ES", fr: "fr-FR", de: "de-DE", ar: "ar", ro: "ro-RO", sq: "sq-AL", hi: "hi-IN",
+};
+
+export function translate(lang: Lang, key: TKey, vars?: Record<string, string | number>) {
+  let s: string = tables[lang][key] ?? dict.en[key] ?? key;
+  if (vars) for (const [k, v] of Object.entries(vars)) s = s.replace(`{${k}}`, String(v));
+  return s;
+}
+
+/** Picks the first supported language from the phone's preferred list. */
+export function detectLang(preferred: readonly string[]): Lang {
+  for (const p of preferred) {
+    const code = p.toLowerCase().split("-")[0] ?? "";
+    if ((LANGS as readonly string[]).includes(code)) return code as Lang;
+  }
+  return "en";
+}
 
 type Ctx = {
   lang: Lang;
@@ -354,30 +437,20 @@ type Ctx = {
 const g = globalThis as { __auraI18nCtx?: React.Context<Ctx | null> };
 const I18nContext = (g.__auraI18nCtx ??= createContext<Ctx | null>(null));
 
-const fallback: Ctx = {
-  lang: "it",
-  setLang: () => {},
-  t: (key, vars) => {
-    let s: string = dict.it[key];
-    if (vars) for (const [k, v] of Object.entries(vars)) s = s.replace(`{${k}}`, String(v));
-    return s;
-  },
-};
+const fallback: Ctx = { lang: "it", setLang: () => {}, t: (key, vars) => translate("it", key, vars) };
 
 export function I18nProvider({ children }: { children: ReactNode }) {
   const [lang, setLangState] = useState<Lang>("it");
 
   useEffect(() => {
     const saved = localStorage.getItem("aura_lang");
-    if (saved === "it" || saved === "en") {
-      setLangState(saved);
-    } else {
-      setLangState(navigator.language?.toLowerCase().startsWith("it") ? "it" : "en");
-    }
+    if (saved && (LANGS as readonly string[]).includes(saved)) setLangState(saved as Lang);
+    else setLangState(detectLang(navigator.languages?.length ? navigator.languages : [navigator.language ?? "it"]));
   }, []);
 
   useEffect(() => {
     document.documentElement.lang = lang;
+    document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
   }, [lang]);
 
   const setLang = useCallback((l: Lang) => {
@@ -385,14 +458,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     localStorage.setItem("aura_lang", l);
   }, []);
 
-  const t = useCallback<Ctx["t"]>(
-    (key, vars) => {
-      let s: string = dict[lang][key];
-      if (vars) for (const [k, v] of Object.entries(vars)) s = s.replace(`{${k}}`, String(v));
-      return s;
-    },
-    [lang],
-  );
+  const t = useCallback<Ctx["t"]>((key, vars) => translate(lang, key, vars), [lang]);
 
   const value = useMemo(() => ({ lang, setLang, t }), [lang, setLang, t]);
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;

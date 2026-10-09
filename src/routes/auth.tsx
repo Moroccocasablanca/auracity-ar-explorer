@@ -56,11 +56,12 @@ function SignIn() {
   const [busy, setBusy] = useState(false);
   const [sentTo, setSentTo] = useState<string | null>(null);
   const [unconfirmed, setUnconfirmed] = useState(false);
+  const [adult, setAdult] = useState(false);
 
   const strong = isStrongPassword(password);
   const canSubmit =
     email.includes("@") &&
-    (mode === "login" ? password.length > 0 : strong && (type === "user" || bizName.trim().length >= 2));
+    (mode === "login" ? password.length > 0 : strong && adult && (type === "user" || bizName.trim().length >= 2));
 
   async function submit() {
     setBusy(true);
@@ -72,7 +73,7 @@ function SignIn() {
           password,
           options: {
             emailRedirectTo: `${window.location.origin}/auth`,
-            data: { account_type: type, business_name: type === "business" ? bizName.trim() : undefined },
+            data: { account_type: type, business_name: type === "business" ? bizName.trim() : undefined, adult_confirmed_at: new Date().toISOString() },
           },
         });
         if (error) return void toast.error(t(authErrorKey(error.message, error.code)));
@@ -222,6 +223,12 @@ function SignIn() {
                 })}
               </ul>
             </div>
+          )}
+          {mode === "signup" && (
+            <label className="flex items-start gap-2 rounded-xl border border-border bg-card/60 p-3 text-xs">
+              <input type="checkbox" className="mt-0.5 size-4 accent-primary" checked={adult} onChange={(e) => setAdult(e.target.checked)} />
+              <span>{t("auth.adult")}</span>
+            </label>
           )}
           <button
             type="button"

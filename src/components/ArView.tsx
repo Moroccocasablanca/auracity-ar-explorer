@@ -1,11 +1,49 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowUpRight, Crosshair, Lock, Power, Radio, Sparkles } from "lucide-react";
+import { AlertTriangle, ArrowUpRight, Crosshair, Lock, Power, Radio, ShieldCheck, Sparkles, Volume2 } from "lucide-react";
 import { angleDiff, bearingDeg, distanceM, formatDistance } from "@/lib/geo";
 import { kindKey, useI18n } from "@/lib/i18n";
 import { useLocation } from "@/lib/location";
-import { nodesQuery, tagline, type NodeRow } from "@/lib/nodes";
+import { messagesQuery, nodesQuery, tagline, type NodeRow } from "@/lib/nodes";
+import { isGardenObject } from "@/lib/node-rules";
+import { useNodeText } from "@/lib/use-node-text";
+import { markDiscovered } from "@/lib/discovered";
+import { GardenFace } from "./GardenCharacter";
+import { useNarrator } from "./ListenButton";
+
+const TALK_ANGLE = 12;
+const TALK_DIST = 80;
+const FAST_MPS = 2.5; // above brisk walking: pause AR for safety
+const talked = new Set<string>();
+
+const talks = (n: NodeRow) => n.kind === "monument" || isGardenObject(n);
+
+/** Starts speaking once when the camera rests on a talking object: monuments tell their story, garden objects the latest message. */
+function AutoTalk({ node, play }: { node: NodeRow; play: ReturnType<typeof useNarrator>["play"] }) {
+  const tx = useNodeText(node);
+  const garden = isGardenObject(node);
+  const { data: messages } = useQuery({ ...messagesQuery(node.id), enabled: garden });
+  useEffect(() => {
+    if (talked.has(node.id)) return;
+    const timer = window.setTimeout(() => {
+      if (garden) {
+        const m = messages?.[0];
+        if (!m) return;
+        talked.add(node.id);
+        markDiscovered(node.id);
+        play(node.id, { nodeId: node.id, source: "message", messageId: m.id }, m.body);
+      } else {
+        const text = `${tx.name}. ${tx.history || tx.description}`;
+        talked.add(node.id);
+        play(node.id, { nodeId: node.id, source: "history" }, text);
+      }
+    }, 1200);
+    return () => window.clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [node.id, garden, messages?.[0]?.id, tx.name, tx.history, tx.description, play]);
+  return null;
+}
 
 const FOV = 70;
 const RANGE_FREE = 250;
@@ -21,6 +59,12 @@ export function ArView() {
   const [cameraOk, setCameraOk] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
   const drag = useRef<{ x: number; h: number } | null>(null);
+  const [safetyAsk, setSafetyAsk] = useState(false);
+  const { playing, play, stop } = useNarrator();
+  const tooFast = !loc.demo && loc.speed != null && loc.speed > FAST_MPS;
+  useEffect(() => {
+    if (tooFast) stop();
+  }, [tooFast, stop]);
 
   // Camera lifecycle
   useEffect(() => {
@@ -70,6 +114,11 @@ export function ArView() {
 
   const inView = placed.filter((p) => Math.abs(angleDiff(p.b, loc.heading)) < FOV / 2 + 10);
   const selectedItem = placed.find((p) => p.n.id === selected) ?? null;
+  const focus = tooFast
+    ? null
+    : inView
+        .filter((p) => talks(p.n) && p.d <= TALK_DIST && Math.abs(angleDiff(p.b, loc.heading)) < TALK_ANGLE)
+        .sort((a, b) => a.d - b.d)[0] ?? null;
 
   if (!loc.active) {
     return (
@@ -91,7 +140,7 @@ export function ArView() {
         <p className="mt-6 max-w-sm text-sm text-muted-foreground">{t("ar.enter.sub")}</p>
         <button
           type="button"
-          onClick={() => loc.start()}
+          onClick={() => setSafetyAsk(true)}
           className="mt-8 inline-flex h-12 items-center gap-2 rounded-full bg-primary px-8 text-sm font-semibold text-primary-foreground shadow-[0_0_30px_var(--glow)] transition-transform active:scale-95"
         >
           <Sparkles className="size-4" /> {t("ar.enter")}
@@ -103,6 +152,30 @@ export function ArView() {
         >
           {t("ar.demo")}
         </button>
+        {safetyAsk && (
+          <div className="fixed inset-0 z-[60] flex items-end justify-center bg-background/80 p-4 backdrop-blur-sm sm:items-center" role="dialog" aria-modal="true">
+            <div className="glass w-full max-w-sm space-y-4 rounded-2xl p-5 text-left">
+              <h2 className="flex items-center gap-2 text-lg font-semibold">
+                <ShieldCheck className="size-5 text-primary" /> {t("safety.cam.title")}
+              </h2>
+              <ul className="space-y-2 text-sm text-foreground/90">
+                {(["safety.cam.1", "safety.cam.2", "safety.cam.3"] as const).map((k) => (
+                  <li key={k} className="flex gap-2"><AlertTriangle className="mt-0.5 size-4 shrink-0 text-kind-business" />{t(k)}</li>
+                ))}
+              </ul>
+              <button
+                type="button"
+                onClick={() => { setSafetyAsk(false); void loc.start(); }}
+                className="h-11 w-full rounded-full bg-primary text-sm font-semibold text-primary-foreground"
+              >
+                {t("safety.cam.ok")}
+              </button>
+              <button type="button" onClick={() => setSafetyAsk(false)} className="w-full text-center text-sm text-muted-foreground">
+                {t("safety.cam.cancel")}
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -164,11 +237,19 @@ export function ArView() {
             className={`kind-${p.n.kind} absolute -translate-x-1/2 -translate-y-full text-left`}
             style={{ left: `${left}%`, top: `${top}%`, transform: `translate(-50%, -100%) scale(${scale})` }}
           >
+            {isGardenObject(p.n) && (
+              <div className="mx-auto mb-1 flex justify-center">
+                <GardenFace kind={p.n.kind} speaking={playing === p.n.id} size={56} />
+              </div>
+            )}
             <div className={`ar-chip flex max-w-[11rem] flex-col rounded-2xl px-3 py-2 ${sel ? "ring-2 ring-primary" : ""}`}>
               <span className="kind-text mono-label !text-[0.58rem]" style={{ color: "var(--kind)" }}>
                 {t(kindKey(p.n.kind))}
               </span>
-              <span className="truncate text-sm font-semibold leading-tight">{p.n.name}</span>
+              <span className="flex items-center gap-1 truncate text-sm font-semibold leading-tight">
+                {playing === p.n.id && <Volume2 className="size-3.5 shrink-0 animate-pulse text-primary" />}
+                {p.n.name}
+              </span>
               <span className="mt-0.5 flex items-center gap-1.5 font-mono text-[0.65rem] text-muted-foreground">
                 {formatDistance(p.d)}
                 {near && <span className="rounded-full bg-success/20 px-1.5 text-success">{t("ar.inrange")}</span>}
@@ -206,6 +287,20 @@ export function ArView() {
           </button>
         </div>
       </div>
+
+      {focus && <AutoTalk key={focus.n.id} node={focus.n} play={play} />}
+
+      {/* Safety reminder */}
+      <div className="pointer-events-none absolute inset-x-0 top-[max(6.5rem,calc(env(safe-area-inset-top)+6rem))] flex justify-center px-4">
+        <p className="glass flex items-center gap-1.5 rounded-full px-3 py-1 text-[0.7rem] text-kind-business">
+          <AlertTriangle className="size-3.5" /> {t("safety.banner")}
+        </p>
+      </div>
+      {tooFast && (
+        <div className="absolute inset-0 z-40 flex items-center justify-center bg-background/90 p-6 text-center">
+          <p className="max-w-xs text-base font-medium">{t("safety.paused")}</p>
+        </div>
+      )}
 
       {/* Center reticle */}
       <Crosshair className="pointer-events-none absolute left-1/2 top-[66%] size-5 -translate-x-1/2 -translate-y-1/2 text-primary/60" />

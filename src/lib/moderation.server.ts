@@ -2,7 +2,7 @@
 
 export type ModerationResult =
   | { ok: true }
-  | { ok: false; reason: "personal_data" | "profanity" | "hate" | "spam" | "unavailable" };
+  | { ok: false; reason: "personal_data" | "profanity" | "hate" | "spam" | "meetup" | "unavailable" };
 
 const PERSONAL_DATA_PATTERNS = [
   /[\w.+-]+@[\w-]+\.[\w.-]+/i, // email
@@ -18,7 +18,7 @@ const SCHEMA = {
   required: ["allowed", "reason"],
   properties: {
     allowed: { type: "boolean" },
-    reason: { type: "string", enum: ["ok", "profanity", "hate", "personal_data", "spam"] },
+    reason: { type: "string", enum: ["ok", "profanity", "hate", "personal_data", "spam", "meetup"] },
   },
 };
 
@@ -44,8 +44,10 @@ export async function moderateText(text: string): Promise<ModerationResult> {
         store: false,
         reasoning: { effort: "low" },
         instructions:
-          "You are a strict content moderator for a public, location-based message board (Italian and English). " +
-          "Block profanity and insults, hate speech or harassment, personal or sensitive data (emails, phone numbers, addresses of private people, IDs, payment data), and spam or advertising. " +
+          "You are a strict content moderator for a public, location-based message board used by families, in any language. " +
+          "Block profanity and insults, hate speech, harassment or bullying, sexual content, personal or sensitive data (emails, phone numbers, addresses of private people, social handles, IDs, payment data), and spam or advertising. " +
+          "Block with reason 'meetup' any attempt to arrange a meeting, gathering or appointment between people (e.g. 'see you at 6', 'let's meet in the square', a time and place to gather). " +
+          "Allow fun and kind content: jokes, everyday stories, greetings, song lyrics or short verses, and generic invitations to come and eat or try a dish (e.g. 'come try the pizza!'). " +
           "Allow ordinary opinions, including honest negative reviews. Answer only with the JSON object.",
         input: [{ role: "user", content: `Text to moderate:\n"""${text}"""` }],
         text: {
@@ -83,7 +85,7 @@ export async function moderateText(text: string): Promise<ModerationResult> {
     const verdict = JSON.parse(out) as { allowed: boolean; reason: string };
     if (verdict.allowed) return { ok: true };
     const reason = verdict.reason === "ok" ? "spam" : verdict.reason;
-    return { ok: false, reason: reason as "personal_data" | "profanity" | "hate" | "spam" };
+    return { ok: false, reason: reason as "personal_data" | "profanity" | "hate" | "spam" | "meetup" };
   } catch (e) {
     console.error("moderation failed", e);
     return { ok: false, reason: "unavailable" };

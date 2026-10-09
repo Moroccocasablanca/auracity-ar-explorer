@@ -1,6 +1,6 @@
-import { lazy, Suspense, useCallback, useMemo, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { ClientOnly, createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Bell, ChevronRight, Crosshair, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MapAppearanceControl, useMapAppearance } from "@/components/MapAppearanceControl";
@@ -8,7 +8,10 @@ import { useProximityAlerts } from "@/components/ProximityWatcher";
 import { distanceM, formatDistance } from "@/lib/geo";
 import { kindKey, useI18n } from "@/lib/i18n";
 import { useLocation } from "@/lib/location";
-import { KINDS, nodesQuery, tagline, type NodeKind } from "@/lib/nodes";
+import { KINDS, messagesQuery, nodesQuery, tagline, type NodeKind, type NodeRow } from "@/lib/nodes";
+import { useNarrator } from "@/components/ListenButton";
+import { isGardenObject } from "@/lib/node-rules";
+import { discovered, markDiscovered } from "@/lib/discovered";
 
 const BraMap = lazy(() => import("@/components/BraMap"));
 
@@ -50,6 +53,22 @@ function Explore() {
   const filtered = useMemo(() => list.map((x) => x.n), [list]);
   const kindLabel = useCallback((k: string) => t(kindKey(k)), [t]);
   const alerts = useProximityAlerts();
+  const qc = useQueryClient();
+  const { playing, play } = useNarrator();
+  const gardens = useMemo(() => nodes.filter(isGardenObject), [nodes]);
+  const [found, setFound] = useState(0);
+  useEffect(() => setFound(discovered().filter((id) => gardens.some((g) => g.id === id)).length), [gardens, playing]);
+  const onTalk = useCallback(
+    async (n: NodeRow) => {
+      const msgs = await qc.fetchQuery(messagesQuery(n.id));
+      const m = msgs[0];
+      if (!m) return;
+      markDiscovered(n.id);
+      play(n.id, { nodeId: n.id, source: "message", messageId: m.id }, m.body);
+    },
+    [qc, play],
+  );
+  const talkLabel = t("garden.talk");
 
   return (
     <div className="grid-backdrop min-h-screen px-4 pb-32 pt-10">
@@ -86,11 +105,15 @@ function Explore() {
         <div className="relative mt-3 h-[58dvh] min-h-80 overflow-hidden rounded-lg border border-border">
           <ClientOnly fallback={<div className="h-full w-full animate-pulse bg-card/60" />}>
             <Suspense fallback={<div className="h-full w-full animate-pulse bg-card/60" />}>
-              <BraMap nodes={filtered} pos={pos} kindLabel={kindLabel} appearance={appearance} recenter={recenter} />
+              <BraMap nodes={filtered} pos={pos} kindLabel={kindLabel} appearance={appearance} recenter={recenter} onTalk={onTalk} talkLabel={talkLabel} speakingId={playing} />
             </Suspense>
           </ClientOnly>
           <span className="pointer-events-none absolute bottom-6 left-3 z-[500] inline-flex items-center gap-1 rounded-md bg-card px-2 py-1 text-xs text-foreground"><MapPin className="size-3" />Bra · {t(appearance === "day" ? "map.day" : "map.night")}</span>
         </div>
+
+        {gardens.length > 0 && (
+          <p className="mono-label mt-3">{t("garden.found", { n: found, t: gardens.length })}</p>
+        )}
 
         {alerts.supported && !alerts.enabled && (
           <button

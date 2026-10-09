@@ -8,6 +8,8 @@ export type LocationState = {
   pos: LatLng | null;
   accuracy: number;
   heading: number;
+  /** ground speed in m/s from GPS, null when unknown */
+  speed: number | null;
   /** true when the position is simulated (no GPS or user far from Bra) */
   demo: boolean;
   demoReason: "nogps" | "outside" | "manual" | null;
@@ -25,6 +27,7 @@ export function LocationProvider({ children }: { children: ReactNode }) {
   const [pos, setPos] = useState<LatLng | null>(null);
   const [accuracy, setAccuracy] = useState(9999);
   const [heading, setHeadingState] = useState(0);
+  const [speed, setSpeed] = useState<number | null>(null);
   const [demo, setDemo] = useState(false);
   const [demoReason, setDemoReason] = useState<LocationState["demoReason"]>(null);
   const [active, setActive] = useState(false);
@@ -92,6 +95,7 @@ export function LocationProvider({ children }: { children: ReactNode }) {
           setDemoReason(null);
           setPos(here);
           setAccuracy(p.coords.accuracy);
+          setSpeed(p.coords.speed);
         },
         () => goDemo("nogps"),
         { enableHighAccuracy: true, maximumAge: 2000, timeout: 12000 },
@@ -112,6 +116,7 @@ export function LocationProvider({ children }: { children: ReactNode }) {
     setDemo(false);
     setDemoReason(null);
     setPos(null);
+    setSpeed(null);
   }, [onOrientation]);
 
   useEffect(() => () => stop(), [stop]);
@@ -119,8 +124,8 @@ export function LocationProvider({ children }: { children: ReactNode }) {
   const setHeading = useCallback((h: number) => setHeadingState(((h % 360) + 360) % 360), []);
 
   const value = useMemo<LocationState>(
-    () => ({ pos, accuracy, heading, demo, demoReason, active, start, stop, setHeading }),
-    [pos, accuracy, heading, demo, demoReason, active, start, stop, setHeading],
+    () => ({ pos, accuracy, heading, speed, demo, demoReason, active, start, stop, setHeading }),
+    [pos, accuracy, heading, speed, demo, demoReason, active, start, stop, setHeading],
   );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

@@ -15,6 +15,7 @@ export type ActionError =
   | "profanity"
   | "hate"
   | "spam"
+  | "meetup"
   | "login_required"
   | "unavailable";
 

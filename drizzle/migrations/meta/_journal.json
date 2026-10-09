@@ -50,6 +50,13 @@
       "when": 1791574131236,
       "tag": "0006_lock_friend_rpc_anonymous_access",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1791575920090,
+      "tag": "0007_trees_translations_voices",
+      "breakpoints": true
     }
   ]
 }

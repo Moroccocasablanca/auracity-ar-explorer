@@ -7,8 +7,9 @@ import { refreshMenu } from "@/lib/auracity.functions";
 import { ArrowLeft, Clock, Landmark, MapPin, Sparkles, Tag } from "lucide-react";
 import { MessageBoard, PresenceBanner, ReviewBoard, usePresence } from "@/components/NodeInteractions";
 import { isOpenNow, formatDistance } from "@/lib/geo";
-import { kindKey, useI18n } from "@/lib/i18n";
-import { description, history, nodeHours, nodeMenu, nodesQuery, promo, specials, tagline, type NodeRow } from "@/lib/nodes";
+import { kindKey, LOCALE_TAG, useI18n } from "@/lib/i18n";
+import { useNodeText } from "@/lib/use-node-text";
+import { nodeHours, nodeMenu, nodesQuery, specials, type NodeRow } from "@/lib/nodes";
 import { allowsMessages, isGardenObject } from "@/lib/node-rules";
 import { GardenCharacter } from "@/components/GardenCharacter";
 
@@ -64,10 +65,10 @@ function NodeDetail({
   const hours = nodeHours(node);
   const open = isOpenNow(hours);
   const menu = nodeMenu(node);
-  const offer = promo(node, lang);
+  const tx = useNodeText(node);
+  const offer = tx.promo;
   const isBiz = node.kind === "business";
-  const isMonument = node.kind === "monument";
-  const story = history(node, lang);
+    const story = tx.history;
   const todaySpecials = specials(node, lang);
   const qc = useQueryClient();
   const refresh = useServerFn(refreshMenu);
@@ -103,8 +104,8 @@ function NodeDetail({
         <p className="mono-label" style={{ color: "var(--kind)" }}>
           {t(kindKey(node.kind))}
         </p>
-        <h1 className="mt-1 text-4xl font-bold">{node.name}</h1>
-        <p className="mt-1 text-muted-foreground">{tagline(node, lang)}</p>
+        <h1 className="mt-1 text-4xl font-bold">{tx.name}</h1>
+        <p className="mt-1 text-muted-foreground">{tx.tagline}</p>
         <div className="mt-4 flex flex-wrap gap-2 text-xs">
           <span className="glass inline-flex items-center gap-1.5 rounded-full px-3 py-1.5">
             <MapPin className="size-3.5" /> {node.address}
@@ -125,15 +126,15 @@ function NodeDetail({
         </div>
       </header>
 
-      <p className="mt-6 leading-relaxed text-foreground/90">{description(node, lang)}</p>
+      <p className="mt-6 leading-relaxed text-foreground/90">{tx.description}</p>
 
-      {!allowsMessages(node) && (story || description(node, lang)) && (
+      {!allowsMessages(node) && (story || tx.description) && (
         <section className="kind-ring mt-6 rounded-2xl border bg-card/60 p-4">
           <div className="flex items-center justify-between gap-3">
             <h2 className="mono-label inline-flex items-center gap-2" style={{ color: "var(--kind)" }}>
               <Landmark className="size-4" /> {t("node.history")}
             </h2>
-            <ListenButton text={`${node.name}. ${story || description(node, lang)}`} />
+            <ListenButton text={`${tx.name}. ${story || tx.description}`} voice={{ nodeId: node.id, source: "history" }} />
           </div>
           {story && <p className="mt-3 leading-relaxed text-foreground/90">{story}</p>}
         </section>
@@ -177,7 +178,7 @@ function NodeDetail({
           <p className="mt-2 text-xs text-muted-foreground">
             {node.menu_source_url && node.menu_updated_at
               ? t("node.menu.auto", {
-                  d: new Date(node.menu_updated_at).toLocaleDateString(lang === "it" ? "it-IT" : "en-GB"),
+                  d: new Date(node.menu_updated_at).toLocaleDateString(LOCALE_TAG[lang]),
                 })
               : t("node.menu.manual")}
           </p>
@@ -185,7 +186,7 @@ function NodeDetail({
       )}
 
       {allowsMessages(node) && <section className="mt-8 space-y-4">
-        {isGardenObject(node) && <GardenCharacter node={node} />}
+        {isGardenObject(node) && <GardenCharacter node={node} inRange={inRange} />}
         <PresenceBanner node={node} dist={dist} inRange={inRange} />
         <div className="glass flex rounded-full p-1">
           {(["messages", ...(isBiz ? (["reviews"] as const) : [])] as ("messages" | "reviews")[]).map((k) => (
