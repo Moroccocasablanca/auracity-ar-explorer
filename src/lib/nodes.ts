@@ -8,7 +8,7 @@ export type NodeRow = Tables<"nodes">;
 export type MenuItem = { name: string; price: number };
 export type NodeKind = NodeRow["kind"];
 
-export const KINDS: NodeKind[] = ["business", "monument", "street", "bench", "service"];
+export const KINDS: NodeKind[] = ["business", "monument", "street", "bench", "tree", "service"];
 
 export const nodesQuery = queryOptions({
   queryKey: ["nodes"],
@@ -40,10 +40,12 @@ export const reviewsQuery = (nodeId: string) =>
     },
   });
 
+// Italian for "it", English for every other language (other languages are translated via useNodeText).
+const isIt = (lang: Lang) => lang === "it";
 export const nodeHours = (n: NodeRow) => n.hours as Hours;
 export const nodeMenu = (n: NodeRow) => (n.menu as MenuItem[] | null) ?? [];
-export const tagline = (n: NodeRow, lang: Lang) => (lang === "it" ? n.tagline_it : n.tagline_en);
-export const description = (n: NodeRow, lang: Lang) => (lang === "it" ? n.description_it : n.description_en);
-export const promo = (n: NodeRow, lang: Lang) => (lang === "it" ? n.promo_it : n.promo_en);
-export const history = (n: NodeRow, lang: Lang) => (lang === "it" ? n.history_it : n.history_en);
-export const specials = (n: NodeRow, lang: Lang) => (lang === "it" ? n.specials_it : n.specials_en);
+export const tagline = (n: NodeRow, lang: Lang) => (isIt(lang) ? n.tagline_it : n.tagline_en);
+export const description = (n: NodeRow, lang: Lang) => (isIt(lang) ? n.description_it : n.description_en);
+export const promo = (n: NodeRow, lang: Lang) => (isIt(lang) ? n.promo_it : n.promo_en);
+export const history = (n: NodeRow, lang: Lang) => (isIt(lang) ? n.history_it : n.history_en);
+export const specials = (n: NodeRow, lang: Lang) => (isIt(lang) ? n.specials_it : n.specials_en);
