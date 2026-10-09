@@ -10,3 +10,5 @@
 - [ ] Moderazione: niente appuntamenti/raduni (ok inviti a mangiare), solo messaggi divertenti
 - [ ] Voce AI naturale donna/uomo
 - [ ] Lingue automatiche: es, fr, de, ar, ro, sq, hi
+- [ ] Sicurezza: punti parlanti solo lontano dalla carreggiata; avviso "guarda dove cammini" prima/durante la fotocamera; pausa AR se si cammina veloci
+- [ ] Registrazione: conferma 18+ e uso responsabile del telefono obbligatori
