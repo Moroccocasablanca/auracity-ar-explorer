@@ -1,0 +1,112 @@
+{
+  "version": 1,
+  "sdk_version": "3.0.5",
+  "path": "/mcp",
+  "auth": {
+    "type": "none"
+  },
+  "mcp": {
+    "server": {
+      "name": "my-daily-companion",
+      "version": "0.1.0",
+      "title": "My Daily Companion"
+    },
+    "tools": [
+      {
+        "name": "list_places",
+        "title": "List places in Bra",
+        "description": "List AURACITY places in Bra (monuments, venues, streets, talking garden benches and trees), optionally filtered by kind or name.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "description": "Only places of this kind.",
+              "type": "string",
+              "enum": [
+                "business",
+                "monument",
+                "street",
+                "service",
+                "bench",
+                "tree"
+              ]
+            },
+            "search": {
+              "description": "Text contained in the place name.",
+              "type": "string",
+              "maxLength": 80
+            }
+          },
+          "additionalProperties": false
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_place",
+        "title": "Get place details",
+        "description": "Get a Bra place's description, history, opening hours and current invitation, in Italian and English.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "slug": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120,
+              "description": "Place slug from list_places."
+            }
+          },
+          "required": [
+            "slug"
+          ],
+          "additionalProperties": false
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "latest_messages",
+        "title": "Latest messages at a place",
+        "description": "Read the most recent anonymous, moderated messages left on a talking garden object or venue in Bra.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "slug": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120,
+              "description": "Place slug from list_places."
+            },
+            "limit": {
+              "description": "How many messages (default 5).",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 20
+            }
+          },
+          "required": [
+            "slug"
+          ],
+          "additionalProperties": false
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
