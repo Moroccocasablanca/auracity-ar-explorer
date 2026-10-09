@@ -14,7 +14,162 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      messages: {
+        Row: {
+          author: string
+          body: string
+          created_at: string
+          id: string
+          node_id: string
+        }
+        Insert: {
+          author: string
+          body: string
+          created_at?: string
+          id?: string
+          node_id: string
+        }
+        Update: {
+          author?: string
+          body?: string
+          created_at?: string
+          id?: string
+          node_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_node_id_fkey"
+            columns: ["node_id"]
+            isOneToOne: false
+            referencedRelation: "nodes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nodes: {
+        Row: {
+          address: string
+          city: string
+          created_at: string
+          description_en: string
+          description_it: string
+          hours: Json | null
+          id: string
+          kind: string
+          lat: number
+          lng: number
+          menu: Json | null
+          name: string
+          promo_en: string | null
+          promo_it: string | null
+          radius_m: number
+          slug: string
+          tagline_en: string
+          tagline_it: string
+        }
+        Insert: {
+          address?: string
+          city?: string
+          created_at?: string
+          description_en?: string
+          description_it?: string
+          hours?: Json | null
+          id?: string
+          kind: string
+          lat: number
+          lng: number
+          menu?: Json | null
+          name: string
+          promo_en?: string | null
+          promo_it?: string | null
+          radius_m?: number
+          slug: string
+          tagline_en?: string
+          tagline_it?: string
+        }
+        Update: {
+          address?: string
+          city?: string
+          created_at?: string
+          description_en?: string
+          description_it?: string
+          hours?: Json | null
+          id?: string
+          kind?: string
+          lat?: number
+          lng?: number
+          menu?: Json | null
+          name?: string
+          promo_en?: string | null
+          promo_it?: string | null
+          radius_m?: number
+          slug?: string
+          tagline_en?: string
+          tagline_it?: string
+        }
+        Relationships: []
+      }
+      receipts: {
+        Row: {
+          code: string
+          node_id: string
+          used_at: string | null
+        }
+        Insert: {
+          code: string
+          node_id: string
+          used_at?: string | null
+        }
+        Update: {
+          code?: string
+          node_id?: string
+          used_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "receipts_node_id_fkey"
+            columns: ["node_id"]
+            isOneToOne: false
+            referencedRelation: "nodes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reviews: {
+        Row: {
+          author: string
+          body: string
+          created_at: string
+          id: string
+          node_id: string
+          rating: number
+        }
+        Insert: {
+          author: string
+          body: string
+          created_at?: string
+          id?: string
+          node_id: string
+          rating: number
+        }
+        Update: {
+          author?: string
+          body?: string
+          created_at?: string
+          id?: string
+          node_id?: string
+          rating?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_node_id_fkey"
+            columns: ["node_id"]
+            isOneToOne: false
+            referencedRelation: "nodes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
