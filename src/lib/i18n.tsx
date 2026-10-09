@@ -1,3 +1,4 @@
+import type React from "react";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 
 export type Lang = "it" | "en";
@@ -239,7 +240,19 @@ type Ctx = {
   t: (key: TKey, vars?: Record<string, string | number>) => string;
 };
 
-const I18nContext = createContext<Ctx | null>(null);
+// Kept on globalThis so hot reloads of this file reuse the same context instead of orphaning the provider.
+const g = globalThis as { __auraI18nCtx?: React.Context<Ctx | null> };
+const I18nContext = (g.__auraI18nCtx ??= createContext<Ctx | null>(null));
+
+const fallback: Ctx = {
+  lang: "it",
+  setLang: () => {},
+  t: (key, vars) => {
+    let s: string = dict.it[key];
+    if (vars) for (const [k, v] of Object.entries(vars)) s = s.replace(`{${k}}`, String(v));
+    return s;
+  },
+};
 
 export function I18nProvider({ children }: { children: ReactNode }) {
   const [lang, setLangState] = useState<Lang>("it");
@@ -277,6 +290,5 @@ export function I18nProvider({ children }: { children: ReactNode }) {
 
 export function useI18n() {
   const ctx = useContext(I18nContext);
-  if (!ctx) throw new Error("useI18n outside provider");
-  return ctx;
+  return ctx ?? fallback;
 }
