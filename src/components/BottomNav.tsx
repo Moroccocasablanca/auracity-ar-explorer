@@ -1,11 +1,12 @@
 import { Link } from "@tanstack/react-router";
-import { Compass, Scan, Store } from "lucide-react";
+import { Compass, Scan, Store, UserRound } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 
 const items = [
   { to: "/", key: "nav.ar", Icon: Scan },
   { to: "/explore", key: "nav.explore", Icon: Compass },
   { to: "/business", key: "nav.business", Icon: Store },
+  { to: "/auth", key: "nav.account", Icon: UserRound },
 ] as const;
 
 export function BottomNav() {
@@ -17,7 +18,7 @@ export function BottomNav() {
           key={to}
           to={to}
           activeOptions={{ exact: to === "/" }}
-          className="flex flex-1 flex-col items-center gap-0.5 rounded-full px-3 py-1.5 text-muted-foreground transition-colors"
+          className="flex flex-1 flex-col items-center gap-0.5 rounded-full px-2 py-1.5 text-muted-foreground transition-colors"
           activeProps={{ className: "text-primary bg-primary/10" }}
         >
           <Icon className="size-5" />

@@ -15,6 +15,13 @@
       "when": 1791566623893,
       "tag": "0001_benches_history_auto_menu",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791567423894,
+      "tag": "0002_profiles_account_type",
+      "breakpoints": true
     }
   ]
 }
