@@ -67,7 +67,8 @@ function NodeDetail({
   const menu = nodeMenu(node);
   const tx = useNodeText(node);
   const offer = tx.promo;
-  const isBiz = node.kind === "business";
+  const isBiz = node.kind === "business" && node.subscribed;
+  const unclaimed = node.kind === "business" && !node.subscribed;
     const story = tx.history;
   const todaySpecials = specials(node, lang);
   const qc = useQueryClient();
@@ -183,6 +184,13 @@ function NodeDetail({
               : t("node.menu.manual")}
           </p>
         </section>
+      )}
+
+      {unclaimed && (
+        <Link to="/business" className="glass mt-6 block rounded-2xl px-4 py-3 text-sm">
+          <span className="font-medium text-foreground">{t("venue.claim.title")}</span>
+          <span className="mt-0.5 block text-muted-foreground">{t("venue.claim.body")}</span>
+        </Link>
       )}
 
       {allowsMessages(node) && <section className="mt-8 space-y-4">
