@@ -73,7 +73,9 @@ function NodeDetail({
   useEffect(() => {
     if (!isBiz || !node.menu_source_url) return;
     refresh({ data: { nodeId: node.id } })
-      .then((r) => r.updated && qc.invalidateQueries({ queryKey: ["nodes"] }))
+      .then((r) => {
+        if (r.updated) void qc.invalidateQueries({ queryKey: ["nodes"] });
+      })
       .catch(() => {});
   }, [isBiz, node.id, node.menu_source_url, refresh, qc]);
 
