@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useMemo, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { ClientOnly, createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Bell, ChevronRight, Crosshair, MapPin } from "lucide-react";
@@ -12,7 +12,6 @@ import { KINDS, messagesQuery, nodesQuery, tagline, type NodeKind, type NodeRow 
 import { useNarrator } from "@/components/ListenButton";
 import { isGardenObject } from "@/lib/node-rules";
 import { discovered, markDiscovered } from "@/lib/discovered";
-import { useEffect } from "react";
 
 const BraMap = lazy(() => import("@/components/BraMap"));
 

@@ -59,6 +59,7 @@
   --color-kind-street: var(--kind-street);
   --color-kind-service: var(--kind-service);
   --color-kind-bench: var(--kind-bench);
+  --color-kind-tree: var(--kind-tree);
   --color-success: var(--success);
 }
 
@@ -102,6 +103,7 @@
   --kind-street: oklch(0.78 0.11 250);
   --kind-service: oklch(0.84 0.14 205);
   --kind-bench: oklch(0.8 0.13 320);
+  --kind-tree: oklch(0.78 0.17 140);
   --success: oklch(0.8 0.17 150);
   --glass: oklch(0.18 0.03 255 / 62%);
   --glow: oklch(0.84 0.14 205 / 35%);
@@ -168,6 +170,7 @@
   .kind-street { --kind: var(--kind-street); }
   .kind-service { --kind: var(--kind-service); }
   .kind-bench { --kind: var(--kind-bench); }
+  .kind-tree { --kind: var(--kind-tree); }
 
   .kind-dot {
     background-color: var(--kind);
@@ -226,7 +229,7 @@
 .aura-pop-title { font-weight: 600; font-size: 14px; color: var(--foreground); text-align: left; padding: 0; margin-top: 2px; }
 .aura-map-day .aura-tiles { filter: none; }
 .aura-map .leaflet-tile { max-width: none; max-height: none; }
-.aura-map-night .aura-tiles { filter: invert(1) hue-rotate(180deg) brightness(1.15) contrast(1.15) saturate(0.55); }
+.aura-map-night .aura-tiles { filter: brightness(1.25) contrast(1.05); }
 .aura-map .leaflet-control-attribution { font-size: 10px; }
 @media (prefers-reduced-motion: reduce) {
   .aura-pin::before, .animate-aura-pulse, .animate-aura-scan { animation: none; }
@@ -240,3 +243,15 @@
 @keyframes garden-sway { 50% { transform: rotate(5deg); } }
 @keyframes garden-talk { to { height: 12px; } }
 @media (prefers-reduced-motion: reduce) { .garden-character.is-speaking, .is-speaking .garden-mouth { animation: none; } }
+
+/* Talking garden objects on the map */
+.aura-face-pin { position: relative; display: block; width: 44px; height: 44px; border-radius: 9999px; background: var(--pin); box-shadow: 0 0 18px var(--pin); border: 3px solid var(--background); animation: garden-sway 2.4s ease-in-out infinite; }
+.aura-face-pin i { position: absolute; top: 13px; width: 7px; height: 9px; border-radius: 50%; background: var(--background); animation: aura-blink 4s infinite; }
+.aura-face-pin i:first-child { left: 11px; }
+.aura-face-pin i:nth-child(2) { right: 11px; }
+.aura-face-pin b { position: absolute; left: 50%; top: 25px; width: 12px; height: 4px; margin-left: -6px; border-radius: 0 0 8px 8px; background: var(--background); }
+.is-speaking .aura-face-pin { animation-duration: .9s; }
+.is-speaking .aura-face-pin b { animation: garden-talk .22s ease-in-out infinite alternate; }
+.aura-pop-talk { margin-top: 8px; width: 100%; border-radius: 9999px; padding: 6px 10px; font-size: 13px; font-weight: 600; background: var(--primary); color: var(--primary-foreground); }
+@keyframes aura-blink { 0%, 92%, 100% { transform: scaleY(1); } 95% { transform: scaleY(0.1); } }
+@media (prefers-reduced-motion: reduce) { .aura-face-pin, .aura-face-pin i, .is-speaking .aura-face-pin b { animation: none; } }
