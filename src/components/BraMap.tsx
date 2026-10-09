@@ -43,10 +43,10 @@ export default function BraMap({
       maxBounds: L.latLngBounds([44.64, 7.74], [44.76, 7.96]),
       maxBoundsViscosity: 0.8,
     });
-    L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>',
-      subdomains: "abcd",
-      maxZoom: 20,
+    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      maxZoom: 19,
+      className: "aura-tiles",
     }).addTo(m);
     L.control.zoom({ position: "topright" }).addTo(m);
     layer.current = L.layerGroup().addTo(m);
