@@ -9,6 +9,8 @@ import { MessageBoard, PresenceBanner, ReviewBoard, usePresence } from "@/compon
 import { isOpenNow, formatDistance } from "@/lib/geo";
 import { kindKey, useI18n } from "@/lib/i18n";
 import { description, history, nodeHours, nodeMenu, nodesQuery, promo, specials, tagline, type NodeRow } from "@/lib/nodes";
+import { allowsMessages, isGardenObject } from "@/lib/node-rules";
+import { GardenCharacter } from "@/components/GardenCharacter";
 
 export const Route = createFileRoute("/node/$slug")({
   head: ({ params }) => {
@@ -20,6 +22,7 @@ export const Route = createFileRoute("/node/$slug")({
         { property: "og:title", content: `${name} — AURACITY node in Bra` },
         { property: "og:description", content: `Interactive AR node "${name}" in Bra.` },
         { property: "og:type", content: "article" },
+        { name: "twitter:card", content: "summary" },
       ],
     };
   },
@@ -124,15 +127,15 @@ function NodeDetail({
 
       <p className="mt-6 leading-relaxed text-foreground/90">{description(node, lang)}</p>
 
-      {isMonument && story && (
+      {!allowsMessages(node) && (story || description(node, lang)) && (
         <section className="kind-ring mt-6 rounded-2xl border bg-card/60 p-4">
           <div className="flex items-center justify-between gap-3">
             <h2 className="mono-label inline-flex items-center gap-2" style={{ color: "var(--kind)" }}>
               <Landmark className="size-4" /> {t("node.history")}
             </h2>
-            <ListenButton text={`${node.name}. ${story}`} />
+            <ListenButton text={`${node.name}. ${story || description(node, lang)}`} />
           </div>
-          <p className="mt-3 leading-relaxed text-foreground/90">{story}</p>
+          {story && <p className="mt-3 leading-relaxed text-foreground/90">{story}</p>}
         </section>
       )}
 
@@ -181,7 +184,8 @@ function NodeDetail({
         </section>
       )}
 
-      <section className="mt-8 space-y-4">
+      {allowsMessages(node) && <section className="mt-8 space-y-4">
+        {isGardenObject(node) && <GardenCharacter node={node} />}
         <PresenceBanner node={node} dist={dist} inRange={inRange} />
         <div className="glass flex rounded-full p-1">
           {(["messages", ...(isBiz ? (["reviews"] as const) : [])] as ("messages" | "reviews")[]).map((k) => (
@@ -198,7 +202,7 @@ function NodeDetail({
           ))}
         </div>
         {isBiz && tab === "reviews" ? <ReviewBoard node={node} /> : <MessageBoard node={node} />}
-      </section>
+      </section>}
     </div>
   );
 }

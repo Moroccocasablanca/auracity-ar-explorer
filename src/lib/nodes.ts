@@ -24,12 +24,7 @@ export const messagesQuery = (nodeId: string) =>
   queryOptions({
     queryKey: ["messages", nodeId],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("messages")
-        .select("*")
-        .eq("node_id", nodeId)
-        .order("created_at", { ascending: false })
-        .limit(50);
+      const { data, error } = await supabase.rpc("public_node_messages", { p_node_id: nodeId });
       if (error) throw error;
       return data;
     },
@@ -39,12 +34,7 @@ export const reviewsQuery = (nodeId: string) =>
   queryOptions({
     queryKey: ["reviews", nodeId],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("reviews")
-        .select("*")
-        .eq("node_id", nodeId)
-        .order("created_at", { ascending: false })
-        .limit(50);
+      const { data, error } = await supabase.rpc("public_node_reviews", { p_node_id: nodeId });
       if (error) throw error;
       return data;
     },

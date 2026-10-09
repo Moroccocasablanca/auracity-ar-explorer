@@ -12,6 +12,7 @@ import { useI18n } from "@/lib/i18n";
 import { useLocation } from "@/lib/location";
 import { messagesQuery, nodeHours, reviewsQuery, type NodeRow } from "@/lib/nodes";
 import { QrScanner, canScanQr } from "./QrScanner";
+import { isGardenObject } from "@/lib/node-rules";
 
 const MAX_ACCURACY_M = 60;
 
@@ -87,7 +88,7 @@ export function MessageBoard({ node }: { node: NodeRow }) {
   const qc = useQueryClient();
   const sendPublic = useServerFn(postMessage);
   const sendBench = useServerFn(postBenchMessage);
-  const isBench = node.kind === "bench";
+  const isBench = isGardenObject(node);
   const send = isBench ? sendBench : sendPublic;
   const { session, ready } = useSession();
   const locked = isBench && ready && !session;
@@ -163,12 +164,12 @@ export function MessageBoard({ node }: { node: NodeRow }) {
         {messages.map((m) => (
           <li key={m.id} className="rounded-xl border border-border bg-card/60 p-3">
             <div className="flex items-baseline justify-between">
-              <span className="text-sm font-semibold">{m.author}</span>
+              <span className="text-sm font-semibold">{t("privacy.visitor")}</span>
               <span className="mono-label !text-[0.58rem]">{timeAgo(m.created_at, lang)}</span>
             </div>
             <div className="mt-1 flex items-start gap-2">
               <p className="flex-1 text-sm text-foreground/90">{m.body}</p>
-              <ListenButton compact text={`${m.author}: ${m.body}`} />
+              <ListenButton compact text={m.body} />
             </div>
           </li>
         ))}
@@ -315,7 +316,7 @@ export function ReviewBoard({ node }: { node: NodeRow }) {
         {reviews.map((r) => (
           <li key={r.id} className="rounded-xl border border-border bg-card/60 p-3">
             <div className="flex items-baseline justify-between">
-              <span className="text-sm font-semibold">{r.author}</span>
+              <span className="text-sm font-semibold">{t("privacy.visitor")}</span>
               <span className="mono-label !text-[0.58rem]">{timeAgo(r.created_at, lang)}</span>
             </div>
             <div className="mt-0.5 flex">

@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { distanceM, isOpenNow, romeDate, type Hours } from "./geo";
+import { allowsMessages, isGardenObject } from "./node-rules";
 
 export type ActionError =
   | "too_far"
@@ -17,7 +18,7 @@ export type ActionError =
   | "login_required"
   | "unavailable";
 
-export type ActionResult = { ok: true } | { ok: false; error: ActionError; distance?: number };
+export type ActionResult = { ok: true } | { ok: false; error: ActionError | "protected_place"; distance?: number };
 
 const presence = {
   nodeId: z.string().uuid(),
@@ -49,12 +50,13 @@ export const postMessage = createServerFn({ method: "POST" })
 
     const { data: node } = await supabaseAdmin
       .from("nodes")
-      .select("id, kind, lat, lng, radius_m")
+      .select("id, kind, lat, lng, radius_m, garden_interactive")
       .eq("id", data.nodeId)
       .maybeSingle();
     if (!node) return { ok: false, error: "not_found" };
     // Bench messages are reserved to registered users (postBenchMessage).
-    if (node.kind === "bench") return { ok: false, error: "login_required" };
+    if (isGardenObject(node)) return { ok: false, error: "login_required" };
+    if (!allowsMessages(node)) return { ok: false, error: "protected_place" };
 
     if (data.accuracy > MAX_ACCURACY_M) return { ok: false, error: "weak_gps" };
     const dist = distanceM({ lat: data.lat, lng: data.lng }, node);
@@ -143,10 +145,11 @@ export const postBenchMessage = createServerFn({ method: "POST" })
 
     const { data: node } = await supabaseAdmin
       .from("nodes")
-      .select("id, kind, lat, lng, radius_m")
+      .select("id, kind, lat, lng, radius_m, garden_interactive")
       .eq("id", data.nodeId)
       .maybeSingle();
-    if (!node || node.kind !== "bench") return { ok: false, error: "not_found" };
+    if (!node) return { ok: false, error: "not_found" };
+    if (!isGardenObject(node)) return { ok: false, error: "protected_place" };
     if (data.accuracy > MAX_ACCURACY_M) return { ok: false, error: "weak_gps" };
     const dist = distanceM({ lat: data.lat, lng: data.lng }, node);
     if (dist > node.radius_m) return { ok: false, error: "too_far", distance: Math.round(dist) };
