@@ -229,7 +229,7 @@
 .aura-pop-title { font-weight: 600; font-size: 14px; color: var(--foreground); text-align: left; padding: 0; margin-top: 2px; }
 .aura-map-day .aura-tiles { filter: none; }
 .aura-map .leaflet-tile { max-width: none; max-height: none; }
-.aura-map-night .aura-tiles { filter: brightness(1.25) contrast(1.05); }
+.aura-map-night .aura-tiles { filter: invert(1) hue-rotate(180deg) brightness(1.15) contrast(1.15) saturate(0.55); }
 .aura-map .leaflet-control-attribution { font-size: 10px; }
 @media (prefers-reduced-motion: reduce) {
   .aura-pin::before, .animate-aura-pulse, .animate-aura-scan { animation: none; }

@@ -67,17 +67,14 @@ export default function BraMap({
     };
   }, []);
 
-  // Clean, readable street map: light streets by day, dark streets by night.
+  // Full OpenStreetMap detail; night look comes from a CSS filter so street names stay readable.
   useEffect(() => {
     const m = map.current;
     if (!m) return;
     tiles.current?.remove();
-    const style = appearance === "day" ? "voyager" : "dark_all";
-    tiles.current = L.tileLayer(`https://{s}.basemaps.cartocdn.com/rastertiles/${style}/{z}/{x}/{y}{r}.png`, {
-      attribution:
-        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
-      subdomains: "abcd",
-      maxZoom: 20,
+    tiles.current = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      maxZoom: 19,
       className: "aura-tiles",
     }).addTo(m);
   }, [appearance]);
