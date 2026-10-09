@@ -29,8 +29,18 @@
 5. **Mappa più curata**
    - Stile più leggibile con nomi delle vie chiari, giorno/notte automatico secondo alba e tramonto a Bra (già presente, rifinito), icone distinte per giardini parlanti, monumenti, locali.
 
-## Da decidere / costi
-- La voce AI e le traduzioni consumano crediti AI (pochi, perché ogni frase si genera una volta sola).
+6. **Sicurezza prima di tutto**
+   - I punti parlanti si trovano solo dentro giardini, parchi e accanto alle panchine, mai sulla carreggiata.
+   - Prima di aprire la fotocamera: schermata "Fermati in un posto sicuro, guarda dove cammini, mai vicino alla strada" da confermare.
+   - Durante la fotocamera: promemoria fisso in alto; se il telefono rileva che stai camminando veloce o sei in auto, la vista si mette in pausa.
+   - Registrazione: casella obbligatoria "Ho almeno 18 anni e uso il telefono in modo responsabile, nel momento e nel posto giusto".
+
+## Chi paga
+- Gli utenti entrano sempre gratis: ascoltano messaggi, monumenti e ricevono gli inviti di bar e ristoranti vicini.
+- Pagano solo le attività (bar, ristoranti, caffè) per menu, inviti e pubblicità.
+- Nota tecnica per te (titolare dell'app, non per gli utenti): la voce naturale e le traduzioni usano un piccolo consumo del tuo spazio di lavoro Lovable, ridotto al minimo salvando ogni frase una sola volta.
+
+## Da verificare
 - I nuovi punti giardino hanno posizioni prese dalla mappa pubblica: da verificare sul posto.
 
 ## Dettagli tecnici
