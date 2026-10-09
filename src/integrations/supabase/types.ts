@@ -153,14 +153,17 @@ export type Database = {
           menu_source_url: string | null
           menu_updated_at: string | null
           name: string
+          osm_id: string | null
           promo_en: string | null
           promo_it: string | null
           radius_m: number
           slug: string
           specials_en: string | null
           specials_it: string | null
+          subscribed: boolean
           tagline_en: string
           tagline_it: string
+          venue_type: string | null
         }
         Insert: {
           address?: string
@@ -182,14 +185,17 @@ export type Database = {
           menu_source_url?: string | null
           menu_updated_at?: string | null
           name: string
+          osm_id?: string | null
           promo_en?: string | null
           promo_it?: string | null
           radius_m?: number
           slug: string
           specials_en?: string | null
           specials_it?: string | null
+          subscribed?: boolean
           tagline_en?: string
           tagline_it?: string
+          venue_type?: string | null
         }
         Update: {
           address?: string
@@ -211,14 +217,17 @@ export type Database = {
           menu_source_url?: string | null
           menu_updated_at?: string | null
           name?: string
+          osm_id?: string | null
           promo_en?: string | null
           promo_it?: string | null
           radius_m?: number
           slug?: string
           specials_en?: string | null
           specials_it?: string | null
+          subscribed?: boolean
           tagline_en?: string
           tagline_it?: string
+          venue_type?: string | null
         }
         Relationships: []
       }

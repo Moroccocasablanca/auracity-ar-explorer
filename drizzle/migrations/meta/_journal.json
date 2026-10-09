@@ -57,6 +57,13 @@
       "when": 1791575920090,
       "tag": "0007_trees_translations_voices",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1791577401305,
+      "tag": "0008_venues_subscription",
+      "breakpoints": true
     }
   ]
 }
