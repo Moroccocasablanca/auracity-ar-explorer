@@ -11,9 +11,11 @@ export function GardenFace({ kind, speaking, size = 88 }: { kind: string; speaki
   const Icon = kind === "bench" ? Armchair : TreePine;
   return (
     <div style={{ width: size, height: size * 1.14, flex: `0 0 ${size}px` }} aria-hidden="true">
-      <div className={`garden-character ${speaking ? "is-speaking" : ""}`} style={{ transform: `scale(${size / 88})`, transformOrigin: "top left" }}>
-        <Icon className="absolute inset-0 size-full text-kind-tree" />
-        <div className="garden-face"><span className="garden-eye" /><span className="garden-eye" /><span className="garden-mouth" /></div>
+      <div style={{ transform: `scale(${size / 88})`, transformOrigin: "top left" }}>
+        <div className={`garden-character ${speaking ? "is-speaking" : ""}`}>
+          <Icon className="absolute inset-0 size-full text-kind-tree" />
+          <div className="garden-face"><span className="garden-eye" /><span className="garden-eye" /><span className="garden-mouth" /></div>
+        </div>
       </div>
     </div>
   );
