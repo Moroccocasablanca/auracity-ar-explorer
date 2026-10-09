@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { distanceM, isOpenNow, type Hours } from "./geo";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { distanceM, isOpenNow, romeDate, type Hours } from "./geo";
 
 export type ActionError =
   | "too_far"
@@ -13,6 +14,7 @@ export type ActionError =
   | "profanity"
   | "hate"
   | "spam"
+  | "login_required"
   | "unavailable";
 
 export type ActionResult = { ok: true } | { ok: false; error: ActionError; distance?: number };
@@ -47,10 +49,12 @@ export const postMessage = createServerFn({ method: "POST" })
 
     const { data: node } = await supabaseAdmin
       .from("nodes")
-      .select("id, lat, lng, radius_m")
+      .select("id, kind, lat, lng, radius_m")
       .eq("id", data.nodeId)
       .maybeSingle();
     if (!node) return { ok: false, error: "not_found" };
+    // Bench messages are reserved to registered users (postBenchMessage).
+    if (node.kind === "bench") return { ok: false, error: "login_required" };
 
     if (data.accuracy > MAX_ACCURACY_M) return { ok: false, error: "weak_gps" };
     const dist = distanceM({ lat: data.lat, lng: data.lng }, node);
