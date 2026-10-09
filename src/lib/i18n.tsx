@@ -363,6 +363,18 @@ const dict = {
     "safety.banner": "Look where you walk · stay away from the road",
     "safety.paused": "You seem to be moving fast: AR paused. Stop in a safe spot to continue.",
     "auth.adult": "I am at least 18 years old and will use my phone responsibly: at the right moment and place, watching where I walk and away from the road.",
+    "nav.guide": "Guide",
+    "guide.title": "Your guide to Bra",
+    "guide.subtitle": "Ask about monuments, places to eat and talking gardens. Answers use AURACITY's places.",
+    "guide.placeholder": "Ask something about Bra…",
+    "guide.thinking": "Looking around Bra…",
+    "guide.s1": "What should I see in one hour?",
+    "guide.s2": "Tell me the story of the Zizzola",
+    "guide.s3": "Where are the talking trees and benches?",
+    "guide.error": "The guide can't answer right now. Try again in a moment.",
+    "guide.tool.list": "Searching places",
+    "guide.tool.get": "Reading place details",
+    "guide.reset": "New chat",
   },
 } as const;
 
@@ -388,6 +400,18 @@ const itExtra = {
   "safety.banner": "Guarda dove cammini · lontano dalla strada",
   "safety.paused": "Sembra che ti stia muovendo veloce: AR in pausa. Fermati in un posto sicuro per continuare.",
   "auth.adult": "Ho almeno 18 anni e userò il telefono in modo responsabile: nel momento e nel posto giusto, guardando dove cammino e lontano dalla strada.",
+  "nav.guide": "Guida",
+  "guide.title": "La tua guida di Bra",
+  "guide.subtitle": "Chiedi di monumenti, posti dove mangiare e giardini parlanti. Le risposte usano i luoghi di AURACITY.",
+  "guide.placeholder": "Chiedi qualcosa su Bra…",
+  "guide.thinking": "Sto guardando in giro per Bra…",
+  "guide.s1": "Cosa vedo in un'ora?",
+  "guide.s2": "Raccontami la storia della Zizzola",
+  "guide.s3": "Dove sono gli alberi e le panchine parlanti?",
+  "guide.error": "La guida ora non riesce a rispondere. Riprova tra poco.",
+  "guide.tool.list": "Cerco i luoghi",
+  "guide.tool.get": "Leggo i dettagli del luogo",
+  "guide.reset": "Nuova chat",
 } satisfies Partial<Record<keyof (typeof dict)["en"], string>>;
 
 export type TKey = keyof (typeof dict)["en"];

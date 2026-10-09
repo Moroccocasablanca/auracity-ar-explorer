@@ -13,8 +13,10 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as BusinessRouteImport } from './routes/business'
 import { Route as ExploreRouteImport } from './routes/explore'
+import { Route as GuideRouteImport } from './routes/guide'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
+import { Route as ApiGuideRouteImport } from './routes/api/guide'
 import { Route as NodeSlugRouteImport } from './routes/node.$slug'
 
 const IndexRoute = IndexRouteImport.update({
@@ -37,6 +39,11 @@ const ExploreRoute = ExploreRouteImport.update({
   path: '/explore',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GuideRoute = GuideRouteImport.update({
+  id: '/guide',
+  path: '/guide',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const McpRoute = McpRouteImport.update({
   id: '/mcp',
   path: '/mcp',
@@ -48,6 +55,11 @@ const Char91DotwellKnownChar93OauthProtectedResourceRoute =
     path: '/.well-known/oauth-protected-resource',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiGuideRoute = ApiGuideRouteImport.update({
+  id: '/api/guide',
+  path: '/api/guide',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const NodeSlugRoute = NodeSlugRouteImport.update({
   id: '/node/$slug',
   path: '/node/$slug',
@@ -59,8 +71,10 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/business': typeof BusinessRoute
   '/explore': typeof ExploreRoute
+  '/guide': typeof GuideRoute
   '/mcp': typeof McpRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/api/guide': typeof ApiGuideRoute
   '/node/$slug': typeof NodeSlugRoute
 }
 export interface FileRoutesByTo {
@@ -68,8 +82,10 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/business': typeof BusinessRoute
   '/explore': typeof ExploreRoute
+  '/guide': typeof GuideRoute
   '/mcp': typeof McpRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/api/guide': typeof ApiGuideRoute
   '/node/$slug': typeof NodeSlugRoute
 }
 export interface FileRoutesById {
@@ -78,8 +94,10 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/business': typeof BusinessRoute
   '/explore': typeof ExploreRoute
+  '/guide': typeof GuideRoute
   '/mcp': typeof McpRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/api/guide': typeof ApiGuideRoute
   '/node/$slug': typeof NodeSlugRoute
 }
 export interface FileRouteTypes {
@@ -89,8 +107,10 @@ export interface FileRouteTypes {
     | '/auth'
     | '/business'
     | '/explore'
+    | '/guide'
     | '/mcp'
     | '/.well-known/oauth-protected-resource'
+    | '/api/guide'
     | '/node/$slug'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -98,8 +118,10 @@ export interface FileRouteTypes {
     | '/auth'
     | '/business'
     | '/explore'
+    | '/guide'
     | '/mcp'
     | '/.well-known/oauth-protected-resource'
+    | '/api/guide'
     | '/node/$slug'
   id:
     | '__root__'
@@ -107,8 +129,10 @@ export interface FileRouteTypes {
     | '/auth'
     | '/business'
     | '/explore'
+    | '/guide'
     | '/mcp'
     | '/.well-known/oauth-protected-resource'
+    | '/api/guide'
     | '/node/$slug'
   fileRoutesById: FileRoutesById
 }
@@ -117,8 +141,10 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   BusinessRoute: typeof BusinessRoute
   ExploreRoute: typeof ExploreRoute
+  GuideRoute: typeof GuideRoute
   McpRoute: typeof McpRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  ApiGuideRoute: typeof ApiGuideRoute
   NodeSlugRoute: typeof NodeSlugRoute
 }
 
@@ -152,6 +178,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ExploreRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/guide': {
+      id: '/guide'
+      path: '/guide'
+      fullPath: '/guide'
+      preLoaderRoute: typeof GuideRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/mcp': {
       id: '/mcp'
       path: '/mcp'
@@ -164,6 +197,13 @@ declare module '@tanstack/react-router' {
       path: '/.well-known/oauth-protected-resource'
       fullPath: '/.well-known/oauth-protected-resource'
       preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/guide': {
+      id: '/api/guide'
+      path: '/api/guide'
+      fullPath: '/api/guide'
+      preLoaderRoute: typeof ApiGuideRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/node/$slug': {
@@ -181,9 +221,11 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   BusinessRoute: BusinessRoute,
   ExploreRoute: ExploreRoute,
+  GuideRoute: GuideRoute,
   McpRoute: McpRoute,
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
+  ApiGuideRoute: ApiGuideRoute,
   NodeSlugRoute: NodeSlugRoute,
 }
 export const routeTree = rootRouteImport

@@ -1,10 +1,11 @@
 import { Link } from "@tanstack/react-router";
-import { Compass, Scan, Store, UserRound } from "lucide-react";
+import { Compass, MessagesSquare, Scan, Store, UserRound } from "lucide-react";
 import { LANG_NAMES, LANGS, useI18n, type Lang } from "@/lib/i18n";
 
 const items = [
   { to: "/", key: "nav.ar", Icon: Scan },
   { to: "/explore", key: "nav.explore", Icon: Compass },
+  { to: "/guide", key: "nav.guide", Icon: MessagesSquare },
   { to: "/business", key: "nav.business", Icon: Store },
   { to: "/auth", key: "nav.account", Icon: UserRound },
 ] as const;

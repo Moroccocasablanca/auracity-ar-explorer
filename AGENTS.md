@@ -27,3 +27,4 @@
 - AR safety gates live in `ArView`: a confirmation before the camera starts and a pause when GPS speed exceeds walking pace, because players must not use the camera near traffic.
 
 - Public read-only MCP server in `src/lib/mcp/` uses only the anon client and public RPCs, because external assistants may read intentionally public place data but never account data or writes.
+- The Bra guide chat (`/guide` + `src/routes/api/guide.ts`) uses Claude via native gateway /v1/messages with read-only anon tools over `nodes`, no stored history, because it must answer from app data without exposing user data.
