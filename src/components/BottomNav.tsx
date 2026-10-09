@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Compass, Scan, Store, UserRound } from "lucide-react";
-import { useI18n } from "@/lib/i18n";
+import { LANG_NAMES, LANGS, useI18n, type Lang } from "@/lib/i18n";
 
 const items = [
   { to: "/", key: "nav.ar", Icon: Scan },
@@ -25,14 +25,19 @@ export function BottomNav() {
           <span className="text-[0.65rem] font-medium tracking-wide">{t(key)}</span>
         </Link>
       ))}
-      <button
-        type="button"
-        onClick={() => setLang(lang === "it" ? "en" : "it")}
-        aria-label="Language"
-        className="mx-1 flex size-10 items-center justify-center rounded-full border border-border font-mono text-xs font-semibold uppercase text-foreground transition-colors hover:bg-accent"
-      >
-        {lang === "it" ? "EN" : "IT"}
-      </button>
+      <label className="relative mx-1 flex size-10 items-center justify-center rounded-full border border-border font-mono text-xs font-semibold uppercase text-foreground">
+        {lang}
+        <select
+          aria-label={t("lang.label")}
+          value={lang}
+          onChange={(e) => setLang(e.target.value as Lang)}
+          className="absolute inset-0 cursor-pointer opacity-0"
+        >
+          {LANGS.map((l) => (
+            <option key={l} value={l}>{LANG_NAMES[l]}</option>
+          ))}
+        </select>
+      </label>
     </nav>
   );
 }
