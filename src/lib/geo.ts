@@ -48,3 +48,8 @@ export function isOpenNow(hours: Hours, now: Date = new Date()): boolean {
 export function formatDistance(m: number): string {
   return m < 1000 ? `${Math.round(m)} m` : `${(m / 1000).toFixed(1)} km`;
 }
+
+/** Calendar date (YYYY-MM-DD) in Bra's time zone. */
+export function romeDate(d: Date): string {
+  return d.toLocaleDateString("en-CA", { timeZone: "Europe/Rome" });
+}
