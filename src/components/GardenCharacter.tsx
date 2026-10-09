@@ -19,7 +19,7 @@ export function GardenFace({ kind, speaking, size = 88 }: { kind: string; speaki
 
 /** Garden object that wakes up and reads the latest message when you arrive within its radius. */
 export function GardenCharacter({ node, inRange }: { node: NodeRow; inRange: boolean }) {
-  const { t, lang } = useI18n();
+  const { t } = useI18n();
   const { data: messages = [] } = useQuery(messagesQuery(node.id));
   const { playing, play, stop } = useNarrator();
   const woke = useRef(false);
@@ -65,7 +65,6 @@ export function GardenCharacter({ node, inRange }: { node: NodeRow; inRange: boo
         </details>
       )}
       <p className="text-xs text-muted-foreground">{t("garden.rules")}</p>
-      {lang && null}
     </div>
   );
 }
