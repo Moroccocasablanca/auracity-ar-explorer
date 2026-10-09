@@ -8,6 +8,13 @@
       "when": 1791565396172,
       "tag": "0000_migration",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791566623893,
+      "tag": "0001_benches_history_auto_menu",
+      "breakpoints": true
     }
   ]
 }
