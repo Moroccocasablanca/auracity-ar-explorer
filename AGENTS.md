@@ -25,3 +25,5 @@
 - Friend identities are returned only by an authenticated RPC after invitation acceptance; public content never returns account identifiers, because mutual consent must precede disclosure.
 
 - AR safety gates live in `ArView`: a confirmation before the camera starts and a pause when GPS speed exceeds walking pace, because players must not use the camera near traffic.
+
+- Public read-only MCP server in `src/lib/mcp/` uses only the anon client and public RPCs, because external assistants may read intentionally public place data but never account data or writes.
