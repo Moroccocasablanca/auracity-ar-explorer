@@ -1,7 +1,12 @@
 import type React from "react";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { locales } from "./locales";
 
-export type Lang = "it" | "en";
+export const LANGS = ["it", "en", "es", "fr", "de", "ar", "ro", "sq", "hi"] as const;
+export type Lang = (typeof LANGS)[number];
+export const LANG_NAMES: Record<Lang, string> = {
+  it: "Italiano", en: "English", es: "Español", fr: "Français", de: "Deutsch", ar: "العربية", ro: "Română", sq: "Shqip", hi: "हिन्दी",
+};
 
 const dict = {
   it: {
@@ -385,9 +390,42 @@ const itExtra = {
   "auth.adult": "Ho almeno 18 anni e userò il telefono in modo responsabile: nel momento e nel posto giusto, guardando dove cammino e lontano dalla strada.",
 } satisfies Partial<Record<keyof (typeof dict)["en"], string>>;
 
-export type TKey = keyof (typeof dict)["it"];
+export type TKey = keyof (typeof dict)["en"];
+
+type Table = Partial<Record<TKey, string>>;
+const tables: Record<Lang, Table> = {
+  it: { ...dict.it, ...itExtra },
+  en: dict.en,
+  es: locales.es,
+  fr: locales.fr,
+  de: locales.de,
+  ar: locales.ar,
+  ro: locales.ro,
+  sq: locales.sq,
+  hi: locales.hi,
+};
 
 export const kindKey = (k: string) => `kind.${k}` as TKey;
+
+/** BCP-47 tag for dates and speech. */
+export const LOCALE_TAG: Record<Lang, string> = {
+  it: "it-IT", en: "en-GB", es: "es-ES", fr: "fr-FR", de: "de-DE", ar: "ar", ro: "ro-RO", sq: "sq-AL", hi: "hi-IN",
+};
+
+export function translate(lang: Lang, key: TKey, vars?: Record<string, string | number>) {
+  let s: string = tables[lang][key] ?? dict.en[key] ?? key;
+  if (vars) for (const [k, v] of Object.entries(vars)) s = s.replace(`{${k}}`, String(v));
+  return s;
+}
+
+/** Picks the first supported language from the phone's preferred list. */
+export function detectLang(preferred: readonly string[]): Lang {
+  for (const p of preferred) {
+    const code = p.toLowerCase().split("-")[0];
+    if ((LANGS as readonly string[]).includes(code)) return code as Lang;
+  }
+  return "en";
+}
 
 type Ctx = {
   lang: Lang;
@@ -399,30 +437,20 @@ type Ctx = {
 const g = globalThis as { __auraI18nCtx?: React.Context<Ctx | null> };
 const I18nContext = (g.__auraI18nCtx ??= createContext<Ctx | null>(null));
 
-const fallback: Ctx = {
-  lang: "it",
-  setLang: () => {},
-  t: (key, vars) => {
-    let s: string = dict.it[key];
-    if (vars) for (const [k, v] of Object.entries(vars)) s = s.replace(`{${k}}`, String(v));
-    return s;
-  },
-};
+const fallback: Ctx = { lang: "it", setLang: () => {}, t: (key, vars) => translate("it", key, vars) };
 
 export function I18nProvider({ children }: { children: ReactNode }) {
   const [lang, setLangState] = useState<Lang>("it");
 
   useEffect(() => {
     const saved = localStorage.getItem("aura_lang");
-    if (saved === "it" || saved === "en") {
-      setLangState(saved);
-    } else {
-      setLangState(navigator.language?.toLowerCase().startsWith("it") ? "it" : "en");
-    }
+    if (saved && (LANGS as readonly string[]).includes(saved)) setLangState(saved as Lang);
+    else setLangState(detectLang(navigator.languages?.length ? navigator.languages : [navigator.language ?? "it"]));
   }, []);
 
   useEffect(() => {
     document.documentElement.lang = lang;
+    document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
   }, [lang]);
 
   const setLang = useCallback((l: Lang) => {
@@ -430,14 +458,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     localStorage.setItem("aura_lang", l);
   }, []);
 
-  const t = useCallback<Ctx["t"]>(
-    (key, vars) => {
-      let s: string = dict[lang][key];
-      if (vars) for (const [k, v] of Object.entries(vars)) s = s.replace(`{${k}}`, String(v));
-      return s;
-    },
-    [lang],
-  );
+  const t = useCallback<Ctx["t"]>((key, vars) => translate(lang, key, vars), [lang]);
 
   const value = useMemo(() => ({ lang, setLang, t }), [lang, setLang, t]);
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
