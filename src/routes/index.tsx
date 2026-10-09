@@ -15,6 +15,7 @@ export const Route = createFileRoute("/")({
         content: "Point your phone at Bra and see streets, monuments and shops as interactive augmented-reality nodes.",
       },
       { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: ArView,

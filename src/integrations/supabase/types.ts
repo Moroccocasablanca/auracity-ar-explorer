@@ -56,6 +56,7 @@ export type Database = {
           created_at: string
           description_en: string
           description_it: string
+          garden_interactive: boolean
           history_en: string
           history_it: string
           hours: Json | null
@@ -84,6 +85,7 @@ export type Database = {
           created_at?: string
           description_en?: string
           description_it?: string
+          garden_interactive?: boolean
           history_en?: string
           history_it?: string
           hours?: Json | null
@@ -112,6 +114,7 @@ export type Database = {
           created_at?: string
           description_en?: string
           description_it?: string
+          garden_interactive?: boolean
           history_en?: string
           history_it?: string
           hours?: Json | null
@@ -229,7 +232,25 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      public_node_messages: {
+        Args: { p_node_id: string }
+        Returns: {
+          body: string
+          created_at: string
+          id: string
+          node_id: string
+        }[]
+      }
+      public_node_reviews: {
+        Args: { p_node_id: string }
+        Returns: {
+          body: string
+          created_at: string
+          id: string
+          node_id: string
+          rating: number
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

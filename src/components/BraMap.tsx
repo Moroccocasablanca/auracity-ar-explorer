@@ -4,6 +4,7 @@ import L from "leaflet";
 import { useNavigate } from "@tanstack/react-router";
 import { BRA_CENTER } from "@/lib/location";
 import type { NodeRow } from "@/lib/nodes";
+import type { MapAppearance } from "@/lib/map-appearance";
 
 const KIND_COLOR_VAR: Record<string, string> = {
   business: "--kind-business",
@@ -21,10 +22,14 @@ export default function BraMap({
   nodes,
   pos,
   kindLabel,
+  appearance,
+  recenter,
 }: {
   nodes: NodeRow[];
   pos: { lat: number; lng: number } | null;
   kindLabel: (k: string) => string;
+  appearance: MapAppearance;
+  recenter: number;
 }) {
   const el = useRef<HTMLDivElement>(null);
   const map = useRef<L.Map | null>(null);
@@ -112,5 +117,9 @@ export default function BraMap({
     } else me.current.setLatLng([pos.lat, pos.lng]);
   }, [pos]);
 
-  return <div ref={el} className="aura-map h-full w-full" />;
+  useEffect(() => {
+    if (recenter > 0 && pos) map.current?.flyTo([pos.lat, pos.lng], 17);
+  }, [recenter, pos]);
+
+  return <div ref={el} data-map-appearance={appearance} className={`aura-map aura-map-${appearance} h-full w-full`} />;
 }

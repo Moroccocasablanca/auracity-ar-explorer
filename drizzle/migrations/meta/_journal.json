@@ -29,6 +29,13 @@
       "when": 1791568111514,
       "tag": "0003_node_images",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791573925575,
+      "tag": "0004_garden_objects_and_identity_privacy",
+      "breakpoints": true
     }
   ]
 }
