@@ -4,6 +4,7 @@ import L from "leaflet";
 import { useNavigate } from "@tanstack/react-router";
 import { BRA_CENTER } from "@/lib/location";
 import type { NodeRow } from "@/lib/nodes";
+import { isGardenObject } from "@/lib/node-rules";
 import type { MapAppearance } from "@/lib/map-appearance";
 
 const KIND_COLOR_VAR: Record<string, string> = {
@@ -12,6 +13,7 @@ const KIND_COLOR_VAR: Record<string, string> = {
   street: "--kind-street",
   service: "--kind-service",
   bench: "--kind-bench",
+  tree: "--kind-tree",
 };
 
 function cssVar(name: string) {
@@ -24,13 +26,21 @@ export default function BraMap({
   kindLabel,
   appearance,
   recenter,
+  onTalk,
+  talkLabel,
+  speakingId,
 }: {
   nodes: NodeRow[];
   pos: { lat: number; lng: number } | null;
   kindLabel: (k: string) => string;
   appearance: MapAppearance;
   recenter: number;
+  onTalk: (n: NodeRow) => void;
+  talkLabel: string;
+  speakingId: string | null;
 }) {
+  const markers = useRef(new Map<string, L.Marker>());
+  const tiles = useRef<L.TileLayer | null>(null);
   const el = useRef<HTMLDivElement>(null);
   const map = useRef<L.Map | null>(null);
   const layer = useRef<L.LayerGroup | null>(null);
@@ -48,11 +58,6 @@ export default function BraMap({
       maxBounds: L.latLngBounds([44.64, 7.74], [44.76, 7.96]),
       maxBoundsViscosity: 0.8,
     });
-    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-      maxZoom: 19,
-      className: "aura-tiles",
-    }).addTo(m);
     L.control.zoom({ position: "topright" }).addTo(m);
     layer.current = L.layerGroup().addTo(m);
     map.current = m;
@@ -62,19 +67,44 @@ export default function BraMap({
     };
   }, []);
 
+  // Clean, readable street map: light streets by day, dark streets by night.
+  useEffect(() => {
+    const m = map.current;
+    if (!m) return;
+    tiles.current?.remove();
+    const style = appearance === "day" ? "voyager" : "dark_all";
+    tiles.current = L.tileLayer(`https://{s}.basemaps.cartocdn.com/rastertiles/${style}/{z}/{x}/{y}{r}.png`, {
+      attribution:
+        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+      subdomains: "abcd",
+      maxZoom: 20,
+      className: "aura-tiles",
+    }).addTo(m);
+  }, [appearance]);
+
   useEffect(() => {
     const g = layer.current;
     if (!g) return;
     g.clearLayers();
+    markers.current.clear();
     for (const n of nodes) {
+      const garden = isGardenObject(n);
       const color = cssVar(KIND_COLOR_VAR[n.kind] ?? "--primary");
-      const icon = L.divIcon({
-        className: "",
-        iconSize: [28, 28],
-        iconAnchor: [14, 14],
-        html: `<span class="aura-pin" style="--pin:${color}"><span></span></span>`,
-      });
+      const icon = garden
+        ? L.divIcon({
+            className: "",
+            iconSize: [44, 44],
+            iconAnchor: [22, 22],
+            html: `<span class="aura-face-pin" style="--pin:${color}"><i></i><i></i><b></b></span>`,
+          })
+        : L.divIcon({
+            className: "",
+            iconSize: [28, 28],
+            iconAnchor: [14, 14],
+            html: `<span class="aura-pin" style="--pin:${color}"><span></span></span>`,
+          });
       const marker = L.marker([n.lat, n.lng], { icon, title: n.name }).addTo(g);
+      markers.current.set(n.id, marker);
       const wrap = document.createElement("div");
       wrap.className = "aura-pop";
       if (n.image_url) {
@@ -94,9 +124,21 @@ export default function BraMap({
       h.textContent = `${n.name} →`;
       h.onclick = () => navigate({ to: "/node/$slug", params: { slug: n.slug } });
       wrap.append(k, h);
+      if (garden) {
+        const talk = document.createElement("button");
+        talk.type = "button";
+        talk.className = "aura-pop-talk";
+        talk.textContent = `▶ ${talkLabel}`;
+        talk.onclick = () => onTalk(n);
+        wrap.append(talk);
+      }
       marker.bindPopup(wrap, { closeButton: false, maxWidth: 240 });
     }
-  }, [nodes, kindLabel, navigate]);
+  }, [nodes, kindLabel, navigate, onTalk, talkLabel]);
+
+  useEffect(() => {
+    for (const [id, mk] of markers.current) mk.getElement()?.classList.toggle("is-speaking", id === speakingId);
+  }, [speakingId, nodes]);
 
   useEffect(() => {
     const m = map.current;
