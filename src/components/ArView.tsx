@@ -151,7 +151,7 @@ export function ArView() {
         const rel = angleDiff(p.b, loc.heading);
         const ratio = p.d / range;
         const left = 50 + (rel / FOV) * 100;
-        const top = 60 - ratio * 30 + ((i % 3) - 1) * 4;
+        const top = 68 + (1 - ratio) * 14 - (i % 3) * 5;
         const scale = 1 - ratio * 0.28;
         const near = p.d <= p.n.radius_m;
         const sel = selected === p.n.id;
