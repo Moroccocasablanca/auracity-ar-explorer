@@ -40,7 +40,8 @@ function AutoTalk({ node, play }: { node: NodeRow; play: ReturnType<typeof useNa
       }
     }, 1200);
     return () => window.clearTimeout(timer);
-  }, [node.id, garden, messages, tx, play]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [node.id, garden, messages?.[0]?.id, tx.name, tx.history, tx.description, play]);
   return null;
 }
 
