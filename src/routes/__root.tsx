@@ -15,6 +15,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { I18nProvider } from "../lib/i18n";
 import { LocationProvider } from "../lib/location";
 import { BottomNav } from "../components/BottomNav";
+import { ProximityWatcher } from "../components/ProximityWatcher";
 import { Toaster } from "../components/ui/sonner";
 
 function NotFoundComponent() {
@@ -141,6 +142,7 @@ function RootComponent() {
           {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
           <Outlet />
           <BottomNav />
+          <ProximityWatcher />
           <Toaster theme="dark" position="top-center" />
         </LocationProvider>
       </I18nProvider>
