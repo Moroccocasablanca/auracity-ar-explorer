@@ -85,6 +85,17 @@ function NodeDetail({
         <ArrowLeft className="size-4" /> {t("node.back")}
       </Link>
 
+      {node.image_url && (
+        <figure className="mt-5 overflow-hidden rounded-2xl border border-border">
+          <img src={node.image_url} alt={node.name} className="aspect-[4/3] w-full object-cover" />
+          {node.image_credit && (
+            <figcaption className="mono-label bg-card/80 px-3 py-1.5 !text-[0.55rem]">
+              {t("node.photo")}: {node.image_credit}
+            </figcaption>
+          )}
+        </figure>
+      )}
+
       <header className="mt-5">
         <p className="mono-label" style={{ color: "var(--kind)" }}>
           {t(kindKey(node.kind))}

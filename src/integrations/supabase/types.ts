@@ -60,6 +60,8 @@ export type Database = {
           history_it: string
           hours: Json | null
           id: string
+          image_credit: string | null
+          image_url: string | null
           kind: string
           lat: number
           lng: number
@@ -86,6 +88,8 @@ export type Database = {
           history_it?: string
           hours?: Json | null
           id?: string
+          image_credit?: string | null
+          image_url?: string | null
           kind: string
           lat: number
           lng: number
@@ -112,6 +116,8 @@ export type Database = {
           history_it?: string
           hours?: Json | null
           id?: string
+          image_credit?: string | null
+          image_url?: string | null
           kind?: string
           lat?: number
           lng?: number

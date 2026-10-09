@@ -14,6 +14,8 @@
 - Venue menus refresh automatically via `refreshMenu` (once per Rome day, claimed atomically) reading `nodes.menu_source_url` with AI in `src/lib/menu.server.ts`; owners never upload menus manually.
 - Bench messages require a signed-in user (`postBenchMessage` with requireSupabaseAuth); audio playback uses on-device speech (`src/lib/speech.ts`) to avoid per-listen AI cost.
 - Account type (visitor vs business) lives in `public.profiles`, created by the `handle_new_user` trigger; users can only edit `display_name`, so `account_type`/`business_status` changes stay server-side and any future business privileges must check `business_status`, never client data.
+- The Bra map uses Leaflet + OpenStreetMap tiles, loaded only in the browser (`React.lazy` behind `<ClientOnly>` in explore), because Leaflet touches `window` at import.
+- Proximity alerts run once at the root (`ProximityWatcher`), one alert per place per session, using `nodes.promo_*` as the business invitation text.
 - Content moderation lives in `src/lib/moderation.server.ts` (pattern checks + Lovable AI Gateway); it fails closed when the gateway is unavailable.
 - Shared geo/opening-hours logic is in `src/lib/geo.ts` and is used by both client and server so rules cannot drift.
 - UI strings live in the dictionary in `src/lib/i18n.tsx` (IT/EN); never hardcode user-facing text in components.
