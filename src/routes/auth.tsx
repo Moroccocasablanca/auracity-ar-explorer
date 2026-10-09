@@ -266,6 +266,7 @@ function Account({ userId, email }: { userId: string; email: string }) {
 
   async function signOut() {
     await qc.cancelQueries();
+    qc.clear();
     await supabase.auth.signOut();
     navigate({ to: "/auth", replace: true });
   }
