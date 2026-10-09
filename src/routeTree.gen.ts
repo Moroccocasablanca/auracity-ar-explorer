@@ -13,6 +13,8 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as BusinessRouteImport } from './routes/business'
 import { Route as ExploreRouteImport } from './routes/explore'
+import { Route as McpRouteImport } from './routes/mcp'
+import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as NodeSlugRouteImport } from './routes/node.$slug'
 
 const IndexRoute = IndexRouteImport.update({
@@ -35,6 +37,17 @@ const ExploreRoute = ExploreRouteImport.update({
   path: '/explore',
   getParentRoute: () => rootRouteImport,
 } as any)
+const McpRoute = McpRouteImport.update({
+  id: '/mcp',
+  path: '/mcp',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const Char91DotwellKnownChar93OauthProtectedResourceRoute =
+  Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
+    id: '/.well-known/oauth-protected-resource',
+    path: '/.well-known/oauth-protected-resource',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const NodeSlugRoute = NodeSlugRouteImport.update({
   id: '/node/$slug',
   path: '/node/$slug',
@@ -46,6 +59,8 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/business': typeof BusinessRoute
   '/explore': typeof ExploreRoute
+  '/mcp': typeof McpRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/node/$slug': typeof NodeSlugRoute
 }
 export interface FileRoutesByTo {
@@ -53,6 +68,8 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/business': typeof BusinessRoute
   '/explore': typeof ExploreRoute
+  '/mcp': typeof McpRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/node/$slug': typeof NodeSlugRoute
 }
 export interface FileRoutesById {
@@ -61,14 +78,38 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/business': typeof BusinessRoute
   '/explore': typeof ExploreRoute
+  '/mcp': typeof McpRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/node/$slug': typeof NodeSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/business' | '/explore' | '/node/$slug'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/business'
+    | '/explore'
+    | '/mcp'
+    | '/.well-known/oauth-protected-resource'
+    | '/node/$slug'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/business' | '/explore' | '/node/$slug'
-  id: '__root__' | '/' | '/auth' | '/business' | '/explore' | '/node/$slug'
+  to:
+    | '/'
+    | '/auth'
+    | '/business'
+    | '/explore'
+    | '/mcp'
+    | '/.well-known/oauth-protected-resource'
+    | '/node/$slug'
+  id:
+    | '__root__'
+    | '/'
+    | '/auth'
+    | '/business'
+    | '/explore'
+    | '/mcp'
+    | '/.well-known/oauth-protected-resource'
+    | '/node/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -76,6 +117,8 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   BusinessRoute: typeof BusinessRoute
   ExploreRoute: typeof ExploreRoute
+  McpRoute: typeof McpRoute
+  Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   NodeSlugRoute: typeof NodeSlugRoute
 }
 
@@ -109,6 +152,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ExploreRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/mcp': {
+      id: '/mcp'
+      path: '/mcp'
+      fullPath: '/mcp'
+      preLoaderRoute: typeof McpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.well-known/oauth-protected-resource': {
+      id: '/.well-known/oauth-protected-resource'
+      path: '/.well-known/oauth-protected-resource'
+      fullPath: '/.well-known/oauth-protected-resource'
+      preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/node/$slug': {
       id: '/node/$slug'
       path: '/node/$slug'
@@ -124,6 +181,9 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   BusinessRoute: BusinessRoute,
   ExploreRoute: ExploreRoute,
+  McpRoute: McpRoute,
+  Char91DotwellKnownChar93OauthProtectedResourceRoute:
+    Char91DotwellKnownChar93OauthProtectedResourceRoute,
   NodeSlugRoute: NodeSlugRoute,
 }
 export const routeTree = rootRouteImport
