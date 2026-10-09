@@ -4,4 +4,9 @@
 - [x] Keep monuments, churches, mosques, houses and schools information-only; restrict playful characters to verified garden objects (Zizzola garden bench enabled).
 - [x] Add selection of available device narration voices and speed; natural voice availability depends on the phone.
 - [ ] Replace dated structure photos: awaiting verified newer photos; searched candidates have unconfirmed recency (a filename dated 2023 has capture metadata dated 2022).
-- [x] Hide author identities in public reads; add invitation and mutual acceptance with names visible only in the accepted friends list.
+- [x] Hide author identities in public reads; add invitation and mutual acceptance with names visible only in the accepted friends list.- [ ] Giardini parlanti: faccina animata che legge l'ultimo messaggio all'arrivo
+- [ ] AR live: inquadrando un oggetto con la fotocamera inizia a parlare (monumento = storia, giardino = ultimo messaggio)
+- [ ] Mappa: marker animati che "parlano" sulla mappa aperta
+- [ ] Moderazione: niente appuntamenti/raduni (ok inviti a mangiare), solo messaggi divertenti
+- [ ] Voce AI naturale donna/uomo
+- [ ] Lingue automatiche: es, fr, de, ar, ro, sq, hi
