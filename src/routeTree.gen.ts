@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as BusinessRouteImport } from './routes/business'
 import { Route as ExploreRouteImport } from './routes/explore'
 import { Route as NodeSlugRouteImport } from './routes/node.$slug'
@@ -17,6 +18,11 @@ import { Route as NodeSlugRouteImport } from './routes/node.$slug'
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BusinessRoute = BusinessRouteImport.update({
@@ -37,12 +43,14 @@ const NodeSlugRoute = NodeSlugRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/business': typeof BusinessRoute
   '/explore': typeof ExploreRoute
   '/node/$slug': typeof NodeSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/business': typeof BusinessRoute
   '/explore': typeof ExploreRoute
   '/node/$slug': typeof NodeSlugRoute
@@ -50,20 +58,22 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/business': typeof BusinessRoute
   '/explore': typeof ExploreRoute
   '/node/$slug': typeof NodeSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/business' | '/explore' | '/node/$slug'
+  fullPaths: '/' | '/auth' | '/business' | '/explore' | '/node/$slug'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/business' | '/explore' | '/node/$slug'
-  id: '__root__' | '/' | '/business' | '/explore' | '/node/$slug'
+  to: '/' | '/auth' | '/business' | '/explore' | '/node/$slug'
+  id: '__root__' | '/' | '/auth' | '/business' | '/explore' | '/node/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthRoute: typeof AuthRoute
   BusinessRoute: typeof BusinessRoute
   ExploreRoute: typeof ExploreRoute
   NodeSlugRoute: typeof NodeSlugRoute
@@ -76,6 +86,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/business': {
@@ -104,6 +121,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthRoute: AuthRoute,
   BusinessRoute: BusinessRoute,
   ExploreRoute: ExploreRoute,
   NodeSlugRoute: NodeSlugRoute,
