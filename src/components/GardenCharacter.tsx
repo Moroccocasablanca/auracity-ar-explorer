@@ -68,7 +68,6 @@ export function GardenCharacter({ node, inRange }: { node: NodeRow; inRange: boo
           </ul>
         </details>
       )}
-      <p className="text-xs text-muted-foreground">{t("garden.rules")}</p>
     </div>
   );
 }
