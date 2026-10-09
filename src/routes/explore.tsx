@@ -3,7 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronRight } from "lucide-react";
 import { distanceM, formatDistance } from "@/lib/geo";
-import { useI18n } from "@/lib/i18n";
+import { kindKey, useI18n } from "@/lib/i18n";
 import { useLocation } from "@/lib/location";
 import { KINDS, nodesQuery, tagline, type NodeKind } from "@/lib/nodes";
 
@@ -58,7 +58,7 @@ function Explore() {
                   : "border-border text-muted-foreground hover:text-foreground"
               }`}
             >
-              {k === "all" ? t("all") : t(`kind.${k}` as const)}
+              {k === "all" ? t("all") : t(kindKey(k))}
             </button>
           ))}
         </div>
@@ -74,7 +74,7 @@ function Explore() {
                 <span className="kind-dot size-3 shrink-0 rounded-full" />
                 <div className="min-w-0 flex-1">
                   <p className="mono-label !text-[0.58rem]" style={{ color: "var(--kind)" }}>
-                    {t(`kind.${n.kind}` as const)}
+                    {t(kindKey(n.kind))}
                   </p>
                   <p className="truncate font-semibold">{n.name}</p>
                   <p className="truncate text-sm text-muted-foreground">{tagline(n, lang)}</p>

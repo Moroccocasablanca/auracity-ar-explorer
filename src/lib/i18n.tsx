@@ -185,6 +185,8 @@ const dict = {
 
 export type TKey = keyof (typeof dict)["it"];
 
+export const kindKey = (k: string) => `kind.${k}` as TKey;
+
 type Ctx = {
   lang: Lang;
   setLang: (l: Lang) => void;

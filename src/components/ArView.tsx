@@ -3,7 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowUpRight, Crosshair, Lock, Power, Radio, Sparkles } from "lucide-react";
 import { angleDiff, bearingDeg, distanceM, formatDistance } from "@/lib/geo";
-import { useI18n } from "@/lib/i18n";
+import { kindKey, useI18n } from "@/lib/i18n";
 import { useLocation } from "@/lib/location";
 import { nodesQuery, tagline, type NodeRow } from "@/lib/nodes";
 
@@ -166,7 +166,7 @@ export function ArView() {
           >
             <div className={`ar-chip flex max-w-[11rem] flex-col rounded-2xl px-3 py-2 ${sel ? "ring-2 ring-primary" : ""}`}>
               <span className="kind-text mono-label !text-[0.58rem]" style={{ color: "var(--kind)" }}>
-                {t(`kind.${p.n.kind}` as const)}
+                {t(kindKey(p.n.kind))}
               </span>
               <span className="truncate text-sm font-semibold leading-tight">{p.n.name}</span>
               <span className="mt-0.5 flex items-center gap-1.5 font-mono text-[0.65rem] text-muted-foreground">
@@ -230,7 +230,7 @@ export function ArView() {
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
               <p className="mono-label !text-[0.6rem]" style={{ color: "var(--kind)" }}>
-                {t(`kind.${selectedItem.n.kind}` as const)} · {formatDistance(selectedItem.d)}
+                {t(kindKey(selectedItem.n.kind))} · {formatDistance(selectedItem.d)}
               </p>
               <h3 className="truncate text-lg font-semibold">{selectedItem.n.name}</h3>
               <p className="truncate text-sm text-muted-foreground">{tagline(selectedItem.n, lang)}</p>

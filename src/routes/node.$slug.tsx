@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Clock, MapPin, Tag } from "lucide-react";
 import { MessageBoard, PresenceBanner, ReviewBoard, usePresence } from "@/components/NodeInteractions";
 import { isOpenNow, formatDistance } from "@/lib/geo";
-import { useI18n } from "@/lib/i18n";
+import { kindKey, useI18n } from "@/lib/i18n";
 import { description, nodeHours, nodeMenu, nodesQuery, promo, tagline, type NodeRow } from "@/lib/nodes";
 
 export const Route = createFileRoute("/node/$slug")({
@@ -69,7 +69,7 @@ function NodeDetail({
 
       <header className="mt-5">
         <p className="mono-label" style={{ color: "var(--kind)" }}>
-          {t(`kind.${node.kind}` as const)}
+          {t(kindKey(node.kind))}
         </p>
         <h1 className="mt-1 text-4xl font-bold">{node.name}</h1>
         <p className="mt-1 text-muted-foreground">{tagline(node, lang)}</p>
