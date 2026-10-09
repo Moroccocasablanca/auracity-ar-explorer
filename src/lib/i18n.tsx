@@ -375,6 +375,8 @@ const dict = {
     "guide.tool.list": "Searching places",
     "guide.tool.get": "Reading place details",
     "guide.reset": "New chat",
+    "venue.claim.title": "Are you the owner?",
+    "venue.claim.body": "Activate your showcase: menu, invitations to passers-by and reviews from customers.",
   },
 } as const;
 
@@ -412,6 +414,8 @@ const itExtra = {
   "guide.tool.list": "Cerco i luoghi",
   "guide.tool.get": "Leggo i dettagli del luogo",
   "guide.reset": "Nuova chat",
+  "venue.claim.title": "Sei il titolare?",
+  "venue.claim.body": "Attiva la tua vetrina: menu, inviti a chi passa e recensioni dei clienti.",
 } satisfies Partial<Record<keyof (typeof dict)["en"], string>>;
 
 export type TKey = keyof (typeof dict)["en"];

@@ -59,6 +59,7 @@ export function ProximityWatcher() {
     if (!on || !pos || demo) return;
     for (const n of nodes) {
       if (seen.current.has(n.id)) continue;
+      if (n.kind === "business" && !n.subscribed) continue;
       if (distanceM(pos, n) > Math.max(ALERT_RADIUS_M, n.radius_m)) continue;
       seen.current.add(n.id);
       sessionStorage.setItem(SEEN_KEY, JSON.stringify([...seen.current]));

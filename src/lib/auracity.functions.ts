@@ -88,7 +88,7 @@ export const postReview = createServerFn({ method: "POST" })
       .eq("id", data.nodeId)
       .maybeSingle();
     if (!node) return { ok: false, error: "not_found" };
-    if (node.kind !== "business") return { ok: false, error: "not_business" };
+    if (node.kind !== "business" || !node.subscribed) return { ok: false, error: "not_business" };
 
     // Temporal moderation: no commercial reviews while the business is closed.
     if (!isOpenNow(node.hours as Hours)) return { ok: false, error: "closed" };
@@ -175,10 +175,10 @@ export const refreshMenu = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: node } = await supabaseAdmin
       .from("nodes")
-      .select("id, kind, menu_source_url, menu_updated_at")
+      .select("id, kind, subscribed, menu_source_url, menu_updated_at")
       .eq("id", data.nodeId)
       .maybeSingle();
-    if (!node || node.kind !== "business" || !node.menu_source_url) return { updated: false };
+    if (!node || node.kind !== "business" || !node.subscribed || !node.menu_source_url) return { updated: false };
     const today = romeDate(new Date());
     if (node.menu_updated_at && romeDate(new Date(node.menu_updated_at)) === today) return { updated: false };
 

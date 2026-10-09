@@ -94,13 +94,20 @@ export default function BraMap({
             iconAnchor: [22, 22],
             html: `<span class="aura-face-pin" style="--pin:${color}"><i></i><i></i><b></b></span>`,
           })
-        : L.divIcon({
-            className: "",
-            iconSize: [28, 28],
-            iconAnchor: [14, 14],
-            html: `<span class="aura-pin" style="--pin:${color}"><span></span></span>`,
-          });
-      const marker = L.marker([n.lat, n.lng], { icon, title: n.name }).addTo(g);
+        : n.kind === "business" && !n.subscribed
+          ? L.divIcon({
+              className: "",
+              iconSize: [14, 14],
+              iconAnchor: [7, 7],
+              html: `<span class="aura-dot" style="--pin:${color}"></span>`,
+            })
+          : L.divIcon({
+              className: "",
+              iconSize: n.kind === "business" ? [40, 40] : [28, 28],
+              iconAnchor: n.kind === "business" ? [20, 20] : [14, 14],
+              html: `<span class="aura-pin${n.kind === "business" ? " aura-pin-vip" : ""}" style="--pin:${color}"><span></span></span>`,
+            });
+      const marker = L.marker([n.lat, n.lng], { icon, title: n.name, zIndexOffset: n.kind === "business" && n.subscribed ? 1000 : 0 }).addTo(g);
       markers.current.set(n.id, marker);
       const wrap = document.createElement("div");
       wrap.className = "aura-pop";
@@ -121,6 +128,12 @@ export default function BraMap({
       h.textContent = `${n.name} →`;
       h.onclick = () => navigate({ to: "/node/$slug", params: { slug: n.slug } });
       wrap.append(k, h);
+      if (n.address) {
+        const a = document.createElement("p");
+        a.className = "aura-pop-addr";
+        a.textContent = n.address;
+        wrap.append(a);
+      }
       if (garden) {
         const talk = document.createElement("button");
         talk.type = "button";
