@@ -9,6 +9,7 @@ import type { Tables } from "@/integrations/supabase/types";
 import { useSession } from "@/lib/auth";
 import { useI18n, type TKey } from "@/lib/i18n";
 import { PASSWORD_RULES, isStrongPassword } from "@/lib/password";
+import { FriendsPanel } from "@/components/FriendsPanel";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -290,6 +291,7 @@ function Account({ userId, email }: { userId: string; email: string }) {
             )}
           </div>
         )}
+        <FriendsPanel userId={userId} />
         <button type="button" onClick={signOut} className="h-11 w-full rounded-full border border-border text-sm font-medium">
           {t("auth.logout")}
         </button>
