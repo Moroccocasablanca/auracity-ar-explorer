@@ -1,7 +1,7 @@
 # AURACITY updates
 
-- [ ] Improve street readability and add automatic day/night map appearance with manual selection.
-- [ ] Keep monuments, churches, mosques, houses and schools information-only; restrict playful characters to garden trees and benches.
-- [ ] Add a choice of narration voices.
-- [ ] Replace dated structure photos only with verified newer photographs.
-- [ ] Protect user identities and add mutually accepted friendships before identity disclosure.
+- [x] Improve street readability and add automatic day/night map appearance with manual selection.
+- [x] Keep monuments, churches, mosques, houses and schools information-only; restrict playful characters to verified garden objects (Zizzola garden bench enabled).
+- [x] Add selection of available device narration voices and speed; natural voice availability depends on the phone.
+- [ ] Replace dated structure photos: awaiting verified newer photos; searched candidates have unconfirmed recency (a filename dated 2023 has capture metadata dated 2022).
+- [x] Hide author identities in public reads; add invitation and mutual acceptance with names visible only in the accepted friends list.

@@ -22,3 +22,4 @@
 - GPS/heading state is global in `LocationProvider` (root) so AR, Explore and node pages share one position.
 - Map appearance uses SunCalc solar position at Bra with a persisted manual override and a live timer, because device timezone and fixed hours are not reliable daylight indicators.
 - Garden interaction eligibility is explicit on nodes and enforced in both shared node rules and a database trigger, because ordinary benches and protected places must not inherit playful messaging privileges.
+- Friend identities are returned only by an authenticated RPC after invitation acceptance; public content never returns account identifiers, because mutual consent must precede disclosure.

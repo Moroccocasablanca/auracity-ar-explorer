@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { TreePine } from "lucide-react";
+import { Armchair, TreePine } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n";
 import { messagesQuery, type NodeRow } from "@/lib/nodes";
@@ -12,9 +12,10 @@ export function GardenCharacter({ node }: { node: NodeRow }) {
   const [playing, setPlaying] = useState(false);
   useEffect(() => () => stopSpeaking(), []);
   const message = messages[0];
+  const Icon = node.kind === "bench" ? Armchair : TreePine;
   return <div className="flex flex-wrap items-center gap-5 border-y border-border py-5">
     <div className={`garden-character ${playing ? "is-speaking" : ""}`} aria-hidden="true">
-      <TreePine className="absolute inset-0 size-full text-kind-monument" />
+      <Icon className="absolute inset-0 size-full text-kind-monument" />
       <div className="garden-face"><span className="garden-eye" /><span className="garden-eye" /><span className="garden-mouth" /></div>
     </div>
     <div className="min-w-0 flex-1 space-y-3">
