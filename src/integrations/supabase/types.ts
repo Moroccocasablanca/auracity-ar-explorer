@@ -130,6 +130,33 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          account_type: string
+          business_name: string | null
+          business_status: string
+          created_at: string
+          display_name: string
+          id: string
+        }
+        Insert: {
+          account_type?: string
+          business_name?: string | null
+          business_status?: string
+          created_at?: string
+          display_name?: string
+          id: string
+        }
+        Update: {
+          account_type?: string
+          business_name?: string | null
+          business_status?: string
+          created_at?: string
+          display_name?: string
+          id?: string
+        }
+        Relationships: []
+      }
       receipts: {
         Row: {
           code: string
