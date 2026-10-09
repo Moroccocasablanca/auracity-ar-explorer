@@ -1,11 +1,14 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Clock, MapPin, Tag } from "lucide-react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { ListenButton } from "@/components/ListenButton";
+import { refreshMenu } from "@/lib/auracity.functions";
+import { ArrowLeft, Clock, Landmark, MapPin, Sparkles, Tag } from "lucide-react";
 import { MessageBoard, PresenceBanner, ReviewBoard, usePresence } from "@/components/NodeInteractions";
 import { isOpenNow, formatDistance } from "@/lib/geo";
 import { kindKey, useI18n } from "@/lib/i18n";
-import { description, nodeHours, nodeMenu, nodesQuery, promo, tagline, type NodeRow } from "@/lib/nodes";
+import { description, history, nodeHours, nodeMenu, nodesQuery, promo, specials, tagline, type NodeRow } from "@/lib/nodes";
 
 export const Route = createFileRoute("/node/$slug")({
   head: ({ params }) => {
@@ -60,6 +63,21 @@ function NodeDetail({
   const menu = nodeMenu(node);
   const offer = promo(node, lang);
   const isBiz = node.kind === "business";
+  const isMonument = node.kind === "monument";
+  const story = history(node, lang);
+  const todaySpecials = specials(node, lang);
+  const qc = useQueryClient();
+  const refresh = useServerFn(refreshMenu);
+
+  // Menus update themselves: the server re-reads the venue's page once per day.
+  useEffect(() => {
+    if (!isBiz || !node.menu_source_url) return;
+    refresh({ data: { nodeId: node.id } })
+      .then((r) => {
+        if (r.updated) void qc.invalidateQueries({ queryKey: ["nodes"] });
+      })
+      .catch(() => {});
+  }, [isBiz, node.id, node.menu_source_url, refresh, qc]);
 
   return (
     <div className={`kind-${node.kind} mx-auto min-h-screen max-w-xl px-4 pb-32 pt-6`}>
@@ -95,6 +113,30 @@ function NodeDetail({
 
       <p className="mt-6 leading-relaxed text-foreground/90">{description(node, lang)}</p>
 
+      {isMonument && story && (
+        <section className="kind-ring mt-6 rounded-2xl border bg-card/60 p-4">
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="mono-label inline-flex items-center gap-2" style={{ color: "var(--kind)" }}>
+              <Landmark className="size-4" /> {t("node.history")}
+            </h2>
+            <ListenButton text={`${node.name}. ${story}`} />
+          </div>
+          <p className="mt-3 leading-relaxed text-foreground/90">{story}</p>
+        </section>
+      )}
+
+      {isBiz && todaySpecials && (
+        <div className="kind-ring mt-6 flex items-start gap-3 rounded-2xl border bg-card/60 p-4">
+          <Sparkles className="mt-0.5 size-5 shrink-0" style={{ color: "var(--kind)" }} />
+          <div>
+            <p className="mono-label !text-[0.6rem]" style={{ color: "var(--kind)" }}>
+              {t("node.specials")}
+            </p>
+            <p className="mt-0.5">{todaySpecials}</p>
+          </div>
+        </div>
+      )}
+
       {offer && (
         <div className="kind-ring mt-6 flex items-start gap-3 rounded-2xl border border-dashed bg-card/60 p-4">
           <Tag className="mt-0.5 size-5 shrink-0" style={{ color: "var(--kind)" }} />
@@ -118,6 +160,13 @@ function NodeDetail({
               </li>
             ))}
           </ul>
+          <p className="mt-2 text-xs text-muted-foreground">
+            {node.menu_source_url && node.menu_updated_at
+              ? t("node.menu.auto", {
+                  d: new Date(node.menu_updated_at).toLocaleDateString(lang === "it" ? "it-IT" : "en-GB"),
+                })
+              : t("node.menu.manual")}
+          </p>
         </section>
       )}
 

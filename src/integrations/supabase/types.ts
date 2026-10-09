@@ -21,6 +21,7 @@ export type Database = {
           created_at: string
           id: string
           node_id: string
+          user_id: string | null
         }
         Insert: {
           author: string
@@ -28,6 +29,7 @@ export type Database = {
           created_at?: string
           id?: string
           node_id: string
+          user_id?: string | null
         }
         Update: {
           author?: string
@@ -35,6 +37,7 @@ export type Database = {
           created_at?: string
           id?: string
           node_id?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -53,17 +56,23 @@ export type Database = {
           created_at: string
           description_en: string
           description_it: string
+          history_en: string
+          history_it: string
           hours: Json | null
           id: string
           kind: string
           lat: number
           lng: number
           menu: Json | null
+          menu_source_url: string | null
+          menu_updated_at: string | null
           name: string
           promo_en: string | null
           promo_it: string | null
           radius_m: number
           slug: string
+          specials_en: string | null
+          specials_it: string | null
           tagline_en: string
           tagline_it: string
         }
@@ -73,17 +82,23 @@ export type Database = {
           created_at?: string
           description_en?: string
           description_it?: string
+          history_en?: string
+          history_it?: string
           hours?: Json | null
           id?: string
           kind: string
           lat: number
           lng: number
           menu?: Json | null
+          menu_source_url?: string | null
+          menu_updated_at?: string | null
           name: string
           promo_en?: string | null
           promo_it?: string | null
           radius_m?: number
           slug: string
+          specials_en?: string | null
+          specials_it?: string | null
           tagline_en?: string
           tagline_it?: string
         }
@@ -93,17 +108,23 @@ export type Database = {
           created_at?: string
           description_en?: string
           description_it?: string
+          history_en?: string
+          history_it?: string
           hours?: Json | null
           id?: string
           kind?: string
           lat?: number
           lng?: number
           menu?: Json | null
+          menu_source_url?: string | null
+          menu_updated_at?: string | null
           name?: string
           promo_en?: string | null
           promo_it?: string | null
           radius_m?: number
           slug?: string
+          specials_en?: string | null
+          specials_it?: string | null
           tagline_en?: string
           tagline_it?: string
         }

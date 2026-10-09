@@ -3,7 +3,10 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Loader2, MapPinOff, Navigation, ScanLine, Star } from "lucide-react";
 import { toast } from "sonner";
-import { postMessage, postReview, type ActionResult } from "@/lib/auracity.functions";
+import { Link } from "@tanstack/react-router";
+import { postBenchMessage, postMessage, postReview, type ActionResult } from "@/lib/auracity.functions";
+import { useSession } from "@/lib/auth";
+import { ListenButton } from "./ListenButton";
 import { distanceM, isOpenNow } from "@/lib/geo";
 import { useI18n } from "@/lib/i18n";
 import { useLocation } from "@/lib/location";
@@ -82,7 +85,12 @@ export function MessageBoard({ node }: { node: NodeRow }) {
   const { t, lang } = useI18n();
   const { loc, inRange } = usePresence(node);
   const qc = useQueryClient();
-  const send = useServerFn(postMessage);
+  const sendPublic = useServerFn(postMessage);
+  const sendBench = useServerFn(postBenchMessage);
+  const isBench = node.kind === "bench";
+  const send = isBench ? sendBench : sendPublic;
+  const { session, ready } = useSession();
+  const locked = isBench && ready && !session;
   const { data: messages = [] } = useQuery(messagesQuery(node.id));
   const [name, setName] = useAuthorName();
   const [body, setBody] = useState("");
@@ -109,13 +117,21 @@ export function MessageBoard({ node }: { node: NodeRow }) {
 
   return (
     <div className="space-y-4">
+      {locked && (
+        <div className="kind-ring flex items-center justify-between gap-3 rounded-xl border bg-card/60 px-3 py-2.5 text-sm">
+          <span>{t("bench.login")}</span>
+          <Link to="/auth" className="shrink-0 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground">
+            {t("bench.loginCta")}
+          </Link>
+        </div>
+      )}
       <div className="space-y-2">
         <input
           className={inputCls}
           placeholder={t("form.name")}
           value={name}
           maxLength={30}
-          disabled={!inRange || busy}
+          disabled={!inRange || busy || locked}
           onChange={(e) => setName(e.target.value)}
         />
         <textarea
@@ -124,13 +140,13 @@ export function MessageBoard({ node }: { node: NodeRow }) {
           placeholder={t("form.message")}
           value={body}
           maxLength={280}
-          disabled={!inRange || busy}
+          disabled={!inRange || busy || locked}
           onChange={(e) => setBody(e.target.value)}
         />
         <button
           type="button"
           className={btnCls}
-          disabled={!inRange || busy || name.trim().length < 1 || body.trim().length < 2}
+          disabled={!inRange || busy || locked || name.trim().length < 1 || body.trim().length < 2}
           onClick={submit}
         >
           {busy ? (
@@ -150,7 +166,10 @@ export function MessageBoard({ node }: { node: NodeRow }) {
               <span className="text-sm font-semibold">{m.author}</span>
               <span className="mono-label !text-[0.58rem]">{timeAgo(m.created_at, lang)}</span>
             </div>
-            <p className="mt-1 text-sm text-foreground/90">{m.body}</p>
+            <div className="mt-1 flex items-start gap-2">
+              <p className="flex-1 text-sm text-foreground/90">{m.body}</p>
+              <ListenButton compact text={`${m.author}: ${m.body}`} />
+            </div>
           </li>
         ))}
       </ul>

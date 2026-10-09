@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { distanceM, isOpenNow, type Hours } from "./geo";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { distanceM, isOpenNow, romeDate, type Hours } from "./geo";
 
 export type ActionError =
   | "too_far"
@@ -13,6 +14,7 @@ export type ActionError =
   | "profanity"
   | "hate"
   | "spam"
+  | "login_required"
   | "unavailable";
 
 export type ActionResult = { ok: true } | { ok: false; error: ActionError; distance?: number };
@@ -47,10 +49,12 @@ export const postMessage = createServerFn({ method: "POST" })
 
     const { data: node } = await supabaseAdmin
       .from("nodes")
-      .select("id, lat, lng, radius_m")
+      .select("id, kind, lat, lng, radius_m")
       .eq("id", data.nodeId)
       .maybeSingle();
     if (!node) return { ok: false, error: "not_found" };
+    // Bench messages are reserved to registered users (postBenchMessage).
+    if (node.kind === "bench") return { ok: false, error: "login_required" };
 
     if (data.accuracy > MAX_ACCURACY_M) return { ok: false, error: "weak_gps" };
     const dist = distanceM({ lat: data.lat, lng: data.lng }, node);
@@ -122,4 +126,82 @@ export const postReview = createServerFn({ method: "POST" })
       return { ok: false, error: "unavailable" };
     }
     return { ok: true };
+  });
+
+const benchSchema = z.object({
+  ...presence,
+  body: z.string().trim().min(2).max(280),
+});
+
+// Geotagged messages on benches / street items: registered users only, physically present, AI-moderated.
+export const postBenchMessage = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: z.input<typeof benchSchema>) => benchSchema.parse(input))
+  .handler(async ({ data, context }): Promise<ActionResult> => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { moderateText } = await import("./moderation.server");
+
+    const { data: node } = await supabaseAdmin
+      .from("nodes")
+      .select("id, kind, lat, lng, radius_m")
+      .eq("id", data.nodeId)
+      .maybeSingle();
+    if (!node || node.kind !== "bench") return { ok: false, error: "not_found" };
+    if (data.accuracy > MAX_ACCURACY_M) return { ok: false, error: "weak_gps" };
+    const dist = distanceM({ lat: data.lat, lng: data.lng }, node);
+    if (dist > node.radius_m) return { ok: false, error: "too_far", distance: Math.round(dist) };
+
+    const verdict = await moderateText(`${data.author}: ${data.body}`);
+    if (!verdict.ok) return { ok: false, error: verdict.reason };
+
+    const { error } = await supabaseAdmin
+      .from("messages")
+      .insert({ node_id: node.id, author: data.author, body: data.body, user_id: context.userId });
+    if (error) {
+      console.error(error);
+      return { ok: false, error: "unavailable" };
+    }
+    return { ok: true };
+  });
+
+// Automatic daily menu refresh: at most once per day (Europe/Rome) per venue, from its public source page.
+export const refreshMenu = createServerFn({ method: "POST" })
+  .inputValidator((input: { nodeId: string }) => z.object({ nodeId: z.string().uuid() }).parse(input))
+  .handler(async ({ data }): Promise<{ updated: boolean }> => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: node } = await supabaseAdmin
+      .from("nodes")
+      .select("id, kind, menu_source_url, menu_updated_at")
+      .eq("id", data.nodeId)
+      .maybeSingle();
+    if (!node || node.kind !== "business" || !node.menu_source_url) return { updated: false };
+    const today = romeDate(new Date());
+    if (node.menu_updated_at && romeDate(new Date(node.menu_updated_at)) === today) return { updated: false };
+
+    // Claim today's refresh so concurrent visitors don't trigger duplicate AI calls.
+    let claim = supabaseAdmin
+      .from("nodes")
+      .update({ menu_updated_at: new Date().toISOString() })
+      .eq("id", node.id);
+    claim = node.menu_updated_at ? claim.eq("menu_updated_at", node.menu_updated_at) : claim.is("menu_updated_at", null);
+    const { data: claimed } = await claim.select("id");
+    if (!claimed || claimed.length === 0) return { updated: false };
+
+    try {
+      const { extractMenuFromUrl } = await import("./menu.server");
+      const menu = await extractMenuFromUrl(node.menu_source_url, today);
+      if (!menu) return { updated: false };
+      await supabaseAdmin
+        .from("nodes")
+        .update({
+          ...(menu.items.length > 0 ? { menu: menu.items } : {}),
+          specials_it: menu.specials_it || null,
+          specials_en: menu.specials_en || null,
+        })
+        .eq("id", node.id);
+      return { updated: true };
+    } catch (e) {
+      console.error("menu refresh failed", e);
+      return { updated: false };
+    }
   });

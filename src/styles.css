@@ -58,6 +58,7 @@
   --color-kind-monument: var(--kind-monument);
   --color-kind-street: var(--kind-street);
   --color-kind-service: var(--kind-service);
+  --color-kind-bench: var(--kind-bench);
   --color-success: var(--success);
 }
 
@@ -100,6 +101,7 @@
   --kind-monument: oklch(0.82 0.15 160);
   --kind-street: oklch(0.78 0.11 250);
   --kind-service: oklch(0.84 0.14 205);
+  --kind-bench: oklch(0.8 0.13 320);
   --success: oklch(0.8 0.17 150);
   --glass: oklch(0.18 0.03 255 / 62%);
   --glow: oklch(0.84 0.14 205 / 35%);
@@ -165,6 +167,7 @@
   .kind-monument { --kind: var(--kind-monument); }
   .kind-street { --kind: var(--kind-street); }
   .kind-service { --kind: var(--kind-service); }
+  .kind-bench { --kind: var(--kind-bench); }
 
   .kind-dot {
     background-color: var(--kind);
