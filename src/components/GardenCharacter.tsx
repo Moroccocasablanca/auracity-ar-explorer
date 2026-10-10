@@ -49,7 +49,7 @@ export function GardenCharacter({ node, inRange }: { node: NodeRow; inRange: boo
         <GardenFace kind={node.kind} speaking={playing != null} />
         <div className="min-w-0 flex-1 space-y-3">
           <p className="mono-label !text-[0.6rem]">{t("garden.latest")}</p>
-          <p className="text-sm text-foreground">{latest?.body ?? tx.history || tx.description}</p>
+          <p className="text-sm text-foreground">{latest?.body ?? (tx.history || tx.description)}</p>
             <Button variant="outline" onClick={() => (playing ? stop() : latest ? say(latest) : welcome())}>
               {playing ? t("audio.stop") : t("garden.talk")}
             </Button>
