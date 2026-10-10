@@ -25,7 +25,7 @@ export function GardenFace({ kind, speaking, size = 88 }: { kind: string; speaki
 /** Garden object that wakes up and reads the latest message when you arrive within its radius. */
 export function GardenCharacter({ node, inRange }: { node: NodeRow; inRange: boolean }) {
   const { t } = useI18n();
-  const { data: messages = [] } = useQuery(messagesQuery(node.id));
+  const { data: messages = [], isPending, isError } = useQuery(messagesQuery(node.id));
   const { playing, play, stop } = useNarrator();
   const woke = useRef(false);
   const latest = messages[0];
@@ -36,12 +36,12 @@ export function GardenCharacter({ node, inRange }: { node: NodeRow; inRange: boo
   const welcome = () => play(node.id, { nodeId: node.id, source: "history" }, `${tx.name}. ${tx.history || tx.description}`);
 
   useEffect(() => {
-    if (!inRange || woke.current) return;
+    if (!inRange || isPending || isError || woke.current) return;
     woke.current = true;
     markDiscovered(node.id);
     if (latest) say(latest); else welcome();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [inRange, latest?.id]);
+  }, [inRange, isPending, isError, latest?.id]);
 
   return (
     <div className="space-y-3 border-y border-border py-5">
