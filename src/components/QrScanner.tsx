@@ -11,10 +11,13 @@ export function canScanQr() {
 export function QrScanner({ onResult, onClose }: { onResult: (value: string) => void; onClose: () => void }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [error, setError] = useState(false);
+  const closeRef = useRef(onClose);
+  closeRef.current = onClose;
 
   useEffect(() => {
     let stream: MediaStream | null = null;
     let timer: number | undefined;
+    let idle: number | undefined;
     let stopped = false;
     (async () => {
       try {
@@ -49,7 +52,7 @@ export function QrScanner({ onResult, onClose }: { onResult: (value: string) => 
           } catch {
             /* keep scanning */
           }
-        }, 350);
+        }, 500);
       } catch {
         setError(true);
       }
@@ -57,6 +60,7 @@ export function QrScanner({ onResult, onClose }: { onResult: (value: string) => 
     return () => {
       stopped = true;
       if (timer) window.clearInterval(timer);
+      if (idle) window.clearTimeout(idle);
       stream?.getTracks().forEach((t) => t.stop());
     };
   }, [onResult]);
