@@ -107,7 +107,7 @@ export function ArView() {
       streamRef.current?.getTracks().forEach((tr) => tr.stop());
       streamRef.current = null;
     };
-  }, [loc.active]);
+  }, [cameraWanted]);
 
   useEffect(() => {
     if (cameraOk && videoRef.current && streamRef.current) videoRef.current.srcObject = streamRef.current;
