@@ -142,6 +142,7 @@ export type Database = {
           garden_interactive: boolean
           history_en: string
           history_it: string
+          history_sources: Json
           hours: Json | null
           id: string
           image_credit: string | null
@@ -174,6 +175,7 @@ export type Database = {
           garden_interactive?: boolean
           history_en?: string
           history_it?: string
+          history_sources?: Json
           hours?: Json | null
           id?: string
           image_credit?: string | null
@@ -206,6 +208,7 @@ export type Database = {
           garden_interactive?: boolean
           history_en?: string
           history_it?: string
+          history_sources?: Json
           hours?: Json | null
           id?: string
           image_credit?: string | null

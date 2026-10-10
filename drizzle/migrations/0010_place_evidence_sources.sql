@@ -1,0 +1,2 @@
+ALTER TABLE public.nodes ADD COLUMN history_sources jsonb NOT NULL DEFAULT '[]'::jsonb;
+COMMENT ON COLUMN public.nodes.history_sources IS 'Public source links for historical narration and verified garden location evidence.';
