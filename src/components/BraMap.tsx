@@ -6,6 +6,8 @@ import { BRA_CENTER } from "@/lib/location";
 import type { NodeRow } from "@/lib/nodes";
 import { isGardenObject } from "@/lib/node-rules";
 import type { MapAppearance } from "@/lib/map-appearance";
+import charTree from "@/assets/char-tree.png";
+import charBench from "@/assets/char-bench.png";
 
 const KIND_COLOR_VAR: Record<string, string> = {
   business: "--kind-business",
@@ -90,9 +92,9 @@ export default function BraMap({
       const icon = garden
         ? L.divIcon({
             className: "",
-            iconSize: [44, 44],
-            iconAnchor: [22, 22],
-            html: `<span class="aura-face-pin" style="--pin:${color}"><i></i><i></i><b></b></span>`,
+            iconSize: [72, 84],
+            iconAnchor: [36, 78],
+            html: `<span class="aura-char" style="--pin:${color}"><img src="${n.kind === "tree" ? charTree : charBench}" alt="" /><em></em></span>`,
           })
         : n.kind === "business" && !n.subscribed
           ? L.divIcon({

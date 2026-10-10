@@ -16,4 +16,7 @@
 - [x] Guida di Bra in chat (Claude)
 - [ ] Monumenti: storia più ricca + nuovi monumenti storici
 - [ ] Più contenuti divertenti per bambini e adulti
+- [x] Personaggi 3D animati sulla mappa per alberi e panchine
+- [ ] App privata solo per il proprietario: va impostata in Pubblica → Accesso al sito → Personalizzato
+- [ ] Altri oggetti parlanti: servono posizioni di giardini/alberi/panchine dal proprietario
 - [x] Tutti i locali di Bra sulla mappa (OpenStreetMap), abbonati in evidenza
