@@ -66,9 +66,19 @@ export function ArView() {
     if (tooFast) stop();
   }, [tooFast, stop]);
 
+  // Battery: the camera only runs while the page is visible and the user is not moving fast.
+  const [pageVisible, setPageVisible] = useState(true);
+  useEffect(() => {
+    const onVis = () => setPageVisible(document.visibilityState === "visible");
+    onVis();
+    document.addEventListener("visibilitychange", onVis);
+    return () => document.removeEventListener("visibilitychange", onVis);
+  }, []);
+  const cameraWanted = loc.active && pageVisible && !tooFast;
+
   // Camera lifecycle
   useEffect(() => {
-    if (!loc.active) {
+    if (!cameraWanted) {
       streamRef.current?.getTracks().forEach((tr) => tr.stop());
       streamRef.current = null;
       setCameraOk(false);
