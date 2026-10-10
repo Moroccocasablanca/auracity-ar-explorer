@@ -23,16 +23,16 @@ const talks = (n: NodeRow) => n.kind === "monument" || isGardenObject(n);
 function AutoTalk({ node, play }: { node: NodeRow; play: ReturnType<typeof useNarrator>["play"] }) {
   const tx = useNodeText(node);
   const garden = isGardenObject(node);
-  const { data: messages } = useQuery({ ...messagesQuery(node.id), enabled: garden });
+  const { data: messages, isPending, isError } = useQuery({ ...messagesQuery(node.id), enabled: garden });
   useEffect(() => {
-    if (talked.has(node.id)) return;
+    if (talked.has(node.id) || (garden && (isPending || isError))) return;
     const timer = window.setTimeout(() => {
       if (garden) {
         const m = messages?.[0];
-        if (!m) return;
         talked.add(node.id);
         markDiscovered(node.id);
-        play(node.id, { nodeId: node.id, source: "message", messageId: m.id }, m.body);
+        if (m) play(node.id, { nodeId: node.id, source: "message", messageId: m.id }, m.body);
+        else play(node.id, { nodeId: node.id, source: "history" }, `${tx.name}. ${tx.history || tx.description}`);
       } else {
         const text = `${tx.name}. ${tx.history || tx.description}`;
         talked.add(node.id);
@@ -41,7 +41,7 @@ function AutoTalk({ node, play }: { node: NodeRow; play: ReturnType<typeof useNa
     }, 1200);
     return () => window.clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [node.id, garden, messages?.[0]?.id, tx.name, tx.history, tx.description, play]);
+  }, [node.id, garden, isPending, isError, messages?.[0]?.id, tx.name, tx.history, tx.description, play]);
   return null;
 }
 
@@ -123,6 +123,7 @@ export function ArView() {
     if (!loc.pos) return [];
     const here = loc.pos;
     return nodes
+      .filter((n) => n.kind !== "street")
       .map((n) => ({ n, d: distanceM(here, n), b: bearingDeg(here, n) }))
       .filter((p) => p.d <= RANGE_FREE)
       .sort((a, b) => b.d - a.d);

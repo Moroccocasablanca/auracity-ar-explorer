@@ -4,6 +4,7 @@ import { Armchair, TreePine } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n";
 import { messagesQuery, type NodeRow } from "@/lib/nodes";
+import { useNodeText } from "@/lib/use-node-text";
 import { markDiscovered } from "@/lib/discovered";
 import { useNarrator } from "./ListenButton";
 
@@ -24,21 +25,23 @@ export function GardenFace({ kind, speaking, size = 88 }: { kind: string; speaki
 /** Garden object that wakes up and reads the latest message when you arrive within its radius. */
 export function GardenCharacter({ node, inRange }: { node: NodeRow; inRange: boolean }) {
   const { t } = useI18n();
-  const { data: messages = [] } = useQuery(messagesQuery(node.id));
+  const { data: messages = [], isPending, isError } = useQuery(messagesQuery(node.id));
   const { playing, play, stop } = useNarrator();
   const woke = useRef(false);
   const latest = messages[0];
+  const tx = useNodeText(node);
   const older = messages.slice(1, 10);
 
   const say = (m: { id: string; body: string }) => play(m.id, { nodeId: node.id, source: "message", messageId: m.id }, m.body);
+  const welcome = () => play(node.id, { nodeId: node.id, source: "history" }, `${tx.name}. ${tx.history || tx.description}`);
 
   useEffect(() => {
-    if (!inRange || !latest || woke.current) return;
+    if (!inRange || isPending || isError || woke.current) return;
     woke.current = true;
     markDiscovered(node.id);
-    say(latest);
+    if (latest) say(latest); else welcome();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [inRange, latest?.id]);
+  }, [inRange, isPending, isError, latest?.id]);
 
   return (
     <div className="space-y-3 border-y border-border py-5">
@@ -46,12 +49,10 @@ export function GardenCharacter({ node, inRange }: { node: NodeRow; inRange: boo
         <GardenFace kind={node.kind} speaking={playing != null} />
         <div className="min-w-0 flex-1 space-y-3">
           <p className="mono-label !text-[0.6rem]">{t("garden.latest")}</p>
-          <p className="text-sm text-foreground">{latest?.body ?? t("messages.empty")}</p>
-          {latest && (
-            <Button variant="outline" onClick={() => (playing ? stop() : say(latest))}>
+          <p className="text-sm text-foreground">{latest?.body ?? (tx.history || tx.description)}</p>
+            <Button variant="outline" onClick={() => (playing ? stop() : latest ? say(latest) : welcome())}>
               {playing ? t("audio.stop") : t("garden.talk")}
             </Button>
-          )}
         </div>
       </div>
       {older.length > 0 && (
