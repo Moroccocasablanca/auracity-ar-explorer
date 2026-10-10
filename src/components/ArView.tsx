@@ -88,7 +88,13 @@ export function ArView() {
     (async () => {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: { ideal: "environment" } },
+          // Modest resolution and frame rate: the AR overlay does not need HD/60fps video.
+          video: {
+            facingMode: { ideal: "environment" },
+            width: { ideal: 960, max: 1280 },
+            height: { ideal: 540, max: 720 },
+            frameRate: { ideal: 24, max: 30 },
+          },
           audio: false,
         });
         if (cancelled) {
