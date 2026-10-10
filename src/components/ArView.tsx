@@ -29,10 +29,10 @@ function AutoTalk({ node, play }: { node: NodeRow; play: ReturnType<typeof useNa
     const timer = window.setTimeout(() => {
       if (garden) {
         const m = messages?.[0];
-        if (!m) return;
         talked.add(node.id);
         markDiscovered(node.id);
-        play(node.id, { nodeId: node.id, source: "message", messageId: m.id }, m.body);
+        if (m) play(node.id, { nodeId: node.id, source: "message", messageId: m.id }, m.body);
+        else play(node.id, { nodeId: node.id, source: "history" }, `${tx.name}. ${tx.history || tx.description}`);
       } else {
         const text = `${tx.name}. ${tx.history || tx.description}`;
         talked.add(node.id);
@@ -123,6 +123,7 @@ export function ArView() {
     if (!loc.pos) return [];
     const here = loc.pos;
     return nodes
+      .filter((n) => n.kind !== "street")
       .map((n) => ({ n, d: distanceM(here, n), b: bearingDeg(here, n) }))
       .filter((p) => p.d <= RANGE_FREE)
       .sort((a, b) => b.d - a.d);

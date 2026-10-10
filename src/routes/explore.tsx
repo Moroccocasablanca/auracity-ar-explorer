@@ -8,7 +8,8 @@ import { useProximityAlerts } from "@/components/ProximityWatcher";
 import { distanceM, formatDistance } from "@/lib/geo";
 import { kindKey, useI18n } from "@/lib/i18n";
 import { useLocation } from "@/lib/location";
-import { KINDS, messagesQuery, nodesQuery, tagline, type NodeKind, type NodeRow } from "@/lib/nodes";
+import { history, description, messagesQuery, nodesQuery, tagline, type NodeRow } from "@/lib/nodes";
+import { explorePriority, matchesExploreFilter, type ExploreFilter } from "@/lib/explore-rules";
 import { useNarrator } from "@/components/ListenButton";
 import { isGardenObject } from "@/lib/node-rules";
 import { discovered, markDiscovered } from "@/lib/discovered";
@@ -21,12 +22,12 @@ export const Route = createFileRoute("/explore")({
       { title: "Explore Bra — AURACITY nodes" },
       {
         name: "description",
-        content: "Browse every street, monument and business of Bra mapped as an AURACITY augmented-reality node.",
+        content: "Discover restaurants, historic monuments and animated talking gardens in Bra with AURACITY.",
       },
       { property: "og:title", content: "Explore Bra — AURACITY nodes" },
       {
         property: "og:description",
-        content: "Browse every street, monument and business of Bra mapped as an AURACITY augmented-reality node.",
+        content: "Discover restaurants, historic monuments and animated talking gardens in Bra with AURACITY.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -42,31 +43,36 @@ function Explore() {
   const { mode, appearance, selectMode } = useMapAppearance();
   const [recenter, setRecenter] = useState(0);
   const { data: nodes = [] } = useQuery(nodesQuery);
-  const [kind, setKind] = useState<NodeKind | "all">("all");
+  const [kind, setKind] = useState<ExploreFilter>("all");
 
   const list = useMemo(() => {
     return nodes
-      .filter((n) => kind === "all" || n.kind === kind)
+      .filter((n) => matchesExploreFilter(n, kind))
       .map((n) => ({ n, d: pos ? distanceM(pos, n) : null }))
-      .sort((a, b) => (a.d != null && b.d != null ? a.d - b.d : a.n.name.localeCompare(b.n.name)));
+      .sort((a, b) => explorePriority(a.n) - explorePriority(b.n) || (a.d != null && b.d != null ? a.d - b.d : a.n.name.localeCompare(b.n.name)));
   }, [nodes, kind, pos]);
   const filtered = useMemo(() => list.map((x) => x.n), [list]);
   const kindLabel = useCallback((k: string) => t(kindKey(k)), [t]);
   const alerts = useProximityAlerts();
   const qc = useQueryClient();
-  const { playing, play } = useNarrator();
+  const { playing, play, stop } = useNarrator();
   const gardens = useMemo(() => nodes.filter(isGardenObject), [nodes]);
   const [found, setFound] = useState(0);
   useEffect(() => setFound(discovered().filter((id) => gardens.some((g) => g.id === id)).length), [gardens, playing]);
   const onTalk = useCallback(
     async (n: NodeRow) => {
+      if (playing === n.id) { stop(); return; }
+      if (n.kind === "monument") {
+        play(n.id, { nodeId: n.id, source: "history" }, `${n.name}. ${history(n, lang) || description(n, lang)}`);
+        return;
+      }
       const msgs = await qc.fetchQuery(messagesQuery(n.id));
       const m = msgs[0];
-      if (!m) return;
       markDiscovered(n.id);
-      play(n.id, { nodeId: n.id, source: "message", messageId: m.id }, m.body);
+      if (m) play(n.id, { nodeId: n.id, source: "message", messageId: m.id }, m.body);
+      else play(n.id, { nodeId: n.id, source: "history" }, `${n.name}. ${history(n, lang) || description(n, lang)}`);
     },
-    [qc, play],
+    [qc, play, playing, stop, lang],
   );
   const talkLabel = t("garden.talk");
 
@@ -76,22 +82,24 @@ function Explore() {
         <p className="mono-label">Bra · Piemonte</p>
         <h1 className="mt-1 text-4xl font-bold">{t("explore.title")}</h1>
         <p className="mt-2 text-muted-foreground">{t("explore.sub")}</p>
-        <p className="mono-label mt-2">{t("explore.count", { n: nodes.length })}</p>
+        <p className="mono-label mt-2">{t("explore.count", { n: list.length })}</p>
 
         <div className="-mx-4 mt-6 flex gap-2 overflow-x-auto px-4 pb-1">
-          {(["all", ...KINDS] as const).map((k) => (
-            <button
+          {(["all", "restaurants", "monument", "gardens", "business"] as const).map((k) => (
+            <Button
               key={k}
               type="button"
               onClick={() => setKind(k)}
-              className={`kind-${k === "all" ? "service" : k} shrink-0 rounded-full border px-4 py-1.5 text-sm transition-colors ${
+              variant="outline"
+              aria-pressed={kind === k}
+              className={`shrink-0 rounded-md px-4 py-1.5 text-sm transition-colors ${
                 kind === k
                   ? "border-primary bg-primary text-primary-foreground"
                   : "border-border text-muted-foreground hover:text-foreground"
               }`}
             >
-              {k === "all" ? t("all") : t(kindKey(k))}
-            </button>
+              {k === "all" ? t("all") : k === "restaurants" ? t("explore.restaurants") : k === "gardens" ? t("explore.gardens") : t(kindKey(k))}
+            </Button>
           ))}
         </div>
 
