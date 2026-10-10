@@ -11,24 +11,39 @@ export function canScanQr() {
 export function QrScanner({ onResult, onClose }: { onResult: (value: string) => void; onClose: () => void }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [error, setError] = useState(false);
+  const closeRef = useRef(onClose);
+  closeRef.current = onClose;
 
   useEffect(() => {
     let stream: MediaStream | null = null;
     let timer: number | undefined;
+    let idle: number | undefined;
     let stopped = false;
     (async () => {
       try {
         const Ctor = (window as unknown as { BarcodeDetector: new (o: { formats: string[] }) => Detector })
           .BarcodeDetector;
         const detector = new Ctor({ formats: ["qr_code"] });
-        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: "environment" } } });
-        if (stopped) return;
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: { ideal: "environment" },
+            width: { ideal: 720, max: 1280 },
+            height: { ideal: 720, max: 1280 },
+            frameRate: { ideal: 15, max: 24 },
+          },
+        });
+        if (stopped) {
+          stream.getTracks().forEach((t) => t.stop());
+          return;
+        }
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
           await videoRef.current.play().catch(() => undefined);
         }
+        // Battery: give up after 60s of scanning.
+        idle = window.setTimeout(() => closeRef.current(), 60_000);
         timer = window.setInterval(async () => {
-          if (!videoRef.current) return;
+          if (!videoRef.current || document.visibilityState !== "visible") return;
           try {
             const codes = await detector.detect(videoRef.current);
             if (codes[0]?.rawValue) {
@@ -37,7 +52,7 @@ export function QrScanner({ onResult, onClose }: { onResult: (value: string) => 
           } catch {
             /* keep scanning */
           }
-        }, 350);
+        }, 500);
       } catch {
         setError(true);
       }
@@ -45,6 +60,7 @@ export function QrScanner({ onResult, onClose }: { onResult: (value: string) => 
     return () => {
       stopped = true;
       if (timer) window.clearInterval(timer);
+      if (idle) window.clearTimeout(idle);
       stream?.getTracks().forEach((t) => t.stop());
     };
   }, [onResult]);

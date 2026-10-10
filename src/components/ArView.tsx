@@ -66,9 +66,19 @@ export function ArView() {
     if (tooFast) stop();
   }, [tooFast, stop]);
 
+  // Battery: the camera only runs while the page is visible and the user is not moving fast.
+  const [pageVisible, setPageVisible] = useState(true);
+  useEffect(() => {
+    const onVis = () => setPageVisible(document.visibilityState === "visible");
+    onVis();
+    document.addEventListener("visibilitychange", onVis);
+    return () => document.removeEventListener("visibilitychange", onVis);
+  }, []);
+  const cameraWanted = loc.active && pageVisible && !tooFast;
+
   // Camera lifecycle
   useEffect(() => {
-    if (!loc.active) {
+    if (!cameraWanted) {
       streamRef.current?.getTracks().forEach((tr) => tr.stop());
       streamRef.current = null;
       setCameraOk(false);
@@ -78,7 +88,13 @@ export function ArView() {
     (async () => {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: { ideal: "environment" } },
+          // Modest resolution and frame rate: the AR overlay does not need HD/60fps video.
+          video: {
+            facingMode: { ideal: "environment" },
+            width: { ideal: 960, max: 1280 },
+            height: { ideal: 540, max: 720 },
+            frameRate: { ideal: 24, max: 30 },
+          },
           audio: false,
         });
         if (cancelled) {
@@ -97,7 +113,7 @@ export function ArView() {
       streamRef.current?.getTracks().forEach((tr) => tr.stop());
       streamRef.current = null;
     };
-  }, [loc.active]);
+  }, [cameraWanted]);
 
   useEffect(() => {
     if (cameraOk && videoRef.current && streamRef.current) videoRef.current.srcObject = streamRef.current;
