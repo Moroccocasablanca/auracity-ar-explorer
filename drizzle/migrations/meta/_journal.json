@@ -64,6 +64,13 @@
       "when": 1791577401305,
       "tag": "0008_venues_subscription",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1791629738987,
+      "tag": "0009_migration",
+      "breakpoints": true
     }
   ]
 }

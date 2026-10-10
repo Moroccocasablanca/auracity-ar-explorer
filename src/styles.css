@@ -98,11 +98,11 @@
   --sidebar-border: oklch(1 0 0 / 11%);
   --sidebar-ring: oklch(0.84 0.14 205);
 
-  --kind-business: oklch(0.82 0.16 75);
-  --kind-monument: oklch(0.82 0.15 160);
-  --kind-street: oklch(0.78 0.11 250);
+  --kind-business: #9b51e0;
+  --kind-monument: #ffd700;
+  --kind-street: oklch(0.6 0.02 250);
   --kind-service: oklch(0.84 0.14 205);
-  --kind-bench: oklch(0.8 0.13 320);
+  --kind-bench: #00ffcc;
   --kind-tree: oklch(0.78 0.17 140);
   --success: oklch(0.8 0.17 150);
   --glass: oklch(0.18 0.03 255 / 62%);
