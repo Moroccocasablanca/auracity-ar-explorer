@@ -19,4 +19,7 @@
 - [x] Personaggi 3D animati sulla mappa per alberi e panchine
 - [ ] App privata solo per il proprietario: va impostata in Pubblica → Accesso al sito → Personalizzato
 - [ ] Altri oggetti parlanti: servono posizioni di giardini/alberi/panchine dal proprietario
+- [ ] Distribuire circa dieci oggetti parlanti nei giardini di Bra con posizioni documentate.
+- [ ] Dare priorità a ristoranti e monumenti, nascondere i punti-via e rendere i monumenti narrabili dalla mappa.
+- [ ] Arricchire la storia dei monumenti da fonti verificabili con fonti consultabili.
 - [x] Tutti i locali di Bra sulla mappa (OpenStreetMap), abbonati in evidenza
