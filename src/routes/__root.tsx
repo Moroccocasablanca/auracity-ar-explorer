@@ -17,6 +17,8 @@ import { LocationProvider } from "../lib/location";
 import { BottomNav } from "../components/BottomNav";
 import { ProximityWatcher } from "../components/ProximityWatcher";
 import { Toaster } from "../components/ui/sonner";
+import { PrivacyConsent } from "../components/PrivacyConsent";
+import { AppEnvironment } from "../components/AppEnvironment";
 
 function NotFoundComponent() {
   return (
@@ -82,7 +84,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   head: () => ({
     meta: [
       { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
       { name: "theme-color", content: "#0b1220" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
       { name: "mobile-web-app-capable", content: "yes" },
@@ -149,6 +151,8 @@ function RootComponent() {
           <Outlet />
           <BottomNav />
           <ProximityWatcher />
+          <PrivacyConsent />
+          <AppEnvironment />
           <Toaster theme="dark" position="top-center" />
         </LocationProvider>
       </I18nProvider>
