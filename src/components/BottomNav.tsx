@@ -13,7 +13,7 @@ const items = [
 export function BottomNav() {
   const { t, lang, setLang } = useI18n();
   return (
-    <nav className="glass fixed inset-x-3 bottom-3 z-50 mx-auto flex max-w-md items-center justify-between rounded-full px-2 py-1.5">
+    <nav className="glass fixed inset-x-3 bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-50 mx-auto flex max-w-md items-center justify-between rounded-full px-2 py-1.5">
       {items.map(({ to, key, Icon }) => (
         <Link
           key={to}

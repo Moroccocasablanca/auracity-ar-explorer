@@ -3,6 +3,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { distanceM, isOpenNow, romeDate, type Hours } from "./geo";
 import { allowsMessages, isGardenObject } from "./node-rules";
+import { venueFeaturesEnabled } from "./systemConfig";
 
 export type ActionError =
   | "too_far"
@@ -88,7 +89,7 @@ export const postReview = createServerFn({ method: "POST" })
       .eq("id", data.nodeId)
       .maybeSingle();
     if (!node) return { ok: false, error: "not_found" };
-    if (node.kind !== "business" || !node.subscribed) return { ok: false, error: "not_business" };
+    if (node.kind !== "business" || !venueFeaturesEnabled(node.subscribed)) return { ok: false, error: "not_business" };
 
     // Temporal moderation: no commercial reviews while the business is closed.
     if (!isOpenNow(node.hours as Hours)) return { ok: false, error: "closed" };
@@ -178,7 +179,7 @@ export const refreshMenu = createServerFn({ method: "POST" })
       .select("id, kind, subscribed, menu_source_url, menu_updated_at")
       .eq("id", data.nodeId)
       .maybeSingle();
-    if (!node || node.kind !== "business" || !node.subscribed || !node.menu_source_url) return { updated: false };
+    if (!node || node.kind !== "business" || !venueFeaturesEnabled(node.subscribed) || !node.menu_source_url) return { updated: false };
     const today = romeDate(new Date());
     if (node.menu_updated_at && romeDate(new Date(node.menu_updated_at)) === today) return { updated: false };
 

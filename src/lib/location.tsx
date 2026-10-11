@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { distanceM, type LatLng } from "./geo";
+import { batterySaverPreference, POWER_EVENT } from "./power";
 
 export const BRA_CENTER: LatLng = { lat: 44.6985, lng: 7.8538 };
 const MAX_DIST_FROM_BRA_M = 8000;
@@ -34,6 +35,14 @@ export function LocationProvider({ children }: { children: ReactNode }) {
   const watchId = useRef<number | null>(null);
   const orientationOn = useRef(false);
   const hasCompass = useRef(false);
+  const lastUpdate = useRef(0);
+  const [batterySaver, setBatterySaver] = useState(true);
+
+  useEffect(() => {
+    const sync = () => setBatterySaver(batterySaverPreference());
+    sync(); window.addEventListener(POWER_EVENT, sync);
+    return () => window.removeEventListener(POWER_EVENT, sync);
+  }, []);
 
   const onOrientation = useCallback((e: Event) => {
     const ev = e as OrientationEvt;
@@ -86,6 +95,9 @@ export function LocationProvider({ children }: { children: ReactNode }) {
       setDemoReason(null);
       watchId.current = navigator.geolocation.watchPosition(
         (p) => {
+          const now = Date.now();
+          if (batterySaver && now - lastUpdate.current < 12_000) return;
+          lastUpdate.current = now;
           const here = { lat: p.coords.latitude, lng: p.coords.longitude };
           if (distanceM(here, BRA_CENTER) > MAX_DIST_FROM_BRA_M) {
             goDemo("outside");
@@ -98,10 +110,10 @@ export function LocationProvider({ children }: { children: ReactNode }) {
           setSpeed(p.coords.speed);
         },
         () => goDemo("nogps"),
-        { enableHighAccuracy: true, maximumAge: 2000, timeout: 12000 },
+        { enableHighAccuracy: !batterySaver, maximumAge: batterySaver ? 15_000 : 2000, timeout: 12000 },
       );
     },
-    [goDemo, onOrientation],
+    [goDemo, onOrientation, batterySaver],
   );
 
   const stop = useCallback(() => {

@@ -1,4 +1,5 @@
 import { isGardenObject } from "./node-rules";
+import { venueFeaturesEnabled } from "./systemConfig";
 
 type Place = { kind: string; venue_type?: string | null; subscribed?: boolean; garden_interactive: boolean };
 export type ExploreFilter = "all" | "restaurants" | "monument" | "gardens" | "business";
@@ -16,7 +17,7 @@ export function matchesExploreFilter(n: Place, filter: ExploreFilter) {
 }
 
 export function explorePriority(n: Place) {
-  if (n.kind === "business" && n.subscribed) return 0;
+  if (n.kind === "business" && venueFeaturesEnabled(Boolean(n.subscribed))) return 0;
   if (isRestaurant(n)) return 1;
   if (n.kind === "monument") return 2;
   if (isGardenObject(n)) return 3;

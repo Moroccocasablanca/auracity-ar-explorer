@@ -6,6 +6,7 @@ import { distanceM } from "@/lib/geo";
 import { useI18n } from "@/lib/i18n";
 import { useLocation } from "@/lib/location";
 import { nodesQuery, promo } from "@/lib/nodes";
+import { venueFeaturesEnabled } from "@/lib/systemConfig";
 
 /** Distance at which a place "calls" you (wider than the interaction radius). */
 export const ALERT_RADIUS_M = 60;
@@ -59,7 +60,7 @@ export function ProximityWatcher() {
     if (!on || !pos || demo) return;
     for (const n of nodes) {
       if (seen.current.has(n.id)) continue;
-      if (n.kind === "business" && !n.subscribed) continue;
+      if (n.kind === "business" && !venueFeaturesEnabled(n.subscribed)) continue;
       if (distanceM(pos, n) > Math.max(ALERT_RADIUS_M, n.radius_m)) continue;
       seen.current.add(n.id);
       sessionStorage.setItem(SEEN_KEY, JSON.stringify([...seen.current]));

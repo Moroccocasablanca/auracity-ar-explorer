@@ -101,7 +101,7 @@
   --kind-business: #9b51e0;
   --kind-restaurant: oklch(0.78 0.17 35);
   --kind-monument: #ffd700;
-  --kind-street: oklch(0.6 0.02 250);
+  --kind-street: #1e1e1e;
   --kind-service: oklch(0.84 0.14 205);
   --kind-bench: #00ffcc;
   --kind-tree: oklch(0.78 0.17 140);
@@ -279,3 +279,4 @@
 @keyframes aura-char-bob { 0%,100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-6px) scale(1.04, 0.98); } }
 @keyframes aura-char-ring { 0% { transform: scale(0.7); opacity: 1; } 100% { transform: scale(1.6); opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .aura-char img, .aura-char em { animation: none; } }
+[data-low-power] .aura-char img, [data-low-power] .aura-char em, [data-low-power] .aura-pin::before, [data-low-power] .garden-character, [data-low-power] .garden-mouth { animation: none !important; }

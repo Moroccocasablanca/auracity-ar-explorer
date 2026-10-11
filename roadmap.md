@@ -23,3 +23,10 @@
 - [ ] Dare priorità a ristoranti e monumenti, nascondere i punti-via e rendere i monumenti narrabili dalla mappa.
 - [ ] Arricchire la storia dei monumenti da fonti verificabili con fonti consultabili.
 - [x] Tutti i locali di Bra sulla mappa (OpenStreetMap), abbonati in evidenza
+- [ ] Centralizzare modalità pilota, sicurezza, PWA e risparmio batteria in una configurazione unica.
+- [ ] Rendere temporaneamente gratuite per tutti i locali le funzioni premium senza modificare gli abbonamenti salvati.
+- [ ] Aggiungere accesso TEST ADMIN limitato a sviluppo/anteprima e autorizzato solo dal server.
+- [ ] Completare risparmio batteria per GPS e animazioni, con controllo in Account.
+- [ ] Aggiungere consenso iniziale GDPR, pagina Privacy, download dati e cancellazione account.
+- [ ] Rifinire installazione iPhone con aree sicure e suggerimento Safari mostrato una volta.
+- [ ] Mostrare storia completa e fonte sui monumenti, con lo stato “prossimamente” se manca una fonte.

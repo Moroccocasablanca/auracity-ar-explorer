@@ -118,6 +118,11 @@ function Explore() {
           </ClientOnly>
           <span className="pointer-events-none absolute bottom-6 left-3 z-[500] inline-flex items-center gap-1 rounded-md bg-card px-2 py-1 text-xs text-foreground"><MapPin className="size-3" />Bra · {t(appearance === "day" ? "map.day" : "map.night")}</span>
         </div>
+        <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground" aria-label={t("map.legend")}>
+          <span><i className="mr-1 inline-block size-2 rounded-sm bg-kind-monument" />{t("kind.monument")}</span>
+          <span><i className="mr-1 inline-block size-2 rounded-sm bg-kind-business" />{t("explore.restaurants")}</span>
+          <span><i className="mr-1 inline-block size-2 rounded-sm bg-kind-bench" />{t("kind.bench")}</span>
+        </div>
 
         {gardens.length > 0 && (
           <p className="mono-label mt-3">{t("garden.found", { n: found, t: gardens.length })}</p>
