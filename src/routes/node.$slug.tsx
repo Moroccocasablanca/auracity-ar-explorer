@@ -12,6 +12,7 @@ import { useNodeText } from "@/lib/use-node-text";
 import { nodeHours, nodeMenu, nodesQuery, specials, type NodeRow } from "@/lib/nodes";
 import { allowsMessages, isGardenObject } from "@/lib/node-rules";
 import { GardenCharacter } from "@/components/GardenCharacter";
+import { venueFeaturesEnabled } from "@/lib/systemConfig";
 
 export const Route = createFileRoute("/node/$slug")({
   head: ({ params }) => {
@@ -67,8 +68,8 @@ function NodeDetail({
   const menu = nodeMenu(node);
   const tx = useNodeText(node);
   const offer = tx.promo;
-  const isBiz = node.kind === "business" && node.subscribed;
-  const unclaimed = node.kind === "business" && !node.subscribed;
+  const isBiz = node.kind === "business" && venueFeaturesEnabled(node.subscribed);
+  const unclaimed = node.kind === "business" && !venueFeaturesEnabled(node.subscribed);
   const story = tx.history;
   const sourceLinks = Array.isArray(node.history_sources) ? node.history_sources.filter((url): url is string => typeof url === "string" && /^https?:\/\//.test(url)) : [];
   const todaySpecials = specials(node, lang);
@@ -130,7 +131,7 @@ function NodeDetail({
 
       <p className="mt-6 leading-relaxed text-foreground/90">{tx.description}</p>
 
-      {!allowsMessages(node) && (story || tx.description) && (
+      {node.kind === "monument" && (
         <section className="mt-6 border-y border-border py-5">
           <div className="flex items-center justify-between gap-3">
             <h2 className="mono-label inline-flex items-center gap-2" style={{ color: "var(--kind)" }}>
@@ -138,7 +139,7 @@ function NodeDetail({
             </h2>
             <ListenButton text={`${tx.name}. ${story || tx.description}`} voice={{ nodeId: node.id, source: "history" }} />
           </div>
-          {story && <p className="mt-3 whitespace-pre-line leading-relaxed text-foreground/90">{story}</p>}
+          {story && sourceLinks.length > 0 ? <p className="mt-3 whitespace-pre-line leading-relaxed text-foreground/90">{story}</p> : <p className="mt-3 text-muted-foreground">{t("node.history.soon")}</p>}
           {sourceLinks.length > 0 && <details className="mt-4 text-sm text-muted-foreground">
             <summary className="cursor-pointer">{t("node.sources")}</summary>
             <ul className="mt-2 space-y-2">{sourceLinks.map((url) => <li key={url}><a href={url} target="_blank" rel="noopener noreferrer" className="break-all text-primary underline">{new URL(url).hostname.replace(/^www\./, "")}</a></li>)}</ul>

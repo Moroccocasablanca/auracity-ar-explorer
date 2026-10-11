@@ -11,6 +11,10 @@ export function venueFeaturesEnabled(subscribed: boolean) {
   return !systemConfig.premiumFeaturesActive || subscribed;
 }
 
+export function publicMessageCutoff(now = Date.now(), expirationHours = 48) {
+  return new Date(now - expirationHours * 60 * 60 * 1000);
+}
+
 export function isPreviewHost(hostname: string) {
   const host = hostname.split(":")[0]?.toLowerCase() ?? "";
   return host === "localhost" || host === "127.0.0.1" || host.startsWith("id-preview--") || host.startsWith("preview--") || host.endsWith(".lovableproject-dev.com") || host === "beta.lovable.dev" || host.endsWith(".beta.lovable.dev");

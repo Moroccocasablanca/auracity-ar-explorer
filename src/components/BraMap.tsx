@@ -6,6 +6,7 @@ import { BRA_CENTER } from "@/lib/location";
 import type { NodeRow } from "@/lib/nodes";
 import { isGardenObject } from "@/lib/node-rules";
 import { isRestaurant } from "@/lib/explore-rules";
+import { venueFeaturesEnabled } from "@/lib/systemConfig";
 import type { MapAppearance } from "@/lib/map-appearance";
 import charTree from "@/assets/char-tree.png";
 import charBench from "@/assets/char-bench.png";
@@ -92,6 +93,7 @@ export default function BraMap({
       if (n.kind === "street") continue;
       const restaurant = isRestaurant(n);
       const monument = n.kind === "monument";
+      const featured = n.kind === "business" && venueFeaturesEnabled(n.subscribed);
       const color = cssVar(restaurant ? "--kind-restaurant" : KIND_COLOR_VAR[n.kind] ?? "--primary");
       const icon = garden
         ? L.divIcon({
@@ -103,9 +105,9 @@ export default function BraMap({
         : monument || restaurant
           ? L.divIcon({
               className: "",
-              iconSize: [monument ? 44 : n.subscribed ? 46 : 32, monument ? 48 : n.subscribed ? 46 : 32],
-              iconAnchor: [monument ? 22 : n.subscribed ? 23 : 16, monument ? 42 : n.subscribed ? 23 : 16],
-              html: `<span class="aura-place-icon ${monument ? "aura-landmark" : "aura-restaurant"} ${n.subscribed ? "aura-subscribed" : ""}" style="--pin:${color}">${monument ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m3 9 9-6 9 6H3Zm1 12h16M6 10v8m4-8v8m4-8v8m4-8v8"/></svg>' : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 3v6c0 3 6 3 6 0V3M8 3v18m11-18c-4 4-4 9 0 9V3Zm0 9v9"/></svg>'}</span>`,
+              iconSize: [monument ? 44 : featured ? 46 : 32, monument ? 48 : featured ? 46 : 32],
+              iconAnchor: [monument ? 22 : featured ? 23 : 16, monument ? 42 : featured ? 23 : 16],
+              html: `<span class="aura-place-icon ${monument ? "aura-landmark" : "aura-restaurant"} ${featured ? "aura-subscribed" : ""}" style="--pin:${color}">${monument ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m3 9 9-6 9 6H3Zm1 12h16M6 10v8m4-8v8m4-8v8m4-8v8"/></svg>' : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 3v6c0 3 6 3 6 0V3M8 3v18m11-18c-4 4-4 9 0 9V3Zm0 9v9"/></svg>'}</span>`,
             })
         : n.kind === "business" && !n.subscribed
           ? L.divIcon({
@@ -120,7 +122,7 @@ export default function BraMap({
               iconAnchor: n.kind === "business" ? [20, 20] : [14, 14],
               html: `<span class="aura-pin${n.kind === "business" ? " aura-pin-vip" : ""}" style="--pin:${color}"><span></span></span>`,
             });
-      const marker = L.marker([n.lat, n.lng], { icon, title: n.name, zIndexOffset: n.kind === "business" && n.subscribed ? 1000 : garden ? 800 : monument ? 600 : restaurant ? 300 : 0 }).addTo(g);
+      const marker = L.marker([n.lat, n.lng], { icon, title: n.name, zIndexOffset: featured ? 1000 : garden ? 800 : monument ? 600 : restaurant ? 300 : 0 }).addTo(g);
       markers.current.set(n.id, marker);
       const wrap = document.createElement("div");
       wrap.className = "aura-pop";
