@@ -1,6 +1,6 @@
 // Narration: natural AI voice (woman/man, cached per clip) with on-device speech as fallback.
 import { LOCALE_TAG, type Lang } from "./i18n";
-import { hasNeuralVoice, speakNeural, stopNeural } from "./neuralVoice";
+import { hasNeuralVoice, isNeuralReady, speakNeural, stopNeural, warmNeuralVoice } from "./neuralVoice";
 import { speechText, splitSentences, type Speakable } from "./text-speech";
 import { vlog } from "./voice-log";
 import { personaVoice, VoicePersona, type VoiceKind } from "./voice-persona";
@@ -118,6 +118,11 @@ export async function speakNatural(raw: string, lang: Lang, onEnd?: () => void, 
   const pv = personaVoice(persona, venueVoice);
   const choice = pv.kind && voiceChoice() !== "device" ? pv.kind : voiceChoice();
   if (choice !== "device" && lang === "it" && persona === VoicePersona.BUSINESS_USER && (await speakFromServer(text, choice, onEnd))) return;
+  // A voice that is not downloaded yet must never freeze the screen: start it in the background and use the phone voice meanwhile.
+  if (choice !== "device" && !isNeuralReady(lang, choice)) {
+    warmNeuralVoice(lang, choice);
+    return speak(text, lang, onEnd, persona);
+  }
   if (choice !== "device" && hasNeuralVoice(lang)) {
     const res = await speakNeural(text, lang, choice, rate() * pv.rate, persona, () => onEnd?.());
     if (res.ok) return;

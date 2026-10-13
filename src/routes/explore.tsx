@@ -122,7 +122,7 @@ function Explore() {
   useEffect(() => {
     // Both voices are ready before the first tap: the woman for monuments, the man for bars and restaurants.
     warmNeuralVoice(contentLang(lang), "female");
-    const id = window.setTimeout(() => warmNeuralVoice(contentLang(lang), "male"), 4000);
+    const id = window.setTimeout(() => warmNeuralVoice(contentLang(lang), "male"), 20000);
     return () => window.clearTimeout(id);
   }, [lang]);
   const talkLabel = t("garden.talk");

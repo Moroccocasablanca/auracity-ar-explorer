@@ -1,6 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { VenueAvatar } from "@/components/VenueAvatar";
-import { placeStyleKey } from "@/lib/place-style";
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { AlertTriangle, ArrowUpRight, Crosshair, Lock, Power, Radio, ShieldCheck, Sparkles, Volume2 } from "lucide-react";
@@ -138,11 +136,25 @@ export function ArView() {
   }, [nodes, loc.pos]);
 
   const inView = placed.filter((p) => Math.abs(angleDiff(p.b, loc.heading)) < FOV / 2 + 10);
+  // Never draw everything at once: nearest first, at most 5 labels, each at least 15° apart from the others, far shops only when close.
+  const shown = useMemo(() => {
+    const taken: number[] = [];
+    const out: Placed[] = [];
+    for (const p of [...inView].sort((a, b) => a.d - b.d)) {
+      const rel = angleDiff(p.b, loc.heading);
+      const forced = p.n.id === selected;
+      if (!forced && (out.length >= 5 || (p.n.kind === "business" && p.d > 120) || taken.some((a) => Math.abs(a - rel) < 15))) continue;
+      taken.push(rel);
+      out.push(p);
+    }
+    return out.sort((a, b) => b.d - a.d);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [placed, Math.round(loc.heading / 3), selected]);
   const selectedItem = placed.find((p) => p.n.id === selected) ?? null;
   // autoPlayOnProximity: a monument starts telling its story once, when you are inside the radius (50 m).
   const nearMonument = tooFast ? null : placed.filter((p) => p.n.kind === "monument" && p.d <= systemConfig.proximityLoadingRadiusMeters).sort((a, b) => a.d - b.d)[0]?.n ?? null;
   // A bar or restaurant within reach: its mascot welcomes you and shows today's offer and 3D menu.
-  const nearBiz = tooFast ? null : placed.filter((p) => p.n.kind === "business" && venueFeaturesEnabled(p.n.subscribed) && p.d <= 60).sort((a, b) => a.d - b.d)[0]?.n ?? null;
+  const nearBiz = tooFast ? null : placed.filter((p) => p.n.kind === "business" && venueFeaturesEnabled(p.n.subscribed) && Math.max(0, p.d - Math.min(loc.accuracy, 40)) <= 60).sort((a, b) => a.d - b.d)[0]?.n ?? null;
   const speakingMonument = placed.find((p) => p.n.kind === "monument" && playing === p.n.id)?.n ?? null;
   const focus = tooFast
     ? null
@@ -250,13 +262,13 @@ export function ArView() {
       <div className="pointer-events-none absolute inset-x-0 top-[66%] h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
 
       {/* AR nodes */}
-      {inView.map((p, i) => {
+      {shown.map((p, i) => {
         const rel = angleDiff(p.b, loc.heading);
         const ratio = p.d / range;
         const left = 50 + (rel / FOV) * 100;
         const top = 68 + (1 - ratio) * 14 - (i % 3) * 5;
         const scale = 1 - ratio * 0.28;
-        const near = p.d <= p.n.radius_m;
+        const near = Math.max(0, p.d - Math.min(loc.accuracy, 30)) <= p.n.radius_m;
         const sel = selected === p.n.id;
         return (
           <button
@@ -267,11 +279,6 @@ export function ArView() {
             className={`kind-${p.n.kind} absolute -translate-x-1/2 -translate-y-full text-left`}
             style={{ left: `${left}%`, top: `${top}%`, transform: `translate(-50%, -100%) scale(${scale})` }}
           >
-            {p.n.kind === "business" && (
-              <div className="mx-auto mb-1 flex justify-center">
-                <VenueAvatar style={placeStyleKey(p.n)} speaking={playing === p.n.id} size={56} />
-              </div>
-            )}
             {isGardenObject(p.n) && (
               <div className="mx-auto mb-1 flex justify-center">
                 <GardenFace kind={p.n.kind} speaking={playing === p.n.id} size={56} />
@@ -286,7 +293,7 @@ export function ArView() {
                 {p.n.name}
               </span>
               <span className="mt-0.5 flex items-center gap-1.5 font-mono text-[0.65rem] text-muted-foreground">
-                {formatDistance(p.d)}
+                {p.d < loc.accuracy ? t("ar.here") : `~${formatDistance(p.d)}`}
                 {near && <span className="rounded-full bg-success/20 px-1.5 text-success">{t("ar.inrange")}</span>}
               </span>
             </div>

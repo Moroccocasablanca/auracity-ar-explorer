@@ -51,7 +51,7 @@ export function VenueGreeter({ node, onClose }: { node: NodeRow; onClose: () => 
     bump(node.id, "totalArViews");
     if (!greeted.has(node.id)) {
       greeted.add(node.id);
-      const id = window.setTimeout(say, 900);
+      const id = window.setTimeout(say, 300);
       return () => window.clearTimeout(id);
     }
     return undefined;
@@ -60,16 +60,17 @@ export function VenueGreeter({ node, onClose }: { node: NodeRow; onClose: () => 
   useEffect(() => () => stopSpeaking(), []);
 
   return (
-    <div className="glass absolute inset-x-3 bottom-24 z-30 mx-auto max-w-md rounded-3xl p-4" onPointerDown={(e) => e.stopPropagation()}>
+    <div className="absolute inset-x-2 bottom-24 z-30 mx-auto flex max-w-md items-end gap-1" onPointerDown={(e) => e.stopPropagation()}>
+      <img
+        src={placeStyleKey(node) === "restaurant" ? "/mascots/chef.png" : "/mascots/barista.png"}
+        alt=""
+        className={`h-64 w-auto shrink-0 self-end drop-shadow-2xl ${talking ? "mascot-talk" : "mascot-idle"}`}
+      />
+      <div className="glass relative min-w-0 flex-1 rounded-3xl p-3">
       <button type="button" aria-label={t("greet.close")} onClick={() => { stopSpeaking(); onClose(); }} className="absolute right-3 top-3 rounded-full p-1.5 text-muted-foreground">
         <X className="size-4" />
       </button>
       <div className="flex items-center gap-3">
-        <img
-          src={placeStyleKey(node) === "restaurant" ? "/mascots/chef.png" : "/mascots/barista.png"}
-          alt=""
-          className={`h-40 w-auto shrink-0 drop-shadow-xl ${talking ? "mascot-talk" : "mascot-idle"}`}
-        />
         <div className="min-w-0 pr-6">
           <p className="mono-label !text-[0.6rem]" style={{ color: "var(--primary)" }}>{t("greet.here")}</p>
           <p className="truncate text-lg font-bold leading-tight">{name}</p>
@@ -90,6 +91,7 @@ export function VenueGreeter({ node, onClose }: { node: NodeRow; onClose: () => 
         <Link to="/node/$slug" params={{ slug: node.slug }} className="inline-flex items-center gap-1 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">
           {t("ar.open")} <ArrowUpRight className="size-4" />
         </Link>
+      </div>
       </div>
     </div>
   );

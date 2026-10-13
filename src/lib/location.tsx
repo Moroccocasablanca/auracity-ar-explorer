@@ -38,6 +38,10 @@ export function LocationProvider({ children }: { children: ReactNode }) {
   const orientationOn = useRef(false);
   const hasCompass = useRef(false);
   const lastUpdate = useRef(0);
+  const lastHeading = useRef(0);
+  const lastHeadingAt = useRef(0);
+  const accuracyRef = useRef(9999);
+  const goodAt = useRef(0);
   const [batterySaver, setBatterySaver] = useState(true);
 
   useEffect(() => {
@@ -53,7 +57,14 @@ export function LocationProvider({ children }: { children: ReactNode }) {
     else if (ev.alpha != null && (ev.absolute || e.type === "deviceorientationabsolute")) h = (360 - ev.alpha) % 360;
     if (h != null && !Number.isNaN(h)) {
       hasCompass.current = true;
-      setHeadingState(h);
+      // The compass fires ~60 times a second: smooth it and update at most ~8 times a second, or the whole AR screen stutters.
+      const now = performance.now();
+      if (now - lastHeadingAt.current < 120) return;
+      const delta = ((h - lastHeading.current + 540) % 360) - 180;
+      if (Math.abs(delta) < 2) return;
+      lastHeadingAt.current = now;
+      lastHeading.current = (lastHeading.current + delta * 0.5 + 360) % 360;
+      setHeadingState(lastHeading.current);
     }
   }, []);
 
@@ -98,7 +109,7 @@ export function LocationProvider({ children }: { children: ReactNode }) {
       watchId.current = navigator.geolocation.watchPosition(
         (p) => {
           const now = Date.now();
-          if (batterySaver && now - lastUpdate.current < 12_000) return;
+          if (now - lastUpdate.current < (batterySaver ? 3_000 : 1_000)) return;
           lastUpdate.current = now;
           const here = { lat: p.coords.latitude, lng: p.coords.longitude };
           if (distanceM(here, BRA_CENTER) > MAX_DIST_FROM_BRA_M) {
@@ -107,12 +118,17 @@ export function LocationProvider({ children }: { children: ReactNode }) {
           }
           setDemo(false);
           setDemoReason(null);
+          // A very imprecise fix must not throw away a good one: keep the better position until it is clearly outdated.
+          if (p.coords.accuracy > 60 && accuracyRef.current <= 30 && now - goodAt.current < 20_000) return;
+          if (p.coords.accuracy <= 30) goodAt.current = now;
+          accuracyRef.current = p.coords.accuracy;
           setPos(here);
           setAccuracy(p.coords.accuracy);
           setSpeed(p.coords.speed);
         },
         () => goDemo("nogps"),
-        { enableHighAccuracy: !batterySaver, maximumAge: batterySaver ? 15_000 : 2000, timeout: 12000 },
+        // AR needs a precise position: always ask the GPS chip (battery saving only slows how often we update).
+        { enableHighAccuracy: true, maximumAge: 1000, timeout: 15000 },
       );
     },
     [goDemo, onOrientation, batterySaver],
