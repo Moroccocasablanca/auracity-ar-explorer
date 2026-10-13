@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { distanceM, type LatLng } from "@/utils/geo";
 import { batterySaverPreference, POWER_EVENT } from "@/utils/power";
+import { isNative } from "@/services/platform/native";
 
 import { BRA_CENTER, cityConfig } from "@/config/bra";
 export { BRA_CENTER };
@@ -51,6 +52,14 @@ export function LocationProvider({ children }: { children: ReactNode }) {
   const [demoReason, setDemoReason] = useState<LocationState["demoReason"]>(null);
   const [active, setActive] = useState(false);
   const watchId = useRef<number | null>(null);
+  const nativeStop = useRef<(() => void) | null>(null);
+  /** Stops following the position, whether it comes from the browser or from the phone itself. */
+  const stopWatching = useCallback(() => {
+    if (watchId.current != null) navigator.geolocation?.clearWatch(watchId.current);
+    watchId.current = null;
+    nativeStop.current?.();
+    nativeStop.current = null;
+  }, []);
   const orientationOn = useRef(false);
   const hasCompass = useRef(false);
   const lastUpdate = useRef(0);
@@ -86,15 +95,12 @@ export function LocationProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const goDemo = useCallback((reason: "nogps" | "outside" | "manual") => {
-    if (watchId.current != null) {
-      navigator.geolocation?.clearWatch(watchId.current);
-      watchId.current = null;
-    }
+    stopWatching();
     setDemo(true);
     setDemoReason(reason);
     setPos(BRA_CENTER);
     setAccuracy(5);
-  }, []);
+  }, [stopWatching]);
 
   const start = useCallback(
     async (opts?: { demo?: boolean }) => {
@@ -117,47 +123,62 @@ export function LocationProvider({ children }: { children: ReactNode }) {
         goDemo("manual");
         return;
       }
-      if (!("geolocation" in navigator)) {
+      const native = isNative();
+      if (!native && !("geolocation" in navigator)) {
         goDemo("nogps");
         return;
       }
       setDemo(false);
       setDemoReason(null);
-      watchId.current = navigator.geolocation.watchPosition(
-        (p) => {
-          const now = Date.now();
-          if (now - lastUpdate.current < (batterySaver ? 3_000 : 1_000)) return;
-          lastUpdate.current = now;
-          const here = { lat: p.coords.latitude, lng: p.coords.longitude };
-          if (distanceM(here, BRA_CENTER) > MAX_DIST_FROM_BRA_M) {
-            goDemo("outside");
+      const onFix = (c: { latitude: number; longitude: number; accuracy: number; speed?: number | null }) => {
+        const now = Date.now();
+        if (now - lastUpdate.current < (batterySaver ? 3_000 : 1_000)) return;
+        lastUpdate.current = now;
+        const here = { lat: c.latitude, lng: c.longitude };
+        if (distanceM(here, BRA_CENTER) > MAX_DIST_FROM_BRA_M) {
+          goDemo("outside");
+          return;
+        }
+        setDemo(false);
+        setDemoReason(null);
+        // A very imprecise fix must not throw away a good one: keep the better position until it is clearly outdated.
+        if (c.accuracy > 60 && accuracyRef.current <= 30 && now - goodAt.current < 20_000) return;
+        if (c.accuracy <= 30) goodAt.current = now;
+        accuracyRef.current = c.accuracy;
+        const smooth = smoothFix(filter.current, here, c.accuracy, now);
+        filter.current = smooth.state;
+        setPos(smooth.pos);
+        setAccuracy(smooth.accuracy);
+        setSpeed(c.speed ?? null);
+      };
+      // AR needs a precise position: always ask the GPS chip (battery saving only slows how often we update).
+      const options = { enableHighAccuracy: true, maximumAge: 1000, timeout: 15000 };
+      if (native) {
+        // Inside the iPhone app the position is asked by the phone itself: the permission box says "AURACITY", not a web address.
+        try {
+          const { Geolocation } = await import("@capacitor/geolocation");
+          const perm = await Geolocation.requestPermissions({ permissions: ["location"] });
+          if (perm.location !== "granted" && perm.coarseLocation !== "granted") {
+            goDemo("nogps");
             return;
           }
-          setDemo(false);
-          setDemoReason(null);
-          // A very imprecise fix must not throw away a good one: keep the better position until it is clearly outdated.
-          if (p.coords.accuracy > 60 && accuracyRef.current <= 30 && now - goodAt.current < 20_000) return;
-          if (p.coords.accuracy <= 30) goodAt.current = now;
-          accuracyRef.current = p.coords.accuracy;
-          const smooth = smoothFix(filter.current, here, p.coords.accuracy, now);
-          filter.current = smooth.state;
-          setPos(smooth.pos);
-          setAccuracy(smooth.accuracy);
-          setSpeed(p.coords.speed);
-        },
-        () => goDemo("nogps"),
-        // AR needs a precise position: always ask the GPS chip (battery saving only slows how often we update).
-        { enableHighAccuracy: true, maximumAge: 1000, timeout: 15000 },
-      );
+          const id = await Geolocation.watchPosition(options, (p, err) => {
+            if (err || !p) return;
+            onFix(p.coords);
+          });
+          nativeStop.current = () => void Geolocation.clearWatch({ id });
+        } catch {
+          goDemo("nogps");
+        }
+        return;
+      }
+      watchId.current = navigator.geolocation.watchPosition((p) => onFix(p.coords), () => goDemo("nogps"), options);
     },
     [goDemo, onOrientation, batterySaver],
   );
 
   const simulate = useCallback((p: LatLng) => {
-    if (watchId.current != null) {
-      navigator.geolocation?.clearWatch(watchId.current);
-      watchId.current = null;
-    }
+    stopWatching();
     setActive(true);
     // Counts as a real position so presence rules (reviews, messages, stamps) can be tested from the sofa.
     setDemo(false);
@@ -165,11 +186,10 @@ export function LocationProvider({ children }: { children: ReactNode }) {
     setPos(p);
     setAccuracy(5);
     setSpeed(null);
-  }, []);
+  }, [stopWatching]);
 
   const stop = useCallback(() => {
-    if (watchId.current != null) navigator.geolocation?.clearWatch(watchId.current);
-    watchId.current = null;
+    stopWatching();
     if (orientationOn.current) {
       window.removeEventListener("deviceorientationabsolute", onOrientation, true);
       window.removeEventListener("deviceorientation", onOrientation, true);
@@ -181,7 +201,7 @@ export function LocationProvider({ children }: { children: ReactNode }) {
     setPos(null);
     setSpeed(null);
     filter.current = null;
-  }, [onOrientation]);
+  }, [onOrientation, stopWatching]);
 
   useEffect(() => () => stop(), [stop]);
 

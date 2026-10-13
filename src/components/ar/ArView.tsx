@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { AlertTriangle, ArrowUpRight, Crosshair, Lock, Power, Radio, ShieldCheck, Sparkles, Volume2 } from "lucide-react";
+import { AlertTriangle, ArrowUpRight, Crosshair, Lock, Power, Radio, Sparkles, Volume2 } from "lucide-react";
 import { angleDiff, bearingDeg, distanceM, formatDistance } from "@/utils/geo";
 import { kindKey, useI18n } from "@/lib/i18n";
 import { useLocation } from "@/lib/location";
@@ -64,7 +64,9 @@ export function ArView() {
   const [cameraOk, setCameraOk] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
   const drag = useRef<{ x: number; h: number } | null>(null);
-  const [safetyAsk, setSafetyAsk] = useState(false);
+  // The camera never opens without the visitor accepting the one-sentence safety notice, every time the AR screen is opened.
+  const [safetyAsk, setSafetyAsk] = useState<"live" | "demo" | null>(null);
+  const [consented, setConsented] = useState(false);
   const [closedGreet, setClosedGreet] = useState<string | null>(null);
   const { playing, play, stop } = useNarrator();
   const tooFast = !loc.demo && loc.speed != null && loc.speed > FAST_MPS;
@@ -80,7 +82,7 @@ export function ArView() {
     document.addEventListener("visibilitychange", onVis);
     return () => document.removeEventListener("visibilitychange", onVis);
   }, []);
-  const cameraWanted = loc.active && pageVisible && !tooFast;
+  const cameraWanted = loc.active && consented && pageVisible && !tooFast;
 
   // Camera lifecycle
   useEffect(() => {
@@ -162,7 +164,7 @@ export function ArView() {
         .filter((p) => talks(p.n) && p.d <= TALK_DIST && Math.abs(angleDiff(p.b, loc.heading)) < TALK_ANGLE)
         .sort((a, b) => a.d - b.d)[0] ?? null;
 
-  if (!loc.active) {
+  if (!loc.active || !consented) {
     return (
       <div className="grid-backdrop relative flex min-h-[100dvh] flex-col items-center justify-center overflow-hidden px-6 pb-28 text-center">
         <div className="pointer-events-none absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-primary/10 to-transparent" />
@@ -182,14 +184,14 @@ export function ArView() {
         <p className="mt-6 max-w-sm text-sm text-muted-foreground">{t("ar.enter.sub")}</p>
         <button
           type="button"
-          onClick={() => setSafetyAsk(true)}
+          onClick={() => setSafetyAsk("live")}
           className="mt-8 inline-flex h-12 items-center gap-2 rounded-full bg-primary px-8 text-sm font-semibold text-primary-foreground shadow-[0_0_30px_var(--glow)] transition-transform active:scale-95"
         >
           <Sparkles className="size-4" /> {t("ar.enter")}
         </button>
         <button
           type="button"
-          onClick={() => loc.start({ demo: true })}
+          onClick={() => setSafetyAsk("demo")}
           className="mt-3 text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
         >
           {t("ar.demo")}
@@ -197,22 +199,17 @@ export function ArView() {
         {safetyAsk && (
           <div className="fixed inset-0 z-[60] flex items-end justify-center bg-background/80 p-4 backdrop-blur-sm sm:items-center" role="dialog" aria-modal="true">
             <div className="glass w-full max-w-sm space-y-4 rounded-2xl p-5 text-left">
-              <h2 className="flex items-center gap-2 text-lg font-semibold">
-                <ShieldCheck className="size-5 text-primary" /> {t("safety.cam.title")}
-              </h2>
-              <ul className="space-y-2 text-sm text-foreground/90">
-                {(["safety.cam.1", "safety.cam.2", "safety.cam.3"] as const).map((k) => (
-                  <li key={k} className="flex gap-2"><AlertTriangle className="mt-0.5 size-4 shrink-0 text-kind-business" />{t(k)}</li>
-                ))}
-              </ul>
+              <p className="flex items-start gap-3 text-base font-semibold leading-snug">
+                <AlertTriangle className="mt-0.5 size-5 shrink-0 text-kind-business" /> {t("safety.cam.one")}
+              </p>
               <button
                 type="button"
-                onClick={() => { setSafetyAsk(false); void loc.start(); }}
+                onClick={() => { const mode = safetyAsk; setSafetyAsk(null); setConsented(true); if (mode === "demo") void loc.start({ demo: true }); else void loc.start(); }}
                 className="h-11 w-full rounded-full bg-primary text-sm font-semibold text-primary-foreground"
               >
                 {t("safety.cam.ok")}
               </button>
-              <button type="button" onClick={() => setSafetyAsk(false)} className="w-full text-center text-sm text-muted-foreground">
+              <button type="button" onClick={() => setSafetyAsk(null)} className="w-full text-center text-sm text-muted-foreground">
                 {t("safety.cam.cancel")}
               </button>
             </div>
@@ -322,7 +319,7 @@ export function ArView() {
           <button
             type="button"
             onPointerDown={(e) => e.stopPropagation()}
-            onClick={() => loc.stop()}
+            onClick={() => { setConsented(false); loc.stop(); }}
             className="glass pointer-events-auto flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs"
           >
             <Power className="size-3.5" /> {t("ar.stop")}
