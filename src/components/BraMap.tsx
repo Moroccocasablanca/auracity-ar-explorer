@@ -335,8 +335,13 @@ export default function BraMap({ nodes, pos, kindLabel, placeLabel, appearance, 
       const h = document.createElement("p");
       h.className = "aura-pop-title";
       h.textContent = s.title ?? s.tag;
-      pop.append(k, h);
-      for (const line of [s.address, s.hours]) {
+      // A big coloured tile with the category icon stands where a photo would be, so the card never looks empty.
+      const ico = document.createElement("div");
+      ico.className = "aura-pop-ico";
+      ico.style.setProperty("--pin", s.color);
+      ico.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${s.symbol}</svg>`;
+      pop.append(ico, k, h);
+      for (const line of [s.address, s.hours, s.phone ? `Tel. ${s.phone}` : ""]) {
         if (!line) continue;
         const a = document.createElement("p");
         a.className = "aura-pop-addr";
@@ -486,7 +491,7 @@ export default function BraMap({ nodes, pos, kindLabel, placeLabel, appearance, 
     labels();
     map.current = m;
     setMapReady(true);
-    if (import.meta.env.DEV) (window as unknown as { __auraMap?: maplibregl.Map }).__auraMap = m;
+    if (import.meta.env.DEV || location.search.includes("debug")) (window as unknown as { __auraMap?: maplibregl.Map }).__auraMap = m;
     return () => {
       for (const mk of shown.current.values()) mk.remove();
       shown.current.clear();

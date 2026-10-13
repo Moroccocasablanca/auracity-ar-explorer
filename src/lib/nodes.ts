@@ -7,7 +7,7 @@ import { cleanText } from "./jokes";
 import { splitSentences } from "./text-speech";
 
 export type NodeRow = Tables<"nodes">;
-export type MenuItem = { name: string; price: number };
+export type MenuItem = { name: string; price: number; /** owner's own photo (small data URL); otherwise a standard 3D illustration is used */ img?: string | undefined };
 export type NodeKind = NodeRow["kind"];
 
 export const KINDS: NodeKind[] = ["business", "monument", "street", "bench", "tree", "service"];

@@ -20,6 +20,7 @@ import { useVenueContent } from "@/lib/venue-content";
 import { useFollowing } from "@/lib/follow";
 import { bump, useFlash } from "@/lib/merchant";
 import { Menu3D } from "@/components/Menu3D";
+import { dishImage } from "@/lib/dishes";
 import { speakAny, stopSpeaking } from "@/lib/speech";
 import { contentLang } from "@/lib/text-speech";
 import { nodeHours, nodeMenu, nodesQuery, shortStory, specials, type NodeRow } from "@/lib/nodes";
@@ -254,9 +255,10 @@ function NodeDetail({
           <h2 className="mono-label mb-2">{t("node.menu")}</h2>
           <ul className="divide-y divide-border rounded-2xl border border-border bg-card/60">
             {menu.map((m) => (
-              <li key={m.name} className="flex justify-between px-4 py-3 text-sm">
-                <span>{m.name}</span>
-                <span className="font-mono text-muted-foreground">€ {m.price.toFixed(2)}</span>
+              <li key={m.name} className="flex items-center gap-3 px-3 py-2 text-sm">
+                <img src={dishImage(m)} alt="" loading="lazy" className="size-14 shrink-0 rounded-2xl bg-gradient-to-br from-white/90 to-slate-200/80 object-contain p-1 shadow-sm" />
+                <span className="flex-1 font-medium">{m.name}</span>
+                <span className="font-semibold text-muted-foreground">€ {m.price.toFixed(2)}</span>
               </li>
             ))}
           </ul>

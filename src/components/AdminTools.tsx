@@ -4,7 +4,9 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ShieldCheck } from "lucide-react";
+import { ImagePlus, ShieldCheck, X } from "lucide-react";
+import { photoToAvatar } from "@/lib/avatar";
+import { dishImage } from "@/lib/dishes";
 import { supabase } from "@/integrations/supabase/client";
 import { startPreviewAdmin } from "@/lib/account.functions";
 import { getInviteOverride, setInviteOverride } from "@/lib/invites";
@@ -37,6 +39,7 @@ export function AdminTools() {
   const [classesText, setClassesText] = useState("");
   const [voice, setVoice] = useState<"female" | "male">("female");
   const [menu3d, setMenu3d] = useState(false);
+  const [photos, setPhotos] = useState<Record<string, string>>({}); // the owner's own dish photos, by dish name
   const [flashText, setFlashText] = useState("");
   const [flashMin, setFlashMin] = useState(30);
   const flash = useFlash(venueId || "bucheria-default");
@@ -57,6 +60,7 @@ export function AdminTools() {
     setOffer(c.offer ?? "");
     setSpecials(c.specials ?? "");
     setMenuText(menuToText(c.menu));
+    setPhotos(Object.fromEntries((c.menu ?? []).filter((m) => m.img).map((m) => [m.name, m.img as string])));
     setReviews(Boolean(c.reviews?.length));
     setClassesText(classesToText(c.classes));
     setVoice(c.voice ?? "female");
@@ -99,7 +103,7 @@ export function AdminTools() {
   };
   const saveContent = () => {
     if (!venue) return;
-    setVenueContent(venue.id, { offer: offer.trim() || undefined, specials: specials.trim() || undefined, menu: parseMenu(menuText), reviews: reviews ? EXAMPLE.reviews : undefined, classes: parseClasses(classesText), voice, has3DMenu: menu3d });
+    setVenueContent(venue.id, { offer: offer.trim() || undefined, specials: specials.trim() || undefined, menu: parseMenu(menuText).map((m) => (photos[m.name] ? { ...m, img: photos[m.name] } : m)), reviews: reviews ? EXAMPLE.reviews : undefined, classes: parseClasses(classesText), voice, has3DMenu: menu3d });
     toast.success(t("admin.content.saved"));
   };
   const gymExample = () => {
@@ -203,6 +207,21 @@ export function AdminTools() {
         <input className={field} value={offer} onChange={(e) => setOffer(e.target.value)} placeholder={t("admin.offer.ph")} />
         <input className={field} value={specials} onChange={(e) => setSpecials(e.target.value)} placeholder={t("admin.specials.ph")} />
         <textarea className={`${field} min-h-24`} value={menuText} onChange={(e) => setMenuText(e.target.value)} placeholder={t("admin.items.ph")} />
+        {parseMenu(menuText).length > 0 && (
+          <ul className="space-y-1.5">
+            {parseMenu(menuText).map((m) => (
+              <li key={m.name} className="flex items-center gap-2 rounded-xl border border-border p-1.5 text-xs">
+                <img src={dishImage({ name: m.name, img: photos[m.name] })} alt="" className="size-10 shrink-0 rounded-lg bg-white/90 object-contain" />
+                <span className="min-w-0 flex-1 truncate">{m.name}</span>
+                <label className="flex cursor-pointer items-center gap-1 rounded-full bg-primary/20 px-2.5 py-1.5 font-semibold">
+                  <ImagePlus className="size-3.5" /> {t("admin.dish.photo")}
+                  <input type="file" accept="image/*" className="hidden" onChange={async (e) => { const f = e.target.files?.[0]; e.target.value = ""; if (f) { try { const data = await photoToAvatar(f, 220); setPhotos((p) => ({ ...p, [m.name]: data })); } catch { toast.error(t("avatar.err")); } } }} />
+                </label>
+                {photos[m.name] && <button type="button" aria-label="remove" onClick={() => setPhotos((p) => { const n = { ...p }; delete n[m.name]; return n; })}><X className="size-4" /></button>}
+              </li>
+            ))}
+          </ul>
+        )}
         <textarea className={`${field} min-h-24`} value={classesText} onChange={(e) => setClassesText(e.target.value)} placeholder={t("admin.classes.ph")} />
         <label className="flex items-center justify-between gap-3 text-xs"><span>{t("admin.voice")}</span>
           <select value={voice} onChange={(e) => setVoice(e.target.value as "female" | "male")} className={`${field} w-auto py-1.5`}><option value="female">{t("audio.female")}</option><option value="male">{t("audio.male")}</option></select>

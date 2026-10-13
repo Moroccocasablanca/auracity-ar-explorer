@@ -503,3 +503,12 @@ button:not(:disabled):active { transform: scale(.96); }
 /* Performance: no blur on dozens of markers (very heavy on phones); lower-priority icons step aside when they overlap. */
 .aura-label { background: color-mix(in oklab, var(--card) 96%, transparent); box-shadow: 0 4px 10px rgb(0 0 0 / .3); }
 .aura-mk.aura-mk-off { opacity: 0; pointer-events: none; }
+
+/* ===== Service cards (pool, pharmacy...): high contrast, big readable text, solid buttons ===== */
+.aura-popup .aura-pop-ico { grid-row: 1 / span 4; grid-column: 1; width: 96px; height: 96px; border-radius: 22px; display: flex; align-items: center; justify-content: center; background: linear-gradient(150deg, color-mix(in oklab, var(--pin) 70%, #fff), var(--pin)); box-shadow: 0 10px 22px color-mix(in oklab, var(--pin) 45%, transparent), inset 0 1px 0 rgb(255 255 255 / .5); }
+.aura-popup .aura-pop-ico svg { width: 52px; height: 52px; filter: drop-shadow(0 2px 2px rgb(0 0 0 / .3)); }
+.aura-popup .aura-pop-kind { font-size: 12px; font-weight: 800; letter-spacing: .08em; color: color-mix(in oklab, currentColor 35%, #fff) !important; filter: brightness(1.5) saturate(1.2); }
+.aura-popup .aura-pop-title { color: #fff; font-size: 18px; }
+.aura-popup .aura-pop-addr { color: color-mix(in oklab, var(--foreground) 92%, transparent); font-size: 15px; line-height: 1.35; margin-top: 3px; }
+.aura-popup .aura-svc-actions a { background: var(--primary); color: var(--primary-foreground); font-size: 15px; padding: 11px 18px; box-shadow: 0 6px 16px color-mix(in oklab, var(--primary) 40%, transparent); text-decoration: none; }
+.aura-popup .aura-svc-actions a + a { background: color-mix(in oklab, var(--foreground) 14%, transparent); color: var(--foreground); box-shadow: none; }

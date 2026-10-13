@@ -7,7 +7,7 @@ export type VenueReview = { author: string; stars: number; body: string; when: s
 export type VenueContent = {
   offer?: string | undefined;
   specials?: string | undefined;
-  menu?: { name: string; price: number }[] | undefined;
+  menu?: { name: string; price: number; img?: string | undefined }[] | undefined;
   reviews?: VenueReview[] | undefined;
   /** Live classes of a gym or sports place, valid every day: "18:30-19:30 | Yoga" */
   classes?: { title: string; start: string; end: string }[] | undefined;
