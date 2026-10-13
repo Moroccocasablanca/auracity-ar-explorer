@@ -185,7 +185,7 @@ export function AdminTools() {
         <button type="button" onClick={() => venue && (venue.activity ? navigate({ to: "/attivita/$id", params: { id: venue.id } }) : navigate({ to: "/node/$slug", params: { slug: venue.slug } }))} className="rounded-full border border-border px-3 py-2.5 text-sm font-bold">{t("admin.open")}</button>
       </div>
       <div className="space-y-2 rounded-xl border-2 border-amber-300/60 p-3">
-        <p className="text-sm font-bold">⚡ {t("admin.flash")}</p>
+        <p className="text-sm font-bold">{t("admin.flash")}</p>
         <input className={field} value={flashText} onChange={(e) => setFlashText(e.target.value)} placeholder={t("admin.flash.ph")} />
         <div className="grid grid-cols-2 gap-2">
           <select className={field} value={flashMin} onChange={(e) => setFlashMin(Number(e.target.value))}>{[15, 30, 45, 60, 120].map((m) => <option key={m} value={m}>{m} min</option>)}</select>

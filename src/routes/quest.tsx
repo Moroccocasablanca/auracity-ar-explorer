@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Check, Gift, Landmark, Sparkles, Star, Store, Volume2, TreePine } from "lucide-react";
+import { BookOpen, Brain, Calculator, Check, CheckCircle2, Dices, FlaskConical, Flame, Gift, Globe2, Landmark, Languages, Map as MapIcon, MapPin, MessagesSquare, Palette, PartyPopper, Scale, Sparkles, Star, Store, Volume2, TreePine, XCircle, type LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n";
 import { nodesQuery, promo, type NodeRow } from "@/lib/nodes";
@@ -16,7 +16,7 @@ import { isOpenNow } from "@/lib/geo";
 import { TOPICS, bandLabel, getBand, nextTrivia, setBand, shuffled, type Band, type Topic, type Trivia } from "@/lib/trivia";
 import { getNick, setNick, useLeaderboard } from "@/lib/leaderboard";
 import { romeDate } from "@/lib/geo";
-import { AVATAR_EMOJI, buildHunt, huntDone, markHuntDone, rewardName, weekKey } from "@/lib/hunt";
+import { AVATAR_IMG, buildHunt, huntDone, markHuntDone, rewardName, weekKey } from "@/lib/hunt";
 import { nodeHours } from "@/lib/nodes";
 import { challengesOfDay, countToday, level, logEvent, randomRiddle, rankKey, riddleOfDay, riddleText, stars, uniqueIds, type Riddle } from "@/lib/quest";
 
@@ -64,7 +64,7 @@ function HuntCard() {
   const listen = (h: (typeof items)[number]) => { stopSpeaking(); void speakNatural(lang === "it" ? h.riddle.it : h.riddle.en, contentLang(lang), undefined, VoicePersona.HUNT_DYNAMIC); };
   return (
     <section className="rounded-3xl border-2 border-fuchsia-300/50 bg-gradient-to-br from-fuchsia-400/15 to-amber-300/10 p-5">
-      <p className="mono-label">🗺️ {t("treasure.title")} · {weekKey()}</p>
+      <p className="mono-label flex items-center gap-1.5"><MapIcon className="size-4" /> {t("treasure.title")} · {weekKey()}</p>
       <p className="mt-1 text-sm text-muted-foreground">{t("treasure.sub", { n: found, m: items.length })}</p>
       <div className="mt-3 space-y-3">
         {items.map((h) => {
@@ -72,12 +72,12 @@ function HuntCard() {
           return (
             <div key={h.elementId} className="rounded-2xl border border-border bg-card/70 p-3">
               <div className="flex items-start gap-3">
-                <span className="text-4xl">{AVATAR_EMOJI[h.currentAvatarType]}</span>
+                <img src={AVATAR_IMG[h.currentAvatarType]} alt="" className="size-16 shrink-0 object-contain drop-shadow-lg" />
                 <p className="flex-1 text-sm font-semibold leading-snug">{lang === "it" ? h.riddle.it : h.riddle.en}</p>
                 <button type="button" aria-label={t("audio.listen")} onClick={() => listen(h)}><Volume2 className="size-5" /></button>
               </div>
               {ok ? (
-                <p className="mt-2 text-sm font-bold text-green-300">🎉 {t("treasure.reward", { r: rewardName(h, lang) })}</p>
+                <p className="mt-2 flex items-center gap-1.5 text-sm font-bold text-green-300"><PartyPopper className="size-4" /> {t("treasure.reward", { r: rewardName(h, lang) })}</p>
               ) : (
                 <div className="mt-2 grid gap-2">
                   {h.options.map((o) => <button key={o.id} type="button" onClick={() => pick(h, o.id)} className="rounded-xl border border-border px-3 py-2 text-left text-sm active:scale-[.98]">{o.name}</button>)}
@@ -240,6 +240,12 @@ function Challenges() {
   );
 }
 
+const TOPIC_ICON: Record<string, LucideIcon> = { mix: Dices, italiano: BookOpen, english: Languages, storia: Landmark, geografia: Globe2, scienze: FlaskConical, mate: Calculator, arte: Palette, civica: Scale, modi: MessagesSquare, locale: MapPin };
+const topicIcon = (id: string, cls: string) => {
+  const I = TOPIC_ICON[id] ?? Sparkles;
+  return <I className={`${cls} shrink-0`} />;
+};
+
 function TriviaCard() {
   const { t } = useI18n();
   const [band, setBandState] = useState<Band>("adult");
@@ -273,8 +279,8 @@ function TriviaCard() {
   return (
     <section className="rounded-3xl border-2 border-emerald-300/40 bg-gradient-to-br from-emerald-400/15 to-sky-400/10 p-5">
       <div className="flex items-center justify-between gap-2">
-        <p className="mono-label">🧠 {t("trivia.title")}</p>
-        {streak > 1 && <span className="rounded-full bg-yellow-300 px-2.5 py-0.5 text-xs font-extrabold text-black">🔥 {streak}</span>}
+        <p className="mono-label flex items-center gap-1.5"><Brain className="size-4" /> {t("trivia.title")}</p>
+        {streak > 1 && <span className="rounded-full bg-yellow-300 px-2.5 py-0.5 text-xs font-extrabold text-black"><Flame className="mr-0.5 inline size-3.5" />{streak}</span>}
       </div>
       <div className="mt-3 flex gap-2">
         {(["kids", "teen", "adult"] as Band[]).map((b) => (
@@ -282,11 +288,11 @@ function TriviaCard() {
         ))}
       </div>
       <div className="chip-row -mx-1 mt-3 flex gap-2 overflow-x-auto px-1 pb-1">
-        {[{ id: "mix" as const, label: t("trivia.mix"), icon: "🎲" }, ...TOPICS].map((tp) => (
-          <button key={tp.id} type="button" onClick={() => { setTopic(tp.id); load(band, tp.id); }} className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold ${topic === tp.id ? "border-transparent bg-foreground text-background" : "border-border"}`}>{tp.icon} {tp.label}</button>
+        {[{ id: "mix" as const, label: t("trivia.mix"), icon: "mix" }, ...TOPICS].map((tp) => (
+          <button key={tp.id} type="button" onClick={() => { setTopic(tp.id); load(band, tp.id); }} className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold ${topic === tp.id ? "border-transparent bg-foreground text-background" : "border-border"}`}>{topicIcon(tp.icon, "size-3.5")}{tp.label}</button>
         ))}
       </div>
-      <p className="mt-4 text-xs font-semibold text-muted-foreground">{topicInfo?.icon} {topicInfo?.label}</p>
+      <p className="mt-4 flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">{topicIcon(topicInfo?.icon ?? "", "size-3.5")}{topicInfo?.label}</p>
       <p className="mt-1 text-lg font-semibold leading-snug">{item.q}</p>
       <div className="mt-4 grid gap-2">
         {opts.map((o, i) => {
@@ -296,7 +302,7 @@ function TriviaCard() {
       </div>
       {picked != null && (
         <div className={`mt-3 rounded-2xl p-3 text-sm ${right ? "bg-green-400/15" : "bg-red-400/10"}`}>
-          <p className="font-bold">{right ? `✅ ${t("quest.right")}` : `❌ ${t("trivia.wrong")}`}</p>
+          <p className="flex items-center gap-1.5 font-bold">{right ? <><CheckCircle2 className="size-5 text-green-400" /> {t("quest.right")}</> : <><XCircle className="size-5 text-red-400" /> {t("trivia.wrong")}</>}</p>
           <p className="mt-1">{!right && <b>{opts.find((o) => o.right)?.text}. </b>}{item.why}</p>
           <Button type="button" className="mt-3 rounded-full" onClick={() => load(band, topic)}>{t("trivia.next")}</Button>
         </div>
@@ -311,7 +317,8 @@ function Leaderboard({ points }: { points: number }) {
   const [draft, setDraft] = useState("");
   useEffect(() => { const n = getNick(); setNickState(n); setDraft(n); }, []);
   const { rows, shared } = useLeaderboard(points, nick);
-  const medal = (i: number) => (i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `${i + 1}`);
+  const medalColor = ["#f5c542", "#c0c7d1", "#d58a4a"];
+  const medal = (i: number) => (i < 3 ? <span className="mx-auto flex size-7 items-center justify-center rounded-full text-sm font-extrabold text-black shadow" style={{ background: medalColor[i] }}>{i + 1}</span> : `${i + 1}`);
   return (
     <section>
       <h2 className="text-xl font-bold">{t("rank.title")}</h2>
@@ -401,7 +408,7 @@ function Quest() {
               const got = q.foundChars.includes(c.id);
               return (
                 <li key={c.id} className={`aspect-square rounded-2xl border p-2 text-center text-[0.65rem] font-semibold leading-tight ${got ? "border-yellow-300/70 bg-yellow-300/15" : "border-dashed border-border bg-card/40 text-muted-foreground"}`}>
-                  <span className={`flex h-2/3 items-center justify-center text-4xl ${got ? "" : "opacity-40 grayscale"}`}>{got ? (c.kind === "tree" ? "🌳" : "🪑") : "?"}</span>
+                  <span className={`flex h-2/3 items-center justify-center text-4xl ${got ? "" : "opacity-40 grayscale"}`}>{got ? <img src={c.kind === "tree" ? "/mascots/tree.png" : "/mascots/bench.png"} alt="" className="h-full w-auto object-contain" /> : "?"}</span>
                   <span className="line-clamp-2">{got ? c.name : t("quest.locked")}</span>
                 </li>
               );

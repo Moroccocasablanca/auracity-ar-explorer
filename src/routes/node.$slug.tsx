@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { ListenButton } from "@/components/ListenButton";
 import { refreshMenu } from "@/lib/auracity.functions";
-import { ArrowLeft, Clock, Landmark, MapPin, Sparkles, Tag } from "lucide-react";
+import { ArrowLeft, Clock, Landmark, MapPin, Sparkles, Tag, Zap } from "lucide-react";
 import { MessageBoard, PresenceBanner, ReviewBoard, usePresence } from "@/components/NodeInteractions";
 import { isOpenNow, formatDistance } from "@/lib/geo";
 import { kindKey, LOCALE_TAG, useI18n } from "@/lib/i18n";
@@ -217,7 +217,7 @@ function NodeDetail({
 
       {flash && (
         <div className="mt-6 rounded-3xl border-2 border-yellow-300 bg-gradient-to-r from-yellow-300/25 to-pink-400/20 p-4">
-          <p className="mono-label !text-[0.65rem]" style={{ color: "#fde047" }}>⚡ {t("flash.title")} · {t("flash.left", { m: flash.minutesLeft })}</p>
+          <p className="mono-label !text-[0.65rem]" style={{ color: "#fde047" }}><Zap className="mr-1 inline size-3.5" />{t("flash.title")} · {t("flash.left", { m: flash.minutesLeft })}</p>
           <p className="mt-1 text-xl font-bold leading-snug">{flash.rawTextFromOwner}</p>
           <button type="button" disabled={redeemed} onClick={() => { bump(node.id, "promosRedeemed"); setRedeemed(true); }} className="mt-3 rounded-full bg-yellow-300 px-5 py-2.5 text-sm font-extrabold text-black disabled:opacity-60">{redeemed ? "✓ " + t("flash.redeemed") : t("flash.redeem")}</button>
         </div>

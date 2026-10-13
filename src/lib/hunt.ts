@@ -14,7 +14,8 @@ export interface HuntElement {
   rewardUnlocked: string;
 }
 
-export const AVATAR_EMOJI: Record<HuntAvatar, string> = { CUBE_MAGIC: "🧊", ANIMAL_MASCOT: "🦊", MYSTERY_OBJECT: "🎁" };
+/** Modern 3D illustrations (made with AI) for the weekly mascots. */
+export const AVATAR_IMG: Record<HuntAvatar, string> = { CUBE_MAGIC: "/mascots/hunt-cube.png", ANIMAL_MASCOT: "/mascots/hunt-owl.png", MYSTERY_OBJECT: "/mascots/hunt-orb.png" };
 const AVATARS: HuntAvatar[] = ["CUBE_MAGIC", "ANIMAL_MASCOT", "MYSTERY_OBJECT"];
 const REWARDS = [
   { it: "Sticker «Esploratore di Bra»", en: "“Bra Explorer” sticker" },

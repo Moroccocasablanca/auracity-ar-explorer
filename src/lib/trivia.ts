@@ -6,16 +6,16 @@ export type Topic = "italiano" | "english" | "storia" | "geografia" | "scienze" 
 export type Trivia = { id: string; topic: Topic; bands: Band[]; q: string; options: string[]; ok: number; why: string };
 
 export const TOPICS: { id: Topic; label: string; icon: string }[] = [
-  { id: "italiano", label: "Italiano", icon: "📖" },
-  { id: "english", label: "Inglese", icon: "🇬🇧" },
-  { id: "storia", label: "Storia", icon: "🏛️" },
-  { id: "geografia", label: "Geografia", icon: "🌍" },
-  { id: "scienze", label: "Scienze", icon: "🔬" },
-  { id: "mate", label: "Matematica", icon: "➗" },
-  { id: "arte", label: "Arte e musica", icon: "🎨" },
-  { id: "civica", label: "Educazione civica", icon: "⚖️" },
-  { id: "modi", label: "Modi di dire", icon: "💬" },
-  { id: "locale", label: "Bra e Piemonte", icon: "🧀" },
+  { id: "italiano", label: "Italiano", icon: "italiano" },
+  { id: "english", label: "Inglese", icon: "english" },
+  { id: "storia", label: "Storia", icon: "storia" },
+  { id: "geografia", label: "Geografia", icon: "geografia" },
+  { id: "scienze", label: "Scienze", icon: "scienze" },
+  { id: "mate", label: "Matematica", icon: "mate" },
+  { id: "arte", label: "Arte e musica", icon: "arte" },
+  { id: "civica", label: "Educazione civica", icon: "civica" },
+  { id: "modi", label: "Modi di dire", icon: "modi" },
+  { id: "locale", label: "Bra e Piemonte", icon: "locale" },
 ];
 
 const ALL: Band[] = ["kids", "teen", "adult"];
