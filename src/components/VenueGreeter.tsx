@@ -4,8 +4,6 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { ArrowUpRight, Volume2, X } from "lucide-react";
 import { Menu3D } from "@/components/Menu3D";
-import { Mascot3D } from "@/components/Mascot3D";
-import { VenueAvatar } from "@/components/VenueAvatar";
 import { getNick, setNick } from "@/lib/leaderboard";
 import { useI18n } from "@/lib/i18n";
 import { bump, useFlash } from "@/lib/merchant";
@@ -67,7 +65,11 @@ export function VenueGreeter({ node, onClose }: { node: NodeRow; onClose: () => 
         <X className="size-4" />
       </button>
       <div className="flex items-center gap-3">
-        <Mascot3D style={placeStyleKey(node)} speaking={talking} size={118} />
+        <img
+          src={placeStyleKey(node) === "restaurant" ? "/mascots/chef.png" : "/mascots/barista.png"}
+          alt=""
+          className={`h-40 w-auto shrink-0 drop-shadow-xl ${talking ? "mascot-talk" : "mascot-idle"}`}
+        />
         <div className="min-w-0 pr-6">
           <p className="mono-label !text-[0.6rem]" style={{ color: "var(--primary)" }}>{t("greet.here")}</p>
           <p className="truncate text-lg font-bold leading-tight">{name}</p>
