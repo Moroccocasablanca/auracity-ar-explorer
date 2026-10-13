@@ -5,6 +5,21 @@ import { batterySaverPreference, POWER_EVENT } from "./power";
 export const BRA_CENTER: LatLng = { lat: 44.6985, lng: 7.8538 };
 const MAX_DIST_FROM_BRA_M = 8000;
 
+/** Smooths the jumpy GPS dot: a precise fix moves the position a lot, a poor one only a little (a light Kalman filter). */
+type GpsFilter = { lat: number; lng: number; variance: number; at: number };
+function smoothFix(prev: GpsFilter | null, fix: LatLng, accuracy: number, now: number): { pos: LatLng; accuracy: number; state: GpsFilter } {
+  const acc = Math.max(3, accuracy);
+  if (!prev || now - prev.at > 30_000) {
+    const state = { lat: fix.lat, lng: fix.lng, variance: acc * acc, at: now };
+    return { pos: fix, accuracy: acc, state };
+  }
+  // the position drifts a little between fixes (walking ≈ 1.5 m/s)
+  const variance = prev.variance + ((now - prev.at) / 1000) * 2.5;
+  const k = variance / (variance + acc * acc);
+  const state = { lat: prev.lat + k * (fix.lat - prev.lat), lng: prev.lng + k * (fix.lng - prev.lng), variance: (1 - k) * variance, at: now };
+  return { pos: { lat: state.lat, lng: state.lng }, accuracy: Math.sqrt(state.variance), state };
+}
+
 export type LocationState = {
   pos: LatLng | null;
   accuracy: number;
@@ -41,6 +56,7 @@ export function LocationProvider({ children }: { children: ReactNode }) {
   const lastHeading = useRef(0);
   const lastHeadingAt = useRef(0);
   const accuracyRef = useRef(9999);
+  const filter = useRef<GpsFilter | null>(null);
   const goodAt = useRef(0);
   const [batterySaver, setBatterySaver] = useState(true);
 
@@ -122,8 +138,10 @@ export function LocationProvider({ children }: { children: ReactNode }) {
           if (p.coords.accuracy > 60 && accuracyRef.current <= 30 && now - goodAt.current < 20_000) return;
           if (p.coords.accuracy <= 30) goodAt.current = now;
           accuracyRef.current = p.coords.accuracy;
-          setPos(here);
-          setAccuracy(p.coords.accuracy);
+          const smooth = smoothFix(filter.current, here, p.coords.accuracy, now);
+          filter.current = smooth.state;
+          setPos(smooth.pos);
+          setAccuracy(smooth.accuracy);
           setSpeed(p.coords.speed);
         },
         () => goDemo("nogps"),
@@ -161,6 +179,7 @@ export function LocationProvider({ children }: { children: ReactNode }) {
     setDemoReason(null);
     setPos(null);
     setSpeed(null);
+    filter.current = null;
   }, [onOrientation]);
 
   useEffect(() => () => stop(), [stop]);

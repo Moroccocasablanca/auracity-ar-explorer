@@ -289,7 +289,10 @@ export default function BraMap({ nodes, pos, kindLabel, placeLabel, appearance, 
     e.style.height = `${pin.h}px`;
     e.style.zIndex = String(featured ? 4 : garden ? 3 : monument ? 2 : 1);
     e.innerHTML = `${pin.html}<span class="aura-label${garden ? " aura-label-kid" : ""}"><small style="color:${color}">${esc(garden ? tl : pl(n))}</small><b>${esc(n.name)}</b>${n.address ? `<em>${esc(n.address.replace(/,?\s*Bra\s*$/i, ""))}</em>` : ""}</span>`;
-    const mk = new maplibregl.Marker({ element: e, anchor: "bottom" }).setLngLat([n.lng, n.lat]).setPopup(popupFor(n, color, garden, monument));
+    const popup = popupFor(n, color, garden, monument);
+    // The card slides up from the bottom, so the place glides up above it instead of hiding behind it.
+    popup.on("open", () => map.current?.easeTo({ center: [n.lng, n.lat], offset: [0, 150], duration: 450 }));
+    const mk = new maplibregl.Marker({ element: e, anchor: "bottom" }).setLngLat([n.lng, n.lat]).setPopup(popup);
     flagClasses(n.id, mk);
     return mk;
   };

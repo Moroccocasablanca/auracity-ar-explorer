@@ -1,8 +1,8 @@
 // One-off: records the Italian stories of monuments, trees and benches with the chosen Gemini voices, so the app can play them without any server.
 import fs from "node:fs";
 import { execSync } from "node:child_process";
-import { shortStory } from "./src/lib/nodes.ts";
-import { speechText } from "./src/lib/text-speech.ts";
+import { shortStory } from "../src/lib/nodes.ts";
+import { speechText } from "../src/lib/text-speech.ts";
 const env = Object.fromEntries(fs.readFileSync(".env", "utf8").split("\n").filter((l) => l.includes("=")).map((l) => [l.split("=")[0], l.slice(l.indexOf("=") + 1).replace(/^"|"$/g, "")]));
 const K = fs.readFileSync(process.env.HOME + "/.auracity-gemini-key", "utf8").replace(/\s/g, "");
 const VOICES = { female: "Kore", young: "Puck" }; // monuments: the woman; garden characters (trees, benches): the young voice

@@ -10,6 +10,9 @@ export const getRouter = () => {
     context: { queryClient },
     scrollRestoration: true,
     defaultPreloadStaleTime: 0,
+    defaultPreload: "intent",
+    // Pages glide into each other (iOS style) instead of cutting.
+    defaultViewTransition: true,
   });
 
   return router;
