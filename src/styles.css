@@ -397,3 +397,17 @@ main.mx-auto { padding-top: calc(env(safe-area-inset-top, 0px) + 1.5rem) !import
 @keyframes mascot-idle { 0%, 100% { transform: translateY(0) rotate(-1deg); } 50% { transform: translateY(-4px) rotate(1deg); } }
 @keyframes mascot-talk { 0%, 100% { transform: translateY(0) scale(1); } 25% { transform: translateY(-6px) scale(1.03) rotate(-2deg); } 75% { transform: translateY(-3px) scale(1.02) rotate(2deg); } }
 @media (prefers-reduced-motion: reduce) { .mascot-idle, .mascot-talk { animation: none; } }
+
+/* You on the map: a person badge with a name tag, the GPS-error circle and the direction you face (not an anonymous blue dot). */
+.aura-me2 { position: relative; width: 46px; height: 46px; pointer-events: none; }
+.aura-me-acc { position: absolute; left: 50%; top: 50%; width: 60px; height: 60px; transform: translate(-50%, -50%); border-radius: 9999px; background: #22d3ee22; border: 2px solid #22d3ee88; }
+.aura-me-cone { position: absolute; left: 50%; top: 50%; width: 120px; height: 120px; transform: translate(-50%, -50%) rotate(var(--h, 0deg)); background: conic-gradient(from -28deg, #22d3ee00 0deg, #22d3eeaa 28deg, #22d3ee00 56deg); border-radius: 9999px; mask: radial-gradient(circle, transparent 18px, #000 20px); -webkit-mask: radial-gradient(circle, transparent 18px, #000 20px); }
+.aura-me-body { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; border-radius: 9999px; background: linear-gradient(145deg, #22d3ee, #6366f1); border: 4px solid #fff; box-shadow: 0 4px 14px #0007, 0 0 0 5px #6366f155; animation: aura-me-pulse 2.4s ease-in-out infinite; }
+.aura-me-body svg { width: 26px; height: 26px; }
+.aura-me-tag { position: absolute; left: 50%; top: calc(100% + 6px); transform: translateX(-50%); white-space: nowrap; padding: 3px 10px; border-radius: 9999px; background: #1e1b4b; color: #fff; font: 700 12px/1.2 system-ui, sans-serif; border: 2px solid #fff; box-shadow: 0 2px 8px #0006; }
+@keyframes aura-me-pulse { 0%, 100% { box-shadow: 0 4px 14px #0007, 0 0 0 5px #6366f155; } 50% { box-shadow: 0 4px 14px #0007, 0 0 0 11px #6366f122; } }
+@media (prefers-reduced-motion: reduce) { .aura-me-body { animation: none; } }
+
+/* Labels keep their natural width (they were squeezed to the width of the icon and broke words in two). */
+.aura-label { width: max-content; max-width: 150px; text-align: center; }
+.aura-label b, .aura-label em { overflow-wrap: normal; word-break: normal; hyphens: auto; }

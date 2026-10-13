@@ -72,7 +72,10 @@ function applyPalette(m: maplibregl.Map, mode: "day" | "night") {
         m.setPaintProperty(id, "fill-extrusion-opacity", 0.96);
         m.setPaintProperty(id, "fill-extrusion-height", ["*", 1.35, ["max", 9, ["coalesce", ["get", "render_height"], 0]]]);
       } else if (layer.type === "line" && /^(road|bridge|tunnel)/.test(id) && !/casing|outline|path|rail/.test(id)) m.setPaintProperty(id, "line-color", p.road);
-      else if (layer.type === "symbol" && /^highway-name/.test(id)) {
+      else if (layer.type === "symbol" && /^(poi|airport|label_other)|transit|shield/.test(id)) {
+        // The base map draws its own shop icons and area names: they pile up under ours, so only streets, water and towns stay.
+        m.setLayoutProperty(id, "visibility", "none");
+      } else if (layer.type === "symbol" && /^highway-name/.test(id)) {
         m.setLayoutProperty(id, "text-size", ["interpolate", ["linear"], ["zoom"], 13, 11, 16, 15, 19, 20]);
         m.setPaintProperty(id, "text-color", p.text);
         m.setPaintProperty(id, "text-halo-color", p.halo);
@@ -108,13 +111,16 @@ function declutter(shown: Map<string, maplibregl.Marker>) {
     .map((mk) => mk.getElement())
     .sort((a, b) => Number(b.style.zIndex || 0) - Number(a.style.zIndex || 0));
   for (const e of items) e.querySelector(".aura-label")?.classList.remove("aura-label-off");
+  // Icons come first: a label is never allowed to sit on top of any icon (its own or a neighbour's), nor on another label.
+  const icons = items.map((e) => ({ e, r: e.querySelector(":scope > :not(.aura-label)")?.getBoundingClientRect() })).filter((x): x is { e: HTMLElement; r: DOMRect } => !!x.r && x.r.width > 0);
   const taken: DOMRect[] = [];
+  const overlap = (r: DOMRect, t: DOMRect, pad = 4) => r.left < t.right + pad && r.right > t.left - pad && r.top < t.bottom + pad && r.bottom > t.top - pad;
   for (const e of items) {
     const lab = e.querySelector(".aura-label");
     if (!lab) continue;
     const r = lab.getBoundingClientRect();
     if (r.width === 0) continue;
-    const hit = taken.some((t) => r.left < t.right + 4 && r.right > t.left - 4 && r.top < t.bottom + 4 && r.bottom > t.top - 4);
+    const hit = taken.some((t) => overlap(r, t)) || icons.some((i) => i.e !== e && overlap(r, i.r, 2));
     if (hit) lab.classList.add("aura-label-off");
     else taken.push(r);
   }
@@ -171,9 +177,11 @@ type Props = {
   pois: Poi[];
   poiText: { call: string; directions: string; open: string };
   speakingId: string | null;
+  /** the visitor: label, GPS error in metres and compass heading */
+  me: { label: string; accuracy: number; heading: number };
 };
 
-export default function BraMap({ nodes, pos, kindLabel, placeLabel, appearance, recenter, onTalk, talkLabel, readLabel, openLabel, pois, poiText, speakingId }: Props) {
+export default function BraMap({ nodes, pos, kindLabel, placeLabel, appearance, recenter, onTalk, talkLabel, readLabel, openLabel, pois, poiText, speakingId, me: meInfo }: Props) {
   const el = useRef<HTMLDivElement>(null);
   const map = useRef<maplibregl.Map | null>(null);
   const shown = useRef(new Map<string, maplibregl.Marker>());
@@ -467,7 +475,7 @@ export default function BraMap({ nodes, pos, kindLabel, placeLabel, appearance, 
     byId.current = new Map(items.map((n) => [n.id, n]));
     gardens.current = items.filter(isGardenObject);
     const clusterable = items.filter((n) => !isGardenObject(n));
-    const idx = new Supercluster({ radius: 56, maxZoom: 17 });
+    const idx = new Supercluster({ radius: 70, maxZoom: 17 });
     idx.load(
       clusterable.map((n) => ({
         type: "Feature" as const,
@@ -509,10 +517,31 @@ export default function BraMap({ nodes, pos, kindLabel, placeLabel, appearance, 
     }
     if (!me.current) {
       const d = document.createElement("div");
-      d.className = "aura-me";
-      me.current = new maplibregl.Marker({ element: d }).setLngLat([pos.lng, pos.lat]).addTo(m);
+      d.className = "aura-me2";
+      d.innerHTML = `<span class="aura-me-acc"></span><span class="aura-me-cone"></span><span class="aura-me-body"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4.2" fill="#fff"/><path d="M4 21c0-4.6 3.6-7.6 8-7.6s8 3 8 7.6Z" fill="#fff"/></svg></span><span class="aura-me-tag"></span>`;
+      me.current = new maplibregl.Marker({ element: d, anchor: "center" }).setLngLat([pos.lng, pos.lat]).addTo(m);
     } else me.current.setLngLat([pos.lng, pos.lat]);
   }, [pos]);
+
+  // Label, GPS-error circle (true size on the map) and the direction you are facing.
+  useEffect(() => {
+    const m = map.current;
+    const el = me.current?.getElement();
+    if (!m || !el || !pos) return;
+    const tag = el.querySelector<HTMLElement>(".aura-me-tag");
+    if (tag) tag.textContent = meInfo.label;
+    el.querySelector<HTMLElement>(".aura-me-cone")?.style.setProperty("--h", `${meInfo.heading}deg`);
+    const ring = el.querySelector<HTMLElement>(".aura-me-acc");
+    const size = () => {
+      if (!ring) return;
+      const mpp = (156543.03392 * Math.cos((pos.lat * Math.PI) / 180)) / 2 ** m.getZoom();
+      const px = Math.min(260, Math.max(44, (meInfo.accuracy * 2) / mpp));
+      ring.style.width = ring.style.height = `${px}px`;
+    };
+    size();
+    m.on("zoom", size);
+    return () => void m.off("zoom", size);
+  }, [pos, meInfo.label, meInfo.accuracy, meInfo.heading]);
 
   useEffect(() => {
     if (recenter > 0 && pos) map.current?.flyTo({ center: [pos.lng, pos.lat], zoom: 17.5, pitch: 62, duration: 1400 });
