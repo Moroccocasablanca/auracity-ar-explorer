@@ -13,7 +13,7 @@ import { warmNeuralVoice } from "@/lib/neuralVoice";
 import { contentLang } from "@/lib/text-speech";
 import { buildLiveQuestions, moonName, useToday, weatherWord, type LiveQuestion } from "@/lib/live";
 import { isOpenNow } from "@/lib/geo";
-import { checkAnswer, searchQuestionsOfDay } from "@/lib/search-quiz";
+import { TOPICS, bandLabel, getBand, nextTrivia, setBand, shuffled, type Band, type Topic, type Trivia } from "@/lib/trivia";
 import { getNick, setNick, useLeaderboard } from "@/lib/leaderboard";
 import { romeDate } from "@/lib/geo";
 import { AVATAR_EMOJI, buildHunt, huntDone, markHuntDone, rewardName, weekKey } from "@/lib/hunt";
@@ -240,45 +240,67 @@ function Challenges() {
   );
 }
 
-function SearchHunt() {
-  const { t, lang } = useI18n();
-  const day = Number(romeDate(new Date()).replace(/-/g, ""));
-  const list = searchQuestionsOfDay(day);
-  const [vals, setVals] = useState<Record<string, string>>({});
-  const [res, setRes] = useState<Record<string, boolean | undefined>>({});
-  const [solved, setSolved] = useState<string[]>([]);
-  useEffect(() => setSolved(uniqueIds("riddle").filter((id) => id.startsWith("sq-"))), []);
+function TriviaCard() {
+  const { t } = useI18n();
+  const [band, setBandState] = useState<Band>("adult");
+  const [topic, setTopic] = useState<Topic | "mix">("mix");
+  const [item, setItem] = useState<Trivia | null>(null);
+  const [opts, setOpts] = useState<{ text: string; right: boolean }[]>([]);
+  const [picked, setPicked] = useState<number | null>(null);
+  const [streak, setStreak] = useState(0);
+  const load = useCallback((b: Band, tp: Topic | "mix") => {
+    const q = nextTrivia(b, tp);
+    setItem(q);
+    setOpts(shuffled(q));
+    setPicked(null);
+  }, []);
+  useEffect(() => {
+    const b = getBand();
+    setBandState(b);
+    load(b, "mix");
+  }, [load]);
+  if (!item) return null;
+  const answer = (i: number) => {
+    if (picked != null) return;
+    setPicked(i);
+    if (opts[i]?.right) {
+      setStreak((s) => s + 1);
+      logEvent("riddle", `trivia-${item.id}`);
+    } else setStreak(0);
+  };
+  const right = picked != null && opts[picked]?.right;
+  const topicInfo = TOPICS.find((x) => x.id === item.topic);
   return (
-    <section>
-      <h2 className="text-xl font-bold">{t("hunt.title")}</h2>
-      <p className="text-sm text-muted-foreground">{t("hunt.sub")}</p>
-      <ul className="mt-3 space-y-3">
-        {list.map((q) => {
-          const id = `sq-${q.id}`;
-          const ok = solved.includes(id);
-          const text = lang === "it" ? q.q.it : q.q.en;
-          return (
-            <li key={q.id} className={`rounded-2xl border p-4 ${ok ? "border-green-400/60 bg-green-400/10" : "border-border bg-card/60"}`}>
-              <p className="font-semibold leading-snug">{text}</p>
-              {q.hint && <p className="mt-1 text-xs text-muted-foreground">{lang === "it" ? q.hint.it : q.hint.en}</p>}
-              {ok ? (
-                <p className="mt-2 text-sm font-semibold text-green-300">✓ {q.answer}</p>
-              ) : (
-                <>
-                  <div className="mt-3 flex gap-2">
-                    <input value={vals[q.id] ?? ""} onChange={(e) => setVals((v) => ({ ...v, [q.id]: e.target.value }))} placeholder={t("hunt.ph")} className="min-w-0 flex-1 rounded-xl border border-input bg-secondary/70 px-3 py-2.5 text-sm" />
-                    <Button type="button" className="rounded-full" onClick={() => { const good = checkAnswer(q, vals[q.id] ?? ""); setRes((r) => ({ ...r, [q.id]: good })); if (good) { logEvent("riddle", id); setSolved((s) => [...s, id]); } }}>{t("hunt.check")}</Button>
-                  </div>
-                  <div className="mt-2 flex items-center gap-3">
-                    <a href={`https://www.google.com/search?q=${encodeURIComponent(text)}`} target="_blank" rel="noopener" className="text-sm font-semibold text-primary underline">🔎 {t("hunt.search")}</a>
-                    {res[q.id] === false && <span className="text-sm text-red-300">{t("quest.retry")}</span>}
-                  </div>
-                </>
-              )}
-            </li>
-          );
+    <section className="rounded-3xl border-2 border-emerald-300/40 bg-gradient-to-br from-emerald-400/15 to-sky-400/10 p-5">
+      <div className="flex items-center justify-between gap-2">
+        <p className="mono-label">🧠 {t("trivia.title")}</p>
+        {streak > 1 && <span className="rounded-full bg-yellow-300 px-2.5 py-0.5 text-xs font-extrabold text-black">🔥 {streak}</span>}
+      </div>
+      <div className="mt-3 flex gap-2">
+        {(["kids", "teen", "adult"] as Band[]).map((b) => (
+          <button key={b} type="button" onClick={() => { setBand(b); setBandState(b); load(b, topic); }} className={`rounded-full border px-3 py-1.5 text-xs font-semibold ${band === b ? "border-transparent bg-primary text-primary-foreground" : "border-border"}`}>{bandLabel[b]}</button>
+        ))}
+      </div>
+      <div className="chip-row -mx-1 mt-3 flex gap-2 overflow-x-auto px-1 pb-1">
+        {[{ id: "mix" as const, label: t("trivia.mix"), icon: "🎲" }, ...TOPICS].map((tp) => (
+          <button key={tp.id} type="button" onClick={() => { setTopic(tp.id); load(band, tp.id); }} className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold ${topic === tp.id ? "border-transparent bg-foreground text-background" : "border-border"}`}>{tp.icon} {tp.label}</button>
+        ))}
+      </div>
+      <p className="mt-4 text-xs font-semibold text-muted-foreground">{topicInfo?.icon} {topicInfo?.label}</p>
+      <p className="mt-1 text-lg font-semibold leading-snug">{item.q}</p>
+      <div className="mt-4 grid gap-2">
+        {opts.map((o, i) => {
+          const state = picked == null ? "" : o.right ? "border-green-400 bg-green-400/20" : picked === i ? "border-red-400 bg-red-400/15" : "opacity-60";
+          return <button key={o.text} type="button" onClick={() => answer(i)} className={`rounded-2xl border border-border bg-card/70 px-4 py-3 text-left text-base font-medium active:scale-[.98] ${state}`}>{o.text}</button>;
         })}
-      </ul>
+      </div>
+      {picked != null && (
+        <div className={`mt-3 rounded-2xl p-3 text-sm ${right ? "bg-green-400/15" : "bg-red-400/10"}`}>
+          <p className="font-bold">{right ? `✅ ${t("quest.right")}` : `❌ ${t("trivia.wrong")}`}</p>
+          <p className="mt-1">{!right && <b>{opts.find((o) => o.right)?.text}. </b>}{item.why}</p>
+          <Button type="button" className="mt-3 rounded-full" onClick={() => load(band, topic)}>{t("trivia.next")}</Button>
+        </div>
+      )}
     </section>
   );
 }
@@ -354,7 +376,7 @@ function Quest() {
 
         <TodayCard />
         <LiveQuiz />
-        <SearchHunt />
+        <TriviaCard />
         <Challenges />
         <HuntCard />
         <RiddleCard audience="kids" />
