@@ -5,7 +5,21 @@
   <key>CAPACITOR_DEBUG</key>
 	<string>$(CAPACITOR_DEBUG)</string>
 	<key>CFBundleDevelopmentRegion</key>
-	<string>en</string>
+	<string>it</string>
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>it</string>
+		<string>en</string>
+		<string>fr</string>
+		<string>de</string>
+		<string>es</string>
+		<string>ar</string>
+		<string>ro</string>
+		<string>sq</string>
+		<string>hi</string>
+	</array>
+	<key>CFBundleAllowMixedLocalizations</key>
+	<true/>
 	<key>CFBundleDisplayName</key>
         <string>AURACITY</string>
 	<key>CFBundleExecutable</key>

@@ -1,0 +1,4 @@
+"NSLocationWhenInUseUsageDescription" = "AURACITY folosește locația ta pentru a-ți arăta locurile din Bra din jurul tău.";
+"NSLocationAlwaysAndWhenInUseUsageDescription" = "AURACITY folosește locația ta chiar și cu ecranul blocat, ca să te anunțe când treci pe lângă un local sau un monument. Nu salvăm traseul tău.";
+"NSCameraUsageDescription" = "Camera este folosită pentru realitatea augmentată: videoclipul rămâne pe telefonul tău.";
+"NSMotionUsageDescription" = "Busola îți arată locurile în direcția corectă.";

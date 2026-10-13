@@ -1,0 +1,4 @@
+"NSLocationWhenInUseUsageDescription" = "AURACITY आपके आस-पास ब्रा की जगहें दिखाने के लिए आपकी लोकेशन का उपयोग करता है।";
+"NSLocationAlwaysAndWhenInUseUsageDescription" = "जब आप किसी दुकान या स्मारक के पास से गुज़रें तो आपको सूचित करने के लिए AURACITY स्क्रीन लॉक होने पर भी आपकी लोकेशन का उपयोग करता है। हम आपका रास्ता सेव नहीं करते।";
+"NSCameraUsageDescription" = "कैमरा ऑगमेंटेड रियलिटी के लिए उपयोग होता है: वीडियो आपके फ़ोन पर ही रहता है।";
+"NSMotionUsageDescription" = "कंपास जगहों को सही दिशा में दिखाता है।";

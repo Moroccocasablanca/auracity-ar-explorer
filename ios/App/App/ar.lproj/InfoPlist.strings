@@ -1,0 +1,4 @@
+"NSLocationWhenInUseUsageDescription" = "يستخدم AURACITY موقعك لعرض أماكن براء من حولك.";
+"NSLocationAlwaysAndWhenInUseUsageDescription" = "يستخدم AURACITY موقعك حتى عند قفل الشاشة لتنبيهك عند مرورك قرب مطعم أو معلم. لا نحفظ مسارك.";
+"NSCameraUsageDescription" = "تُستخدم الكاميرا للواقع المعزز: يبقى الفيديو على هاتفك.";
+"NSMotionUsageDescription" = "تُستخدم البوصلة لعرض الأماكن في الاتجاه الصحيح.";

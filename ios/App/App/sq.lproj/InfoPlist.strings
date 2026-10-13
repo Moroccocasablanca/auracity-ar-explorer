@@ -1,0 +1,4 @@
+"NSLocationWhenInUseUsageDescription" = "AURACITY përdor vendndodhjen tënde për të të shfaqur vendet e Bra-s rreth teje.";
+"NSLocationAlwaysAndWhenInUseUsageDescription" = "AURACITY përdor vendndodhjen tënde edhe me ekranin të kyçur, për të të njoftuar kur kalon pranë një lokali ose monumenti. Nuk e ruajmë rrugën tënde.";
+"NSCameraUsageDescription" = "Kamera përdoret për realitetin e shtuar: videoja mbetet në telefonin tënd.";
+"NSMotionUsageDescription" = "Busulla të tregon vendet në drejtimin e duhur.";

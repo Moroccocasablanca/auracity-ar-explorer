@@ -16,6 +16,14 @@
 		504EC3121FED79650016851F /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 504EC3101FED79650016851F /* LaunchScreen.storyboard */; };
 		50B271D11FEDC1A000F3C39B /* public in Resources */ = {isa = PBXBuildFile; fileRef = 50B271D01FEDC1A000F3C39B /* public */; };
 		9582B6832FE993A70072D4E8 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9582B6822FE993A50072D4E8 /* SceneDelegate.swift */; };
+		B387066B4A412803DB112439 /* en.lproj in Resources */ = {isa = PBXBuildFile; fileRef = 0C9DADB8D301D12E6EAA4DF6 /* en.lproj */; };
+		E49CAAC8A9132216654F0681 /* fr.lproj in Resources */ = {isa = PBXBuildFile; fileRef = 67D0DF9FFDFC756C5ED9063B /* fr.lproj */; };
+		D12C95FDC9525BEB5FE9B205 /* de.lproj in Resources */ = {isa = PBXBuildFile; fileRef = E14D8DECE867224ACF827D52 /* de.lproj */; };
+		830681855C4BEFB73176A08F /* es.lproj in Resources */ = {isa = PBXBuildFile; fileRef = 3EFDCBBF3EFA5B2356E8A5FC /* es.lproj */; };
+		AB6CD8950FFA8D75A8913378 /* ar.lproj in Resources */ = {isa = PBXBuildFile; fileRef = F5A74FB2C82B94ABD936FDFF /* ar.lproj */; };
+		51C490B96AAD330CA00F8FE4 /* ro.lproj in Resources */ = {isa = PBXBuildFile; fileRef = 6DF32A5AA3072E6FCAF6F530 /* ro.lproj */; };
+		115ECFC26F6E2EC7BC74009E /* sq.lproj in Resources */ = {isa = PBXBuildFile; fileRef = 1597A1FD84DC8A8F7F18F084 /* sq.lproj */; };
+		55796FD148DD9E4867765BB7 /* hi.lproj in Resources */ = {isa = PBXBuildFile; fileRef = 1A24EF25D3E64EA392A3A813 /* hi.lproj */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -30,6 +38,14 @@
 		50B271D01FEDC1A000F3C39B /* public */ = {isa = PBXFileReference; lastKnownFileType = folder; path = public; sourceTree = "<group>"; };
 		9582B6822FE993A50072D4E8 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		958DCC722DB07C7200EA8C5F /* debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = debug.xcconfig; path = ../debug.xcconfig; sourceTree = SOURCE_ROOT; };
+		0C9DADB8D301D12E6EAA4DF6 /* en.lproj */ = {isa = PBXFileReference; lastKnownFileType = folder; path = en.lproj; sourceTree = "<group>"; };
+		67D0DF9FFDFC756C5ED9063B /* fr.lproj */ = {isa = PBXFileReference; lastKnownFileType = folder; path = fr.lproj; sourceTree = "<group>"; };
+		E14D8DECE867224ACF827D52 /* de.lproj */ = {isa = PBXFileReference; lastKnownFileType = folder; path = de.lproj; sourceTree = "<group>"; };
+		3EFDCBBF3EFA5B2356E8A5FC /* es.lproj */ = {isa = PBXFileReference; lastKnownFileType = folder; path = es.lproj; sourceTree = "<group>"; };
+		F5A74FB2C82B94ABD936FDFF /* ar.lproj */ = {isa = PBXFileReference; lastKnownFileType = folder; path = ar.lproj; sourceTree = "<group>"; };
+		6DF32A5AA3072E6FCAF6F530 /* ro.lproj */ = {isa = PBXFileReference; lastKnownFileType = folder; path = ro.lproj; sourceTree = "<group>"; };
+		1597A1FD84DC8A8F7F18F084 /* sq.lproj */ = {isa = PBXFileReference; lastKnownFileType = folder; path = sq.lproj; sourceTree = "<group>"; };
+		1A24EF25D3E64EA392A3A813 /* hi.lproj */ = {isa = PBXFileReference; lastKnownFileType = folder; path = hi.lproj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -73,6 +89,14 @@
 				504EC3131FED79650016851F /* Info.plist */,
 				2FAD9762203C412B000D30F8 /* config.xml */,
 				50B271D01FEDC1A000F3C39B /* public */,
+				0C9DADB8D301D12E6EAA4DF6 /* en.lproj */,
+				67D0DF9FFDFC756C5ED9063B /* fr.lproj */,
+				E14D8DECE867224ACF827D52 /* de.lproj */,
+				3EFDCBBF3EFA5B2356E8A5FC /* es.lproj */,
+				F5A74FB2C82B94ABD936FDFF /* ar.lproj */,
+				6DF32A5AA3072E6FCAF6F530 /* ro.lproj */,
+				1597A1FD84DC8A8F7F18F084 /* sq.lproj */,
+				1A24EF25D3E64EA392A3A813 /* hi.lproj */,
 			);
 			path = App;
 			sourceTree = "<group>";
@@ -144,6 +168,14 @@
 			files = (
 				504EC3121FED79650016851F /* LaunchScreen.storyboard in Resources */,
 				50B271D11FEDC1A000F3C39B /* public in Resources */,
+				B387066B4A412803DB112439 /* en.lproj in Resources */,
+				E49CAAC8A9132216654F0681 /* fr.lproj in Resources */,
+				D12C95FDC9525BEB5FE9B205 /* de.lproj in Resources */,
+				830681855C4BEFB73176A08F /* es.lproj in Resources */,
+				AB6CD8950FFA8D75A8913378 /* ar.lproj in Resources */,
+				51C490B96AAD330CA00F8FE4 /* ro.lproj in Resources */,
+				115ECFC26F6E2EC7BC74009E /* sq.lproj in Resources */,
+				55796FD148DD9E4867765BB7 /* hi.lproj in Resources */,
 				504EC30F1FED79650016851F /* Assets.xcassets in Resources */,
 				50379B232058CBB4000EE86E /* capacitor.config.json in Resources */,
 				504EC30D1FED79650016851F /* Main.storyboard in Resources */,
