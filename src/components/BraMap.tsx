@@ -15,6 +15,7 @@ import type { MapAppearance } from "@/lib/map-appearance";
 import { placeStyle } from "@/lib/place-style";
 import { directionsUrl, telHref } from "@/lib/services";
 import type { Poi } from "@/lib/poi";
+import type { MyAvatar } from "@/lib/avatar";
 import charTree from "@/assets/char-tree.png";
 import charBench from "@/assets/char-bench.png";
 
@@ -184,7 +185,7 @@ type Props = {
   poiText: { call: string; directions: string; open: string };
   speakingId: string | null;
   /** the visitor: label, GPS error in metres and compass heading */
-  me: { label: string; accuracy: number; heading: number };
+  me: { label: string; accuracy: number; heading: number; avatar: MyAvatar; name: string };
 };
 
 export default function BraMap({ nodes, pos, kindLabel, placeLabel, appearance, recenter, onTalk, talkLabel, readLabel, openLabel, pois, poiText, speakingId, me: meInfo }: Props) {
@@ -535,7 +536,26 @@ export default function BraMap({ nodes, pos, kindLabel, placeLabel, appearance, 
     const el = me.current?.getElement();
     if (!m || !el || !pos) return;
     const tag = el.querySelector<HTMLElement>(".aura-me-tag");
-    if (tag) tag.textContent = meInfo.label;
+    if (tag) tag.textContent = meInfo.name ? `${meInfo.name} · ${meInfo.label}` : meInfo.label;
+    const body = el.querySelector<HTMLElement>(".aura-me-body");
+    if (body) {
+      const a = meInfo.avatar;
+      body.textContent = "";
+      body.classList.toggle("aura-me-photo", a.kind === "photo");
+      if (a.kind === "photo") {
+        const img = document.createElement("img");
+        img.src = a.value;
+        img.alt = "";
+        body.append(img);
+      } else if (a.kind === "emoji") {
+        const sp = document.createElement("span");
+        sp.className = "aura-me-emoji";
+        sp.textContent = a.value;
+        body.append(sp);
+      } else {
+        body.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4.2" fill="#fff"/><path d="M4 21c0-4.6 3.6-7.6 8-7.6s8 3 8 7.6Z" fill="#fff"/></svg>';
+      }
+    }
     el.querySelector<HTMLElement>(".aura-me-cone")?.style.setProperty("--h", `${meInfo.heading}deg`);
     const ring = el.querySelector<HTMLElement>(".aura-me-acc");
     const size = () => {
@@ -547,7 +567,7 @@ export default function BraMap({ nodes, pos, kindLabel, placeLabel, appearance, 
     size();
     m.on("zoom", size);
     return () => void m.off("zoom", size);
-  }, [pos, meInfo.label, meInfo.accuracy, meInfo.heading]);
+  }, [pos, meInfo.label, meInfo.name, meInfo.avatar, meInfo.accuracy, meInfo.heading]);
 
   useEffect(() => {
     if (recenter > 0 && pos) map.current?.flyTo({ center: [pos.lng, pos.lat], zoom: 17.5, pitch: 62, duration: 1400 });

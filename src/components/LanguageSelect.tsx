@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { AvatarPicker } from "@/components/AvatarPicker";
 import { useQuery } from "@tanstack/react-query";
 import { nodesQuery } from "@/lib/nodes";
 import { useFollowing } from "@/lib/follow";
@@ -14,6 +15,8 @@ export function LanguageSelect() {
   const followed = nodes.filter((n) => ids.includes(n.id));
   const prefs = usePrefs();
   return (
+    <>
+    <AvatarPicker />
     <div className="space-y-2 rounded-2xl border border-border bg-card/60 p-4">
       <label className="flex items-center gap-3 text-sm font-semibold">
         <Globe className="size-5 text-primary" />
@@ -46,5 +49,6 @@ export function LanguageSelect() {
         <span aria-hidden="true">›</span>
       </Link>
     </div>
+    </>
   );
 }

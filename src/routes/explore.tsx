@@ -9,6 +9,8 @@ import { useProximityAlerts } from "@/components/ProximityWatcher";
 import { distanceM, formatDistance } from "@/lib/geo";
 import { kindKey, useI18n } from "@/lib/i18n";
 import { useLocation } from "@/lib/location";
+import { useAvatar } from "@/lib/avatar";
+import { getNick } from "@/lib/leaderboard";
 import { placeStyle, PLACE_STYLE } from "@/lib/place-style";
 import { speakAny } from "@/lib/speech";
 import { VoicePersona } from "@/lib/voice-persona";
@@ -49,6 +51,9 @@ export const Route = createFileRoute("/explore")({
 function Explore() {
   const { t, lang } = useI18n();
   const loc = useLocation();
+  const myAvatar = useAvatar();
+  const [myName, setMyName] = useState("");
+  useEffect(() => { setMyName(getNick()); const f = () => setMyName(getNick()); window.addEventListener("focus", f); return () => window.removeEventListener("focus", f); }, []);
   const { pos } = loc;
   const { mode, appearance, selectMode } = useMapAppearance();
   const [recenter, setRecenter] = useState(0);
@@ -141,7 +146,7 @@ function Explore() {
       <div className="relative h-[calc(100dvh-5.4rem)] min-h-[26rem] w-full overflow-hidden bg-card/60">
         <ClientOnly fallback={<div className="h-full w-full animate-pulse bg-card/60" />}>
           <Suspense fallback={<div className="h-full w-full animate-pulse bg-card/60" />}>
-            <BraMap nodes={filtered} pos={pos} kindLabel={kindLabel} placeLabel={(n) => t(placeStyle(n).label)} appearance={appearance} recenter={recenter} onTalk={onTalk} talkLabel={talkLabel} pois={pois} poiText={{ call: t("svc.call"), directions: t("svc.directions"), open: t("act.open") }} readLabel={t("venue.read")} openLabel={(o) => t(o ? "node.open" : "node.closed")} speakingId={playing} me={{ label: t("map.me"), accuracy: loc.accuracy, heading: loc.heading }} />
+            <BraMap nodes={filtered} pos={pos} kindLabel={kindLabel} placeLabel={(n) => t(placeStyle(n).label)} appearance={appearance} recenter={recenter} onTalk={onTalk} talkLabel={talkLabel} pois={pois} poiText={{ call: t("svc.call"), directions: t("svc.directions"), open: t("act.open") }} readLabel={t("venue.read")} openLabel={(o) => t(o ? "node.open" : "node.closed")} speakingId={playing} me={{ label: t("map.me"), accuracy: loc.accuracy, heading: loc.heading, avatar: myAvatar, name: myName }} />
           </Suspense>
         </ClientOnly>
         <div className="absolute inset-x-0 top-0 z-[5] bg-gradient-to-b from-background/70 to-transparent px-3 pb-3 pt-[max(0.55rem,env(safe-area-inset-top))]">
