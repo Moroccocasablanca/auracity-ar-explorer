@@ -18,6 +18,7 @@ import { Route as McpRouteImport } from './routes/mcp'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as QuestRouteImport } from './routes/quest'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
+import { Route as ApiDailyTriviaRouteImport } from './routes/api/daily-trivia'
 import { Route as ApiGuideRouteImport } from './routes/api/guide'
 import { Route as ApiTtsRouteImport } from './routes/api/tts'
 import { Route as AttivitaIdRouteImport } from './routes/attivita.$id'
@@ -69,6 +70,11 @@ const Char91DotwellKnownChar93OauthProtectedResourceRoute =
     path: '/.well-known/oauth-protected-resource',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiDailyTriviaRoute = ApiDailyTriviaRouteImport.update({
+  id: '/api/daily-trivia',
+  path: '/api/daily-trivia',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiGuideRoute = ApiGuideRouteImport.update({
   id: '/api/guide',
   path: '/api/guide',
@@ -100,6 +106,7 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/quest': typeof QuestRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/api/daily-trivia': typeof ApiDailyTriviaRoute
   '/api/guide': typeof ApiGuideRoute
   '/api/tts': typeof ApiTtsRoute
   '/attivita/$id': typeof AttivitaIdRoute
@@ -115,6 +122,7 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/quest': typeof QuestRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/api/daily-trivia': typeof ApiDailyTriviaRoute
   '/api/guide': typeof ApiGuideRoute
   '/api/tts': typeof ApiTtsRoute
   '/attivita/$id': typeof AttivitaIdRoute
@@ -131,6 +139,7 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/quest': typeof QuestRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/api/daily-trivia': typeof ApiDailyTriviaRoute
   '/api/guide': typeof ApiGuideRoute
   '/api/tts': typeof ApiTtsRoute
   '/attivita/$id': typeof AttivitaIdRoute
@@ -148,6 +157,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/quest'
     | '/.well-known/oauth-protected-resource'
+    | '/api/daily-trivia'
     | '/api/guide'
     | '/api/tts'
     | '/attivita/$id'
@@ -163,6 +173,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/quest'
     | '/.well-known/oauth-protected-resource'
+    | '/api/daily-trivia'
     | '/api/guide'
     | '/api/tts'
     | '/attivita/$id'
@@ -178,6 +189,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/quest'
     | '/.well-known/oauth-protected-resource'
+    | '/api/daily-trivia'
     | '/api/guide'
     | '/api/tts'
     | '/attivita/$id'
@@ -194,6 +206,7 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   QuestRoute: typeof QuestRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  ApiDailyTriviaRoute: typeof ApiDailyTriviaRoute
   ApiGuideRoute: typeof ApiGuideRoute
   ApiTtsRoute: typeof ApiTtsRoute
   AttivitaIdRoute: typeof AttivitaIdRoute
@@ -265,6 +278,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/daily-trivia': {
+      id: '/api/daily-trivia'
+      path: '/api/daily-trivia'
+      fullPath: '/api/daily-trivia'
+      preLoaderRoute: typeof ApiDailyTriviaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/guide': {
       id: '/api/guide'
       path: '/api/guide'
@@ -307,6 +327,7 @@ const rootRouteChildren: RootRouteChildren = {
   QuestRoute: QuestRoute,
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
+  ApiDailyTriviaRoute: ApiDailyTriviaRoute,
   ApiGuideRoute: ApiGuideRoute,
   ApiTtsRoute: ApiTtsRoute,
   AttivitaIdRoute: AttivitaIdRoute,

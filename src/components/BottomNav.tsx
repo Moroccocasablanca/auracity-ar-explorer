@@ -14,7 +14,7 @@ const items = [
 export function BottomNav() {
   const { t } = useI18n();
   return (
-    <nav className="glass fixed inset-x-3 bottom-[max(0.5rem,env(safe-area-inset-bottom))] z-50 mx-auto flex max-w-md items-center justify-between rounded-full px-1.5 py-1">
+    <nav className="fixed inset-x-3 bottom-[max(0.5rem,env(safe-area-inset-bottom))] z-50 mx-auto flex max-w-md items-center justify-between rounded-full border border-border bg-card/97 px-1.5 py-1 shadow-xl">
       {items.map(({ to, key, Icon }) => (
         <Link
           key={to}

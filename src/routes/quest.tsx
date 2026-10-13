@@ -13,7 +13,7 @@ import { warmNeuralVoice } from "@/lib/neuralVoice";
 import { contentLang } from "@/lib/text-speech";
 import { buildLiveQuestions, moonName, useToday, weatherWord, type LiveQuestion } from "@/lib/live";
 import { isOpenNow } from "@/lib/geo";
-import { TOPICS, bandLabel, getBand, nextTrivia, setBand, shuffled, type Band, type Topic, type Trivia } from "@/lib/trivia";
+import { TOPICS, bandLabel, getBand, loadDailyTrivia, nextTrivia, setBand, shuffled, type Band, type Topic, type Trivia } from "@/lib/trivia";
 import { getNick, setNick, useLeaderboard } from "@/lib/leaderboard";
 import { romeDate } from "@/lib/geo";
 import { AVATAR_IMG, buildHunt, huntDone, markHuntDone, rewardName, weekKey } from "@/lib/hunt";
@@ -264,6 +264,7 @@ function TriviaCard() {
     const b = getBand();
     setBandState(b);
     load(b, "mix");
+    void loadDailyTrivia(); // today's fresh AI questions join the pool for the next ones
   }, [load]);
   if (!item) return null;
   const answer = (i: number) => {
@@ -292,7 +293,7 @@ function TriviaCard() {
           <button key={tp.id} type="button" onClick={() => { setTopic(tp.id); load(band, tp.id); }} className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold ${topic === tp.id ? "border-transparent bg-foreground text-background" : "border-border"}`}>{topicIcon(tp.icon, "size-3.5")}{tp.label}</button>
         ))}
       </div>
-      <p className="mt-4 flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">{topicIcon(topicInfo?.icon ?? "", "size-3.5")}{topicInfo?.label}</p>
+      <p className="mt-4 flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">{topicIcon(topicInfo?.icon ?? "", "size-3.5")}{topicInfo?.label}{item.ai && <span className="ml-1 rounded-full bg-violet-400/25 px-2 py-0.5 text-[0.65rem] text-violet-200">{t("trivia.ai")}</span>}</p>
       <p className="mt-1 text-lg font-semibold leading-snug">{item.q}</p>
       <div className="mt-4 grid gap-2">
         {opts.map((o, i) => {

@@ -3,7 +3,7 @@
 export type Band = "kids" | "teen" | "adult";
 export type Topic = "italiano" | "english" | "storia" | "geografia" | "scienze" | "mate" | "arte" | "civica" | "modi" | "locale";
 
-export type Trivia = { id: string; topic: Topic; bands: Band[]; q: string; options: string[]; ok: number; why: string };
+export type Trivia = { id: string; topic: Topic; bands: Band[]; q: string; options: string[]; ok: number; why: string; ai?: boolean };
 
 export const TOPICS: { id: Topic; label: string; icon: string }[] = [
   { id: "italiano", label: "Italiano", icon: "italiano" },
@@ -159,8 +159,27 @@ const markSeen = (id: string) => {
 };
 
 /** Picks a question for the player's age group and chosen subject, avoiding the ones seen most recently. */
+/** Questions written by the AI today (fetched from the server); they join the built-in bank. */
+let daily: Trivia[] = [];
+export const setDailyTrivia = (list: Trivia[]) => { daily = list; };
+export async function loadDailyTrivia(): Promise<number> {
+  try {
+    for (let attempt = 0; attempt < 4; attempt++) {
+      const r = await fetch("/api/daily-trivia");
+      if (r.status === 200) {
+        const list = (await r.json()) as Trivia[];
+        if (Array.isArray(list)) setDailyTrivia(list.filter((t) => Array.isArray(t.options) && t.options.length >= 3));
+        break;
+      }
+      if (r.status !== 202) break; // 202 = being written right now: ask again in a moment
+      await new Promise((res) => setTimeout(res, 20_000));
+    }
+  } catch { /* offline or no key: the built-in bank is enough */ }
+  return daily.length;
+}
+
 export function nextTrivia(band: Band, topic: Topic | "mix"): Trivia {
-  const pool = BANK.filter((t) => t.bands.includes(band) && (topic === "mix" || t.topic === topic));
+  const pool = [...BANK, ...daily].filter((t) => t.bands.includes(band) && (topic === "mix" || t.topic === topic));
   const seen = new Set(seenIds());
   const fresh = pool.filter((t) => !seen.has(t.id));
   const from = fresh.length ? fresh : pool;

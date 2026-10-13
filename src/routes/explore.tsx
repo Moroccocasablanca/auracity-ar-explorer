@@ -201,7 +201,7 @@ function Explore() {
         </div>
       </div>
 
-      <div className="mx-auto max-w-5xl px-4 pt-3">
+      <div className="mx-auto max-w-5xl px-4 pt-24">
 
         {gardens.length > 0 && (
           <p className="mono-label mt-3">{t("garden.found", { n: found, t: gardens.length })}</p>

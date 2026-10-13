@@ -114,6 +114,13 @@ function declutter(shown: Map<string, maplibregl.Marker>, services?: Map<string,
   for (const e of items) e.querySelector(".aura-label")?.classList.remove("aura-label-off");
   // Icons come first: a label is never allowed to sit on top of any icon (its own or a neighbour's), nor on another label.
   const icons = items.map((e) => ({ e, r: e.querySelector(":scope > :not(.aura-label)")?.getBoundingClientRect() })).filter((x): x is { e: HTMLElement; r: DOMRect } => !!x.r && x.r.width > 0);
+  // Services (pool, pharmacy...) never sit on top of a place: if they overlap one, they step aside until you zoom in.
+  const placeIcons = icons.filter((i) => !i.e.classList.contains("aura-svc"));
+  for (const i of icons) {
+    if (!i.e.classList.contains("aura-svc")) continue;
+    const hit = placeIcons.some((p) => p.r.left < i.r.right + 2 && p.r.right > i.r.left - 2 && p.r.top < i.r.bottom + 2 && p.r.bottom > i.r.top - 2);
+    i.e.classList.toggle("aura-mk-off", hit);
+  }
   const taken: DOMRect[] = [];
   // The filter chips and tool buttons now live outside the map; only the 2D/3D switch floats on it, so labels keep away from it.
   const box = items[0]?.closest(".maplibregl-map")?.getBoundingClientRect();
