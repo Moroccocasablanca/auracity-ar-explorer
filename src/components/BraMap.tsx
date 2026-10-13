@@ -16,8 +16,8 @@ import { placeStyle } from "@/lib/place-style";
 import { directionsUrl, telHref } from "@/lib/services";
 import type { Poi } from "@/lib/poi";
 import type { MyAvatar } from "@/lib/avatar";
-import charTree from "@/assets/char-tree.png";
-import charBench from "@/assets/char-bench.png";
+const charTree = "/mascots/tree.png"; // modern 3D characters (made with AI)
+const charBench = "/mascots/bench.png";
 
 maplibregl.setWorkerUrl(workerUrl);
 

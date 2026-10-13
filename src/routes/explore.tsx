@@ -193,7 +193,7 @@ function Explore() {
           </div>
         )}
         </div>
-        <div className="relative z-[5] flex shrink-0 items-center justify-center gap-3 border-t border-border bg-card/95 px-3 py-2 backdrop-blur">
+        <div className="aura-tools relative z-[5] flex shrink-0 items-center justify-center gap-3 border-t border-border bg-card/95 px-3 py-2 backdrop-blur">
           <button type="button" title={t("map.locate")} aria-label={t("map.locate")} onClick={() => { if (!loc.active) void loc.start(); setRecenter((v) => v + 1); }} className="flex size-10 items-center justify-center rounded-full border border-border bg-card/90 shadow-lg backdrop-blur"><Crosshair className="size-5" /></button>
           <button type="button" title={t(mode === "auto" ? "map.auto" : mode === "day" ? "map.day" : "map.night")} aria-label={t("map.appearance")} onClick={() => selectMode(nextMode)} className="flex size-10 items-center justify-center rounded-full border border-border bg-card/90 shadow-lg backdrop-blur"><ModeIcon className="size-5" /></button>
           <button type="button" aria-label={t("map.legend")} onClick={() => setLegend((v) => !v)} className={`flex size-10 items-center justify-center rounded-full border border-border shadow-lg backdrop-blur ${legend ? "bg-primary text-primary-foreground" : "bg-card/90"}`}><Info className="size-5" /></button>

@@ -18,9 +18,9 @@
   --radius-2xl: calc(var(--radius) + 8px);
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
-  --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
-  --font-sans: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --font-display: -apple-system, "SF Pro Display", "SF Pro Text", system-ui, "Segoe UI", Roboto, sans-serif;
+  --font-sans: -apple-system, "SF Pro Display", "SF Pro Text", system-ui, "Segoe UI", Roboto, sans-serif;
+  --font-mono: -apple-system, "SF Pro Display", "SF Pro Text", system-ui, "Segoe UI", Roboto, sans-serif; /* no more retro monospace: the iPhone system font everywhere */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -160,8 +160,9 @@
 
   .mono-label {
     font-family: var(--font-mono);
-    font-size: 0.68rem;
-    letter-spacing: 0.14em;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
     color: var(--color-muted-foreground);
   }
@@ -236,13 +237,13 @@
 .venue-avatar { animation: aura-char-float 3.4s ease-in-out infinite; }
 .venue-avatar.is-speaking .venue-mouth { animation: venue-talk .24s ease-in-out infinite alternate; transform-origin: 50% 64px; }
 @keyframes venue-talk { from { transform: scaleY(1); } to { transform: scaleY(2.2); } }
-.aura-viewtoggle { position: absolute; left: 10px; top: 10px; z-index: 10; min-width: 44px; height: 36px; padding: 0 12px; border-radius: 9999px; font: 800 13px/1 "IBM Plex Mono", monospace; background: var(--card); color: var(--foreground); border: 2px solid var(--primary); box-shadow: 0 3px 8px oklch(0 0 0 / .35); }
+.aura-viewtoggle { position: absolute; left: 10px; top: 10px; z-index: 10; min-width: 44px; height: 36px; padding: 0 12px; border-radius: 9999px; font: 800 13px/1 -apple-system, system-ui, sans-serif; background: var(--card); color: var(--foreground); border: 2px solid var(--primary); box-shadow: 0 3px 8px oklch(0 0 0 / .35); }
 .aura-svc-badge { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 9999px; background: var(--pin); border: 3px solid var(--edge, #fff); box-shadow: 0 3px 8px oklch(0 0 0 / .4); }
 .aura-svc-badge svg { width: 24px; height: 24px; }
 .aura-label-svc { bottom: calc(100% + 1px); }
 .aura-svc-actions { display: flex; gap: 8px; margin-top: 8px; }
 .aura-svc-actions a { flex: 1; text-align: center; border-radius: 9999px; padding: 6px 8px; font-size: 13px; font-weight: 700; background: var(--primary); color: var(--primary-foreground); text-decoration: none; }
-.aura-open { display: inline-block; margin-bottom: 6px; padding: 2px 9px; border-radius: 9999px; font: 700 10px/1.5 "IBM Plex Mono", monospace; letter-spacing: .08em; text-transform: uppercase; }
+.aura-open { display: inline-block; margin-bottom: 6px; padding: 2px 9px; border-radius: 9999px; font: 700 10px/1.5 -apple-system, system-ui, sans-serif; letter-spacing: .08em; text-transform: uppercase; }
 .aura-open.is-open { background: #22c55e; color: #052e16; }
 .aura-open.is-closed { background: #f87171; color: #450a0a; }
 .maplibregl-ctrl-attrib:not(.maplibregl-compact-show) { background: transparent !important; }
@@ -258,7 +259,7 @@
 .aura-map .leaflet-popup-content-wrapper, .aura-map .leaflet-popup-tip { background: var(--card); color: var(--foreground); border: 1px solid var(--border); }
 .aura-map .leaflet-popup-content { margin: 10px; }
 .aura-pop img { width: 100%; height: 110px; object-fit: cover; border-radius: 10px; margin-bottom: 8px; }
-.aura-pop-kind { font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: .14em; text-transform: uppercase; margin: 0 !important; }
+.aura-pop-kind { font-family: -apple-system, system-ui, sans-serif; font-size: 10px; letter-spacing: .14em; text-transform: uppercase; margin: 0 !important; }
 .aura-pop-title { font-weight: 600; font-size: 14px; color: var(--foreground); text-align: left; padding: 0; margin-top: 2px; }
 .aura-map-day .aura-tiles { filter: saturate(1.45) hue-rotate(-6deg) brightness(1.05) contrast(.92); }
 .aura-map .leaflet-tile { max-width: none; max-height: none; }
@@ -271,7 +272,7 @@
 .aura-stop-disc { fill: oklch(0 0 0 / .22); }
 .aura-stop:hover { transform: translateY(-2px) scale(1.06); }
 .aura-stop-big::before { content: ""; position: absolute; left: 50%; bottom: -3px; width: 30px; height: 10px; margin-left: -15px; border-radius: 50%; border: 2px solid var(--pin); animation: aura-char-ring 2.2s ease-out infinite; }
-.aura-cluster { display: flex; align-items: center; justify-content: center; border-radius: 9999px; color: #fff; font: 700 13px/1 "IBM Plex Mono", monospace;
+.aura-cluster { display: flex; align-items: center; justify-content: center; border-radius: 9999px; color: #fff; font: 700 13px/1 -apple-system, system-ui, sans-serif;
   background: radial-gradient(circle at 30% 30%, #b97cf5, #7a35c4); border: 3px solid #fff; box-shadow: 0 0 0 4px color-mix(in oklab, #9b51e0 35%, transparent), 0 4px 10px oklch(0 0 0 / .4); }
 .aura-photo-stop { position: relative; display: block; border-radius: 9999px; border: 3px solid var(--pin); background: color-mix(in oklab, var(--pin) 55%, #fff); box-shadow: 0 0 0 2px #fff, 0 4px 10px oklch(0 0 0 / .45), 0 0 14px color-mix(in oklab, var(--pin) 70%, transparent); }
 .aura-photo-fallback { position: absolute; inset: 22%; width: 56%; height: 56%; opacity: .9; }
@@ -280,7 +281,7 @@
 .is-speaking .aura-photo-stop { box-shadow: 0 0 0 2px #fff, 0 0 18px #fff; }
 .aura-label { position: absolute; left: 50%; bottom: calc(100% + 2px); transform: translateX(-50%); z-index: 5; display: none; flex-direction: column; background: color-mix(in oklab, var(--card) 92%, transparent); color: var(--foreground); border: 1px solid color-mix(in oklab, var(--foreground) 22%, transparent);
   border-radius: 12px; padding: 3px 9px 4px; box-shadow: 0 3px 8px oklch(0 0 0 / .35); text-align: center; white-space: nowrap; pointer-events: none; line-height: 1.15; }
-.aura-label small { font: 700 9px/1.2 "IBM Plex Mono", monospace; letter-spacing: .12em; text-transform: uppercase; }
+.aura-label small { font: 700 9px/1.2 -apple-system, system-ui, sans-serif; letter-spacing: .12em; text-transform: uppercase; }
 .aura-label em { font-style: normal; font-size: 10px; opacity: .8; max-width: 170px; white-space: normal; overflow-wrap: anywhere; }
 .aura-label b { font-weight: 700; font-size: 12px; max-width: 170px; white-space: normal; overflow-wrap: anywhere; line-height: 1.2; }
 .aura-labels .aura-label { display: flex; }
@@ -371,7 +372,7 @@
 
 .aura-viewtoggle { display: none; }
 .aura-viewseg { position: absolute; left: 10px; bottom: 34px; z-index: 10; display: flex; padding: 3px; gap: 2px; border-radius: 9999px; background: color-mix(in oklab, var(--card) 90%, transparent); border: 1px solid var(--border); box-shadow: 0 3px 10px oklch(0 0 0 / .35); backdrop-filter: blur(6px); }
-.aura-viewseg button { min-width: 40px; height: 32px; border-radius: 9999px; font: 800 12px/1 "IBM Plex Mono", monospace; color: var(--muted-foreground); }
+.aura-viewseg button { min-width: 40px; height: 32px; border-radius: 9999px; font: 800 12px/1 -apple-system, system-ui, sans-serif; color: var(--muted-foreground); }
 .aura-viewseg button.is-on { background: var(--primary); color: var(--primary-foreground); }
 
 /* ---- smoothness and fit on phones ---- */
@@ -458,3 +459,43 @@ button, a { -webkit-tap-highlight-color: transparent; }
 button:not(:disabled), [role="button"] { transition: transform .14s cubic-bezier(.2, .9, .3, 1), background-color .2s, opacity .2s; }
 button:not(:disabled):active { transform: scale(.96); }
 @media (prefers-reduced-motion: reduce) { ::view-transition-old(root), ::view-transition-new(root) { animation: none; } button:not(:disabled):active { transform: none; } }
+
+/* =====================================================================================================
+   MAP LOOK 2026 — glassy squircle badges, soft coloured glow, clean sans labels, springy appearance.
+   (Placed last on purpose: it overrides the older marker styles above.)
+   ===================================================================================================== */
+.aura-badge, .aura-svc-badge {
+  border-radius: 34%;
+  border: 1.5px solid rgb(255 255 255 / .8);
+  background: linear-gradient(155deg, color-mix(in oklab, var(--pin) 55%, #fff) 0%, var(--pin) 55%, color-mix(in oklab, var(--pin) 80%, #000) 100%);
+  box-shadow: 0 8px 18px color-mix(in oklab, var(--pin) 55%, transparent), 0 2px 4px rgb(0 0 0 / .35), inset 0 1px 0 rgb(255 255 255 / .55);
+}
+.aura-svc-badge { background: linear-gradient(160deg, #fff, color-mix(in oklab, var(--pin) 85%, #fff)); color: var(--edge, #334155); box-shadow: 0 8px 16px rgb(0 0 0 / .28), 0 2px 3px rgb(0 0 0 / .25), inset 0 -2px 0 color-mix(in oklab, var(--edge, #334155) 25%, transparent); }
+.aura-badge svg { stroke-width: 2.2; filter: drop-shadow(0 1px 1px rgb(0 0 0 / .3)); }
+.aura-badge-mon { border-radius: 38%; border-width: 2px; box-shadow: 0 0 0 3px color-mix(in oklab, var(--pin) 45%, transparent), 0 10px 22px color-mix(in oklab, var(--pin) 60%, transparent), inset 0 1px 0 rgb(255 255 255 / .6); }
+.aura-photo-stop { border: 2.5px solid #fff; border-radius: 36%; box-shadow: 0 0 0 2.5px var(--pin), 0 10px 22px color-mix(in oklab, var(--pin) 55%, transparent); }
+.aura-photo-stop img { border-radius: 33%; }
+.aura-cluster { border-radius: 38%; font: 800 13px/1 system-ui, -apple-system, sans-serif; letter-spacing: -.02em; background: linear-gradient(155deg, #c4a2ff, #7c3aed 60%, #5b21b6); border: 1.5px solid rgb(255 255 255 / .85); box-shadow: 0 8px 18px rgb(124 58 237 / .5), 0 2px 4px rgb(0 0 0 / .3), inset 0 1px 0 rgb(255 255 255 / .5); }
+
+/* Talking garden characters: a glass bubble with the 3D character popping out of it. */
+.aura-char::before { border-radius: 38%; border: 1.5px solid rgb(255 255 255 / .85); background: linear-gradient(160deg, color-mix(in oklab, var(--pin) 30%, #fff), color-mix(in oklab, var(--pin) 70%, #fff)); box-shadow: 0 8px 18px color-mix(in oklab, var(--pin) 50%, transparent), inset 0 1px 0 rgb(255 255 255 / .8); }
+.aura-char img { filter: drop-shadow(0 4px 4px rgb(0 0 0 / .3)); inset: -6px 0 10px 0; width: 46px; height: 46px; }
+.aura-kid-star { font-size: 14px; }
+
+/* Labels: frosted pill, normal sans font (no old monospace), colour-coded dot instead of shouty caps. */
+.aura-label { border-radius: 14px; padding: 4px 10px 5px; background: color-mix(in oklab, var(--card) 88%, transparent); backdrop-filter: blur(14px) saturate(1.4); -webkit-backdrop-filter: blur(14px) saturate(1.4); border: 1px solid rgb(255 255 255 / .16); box-shadow: 0 10px 24px rgb(0 0 0 / .35); font-family: system-ui, -apple-system, "SF Pro Text", sans-serif; }
+.aura-label small { font: 700 9.5px/1.2 system-ui, -apple-system, sans-serif; letter-spacing: .06em; opacity: .95; }
+.aura-label b { font: 700 12px/1.2 system-ui, -apple-system, sans-serif; letter-spacing: -.01em; }
+.aura-label em { font-size: 10.5px; opacity: .72; }
+.aura-label-kid { background: linear-gradient(135deg, #fde68a, #fbbf24); border-color: #fff; color: #3a2a00; }
+
+/* Everything appears with a small spring, so the map feels alive while you move. */
+.aura-mk > :not(.aura-label) { animation: aura-spring .45s cubic-bezier(.2, 1.3, .4, 1) both; transform-origin: 50% 100%; }
+@keyframes aura-spring { from { opacity: 0; transform: scale(.4) translateY(8px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .aura-mk > :not(.aura-label) { animation: none; } }
+
+/* Round buttons under the map: frosted, thicker icons. */
+.aura-tools button { background: color-mix(in oklab, var(--card) 80%, transparent) !important; backdrop-filter: blur(14px); border: 1px solid rgb(255 255 255 / .18) !important; box-shadow: 0 6px 16px rgb(0 0 0 / .3), inset 0 1px 0 rgb(255 255 255 / .12); }
+.aura-tools svg { stroke-width: 2.2; }
+
+.aura-tools a { background: linear-gradient(145deg, #fde68a, #f59e0b) !important; border: 1.5px solid rgb(255 255 255 / .7) !important; box-shadow: 0 6px 18px rgb(245 158 11 / .5), inset 0 1px 0 rgb(255 255 255 / .6); }
