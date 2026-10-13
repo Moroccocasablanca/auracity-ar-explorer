@@ -16,6 +16,8 @@ import { placeStyle } from "@/lib/place-style";
 import { directionsUrl, telHref } from "@/lib/services";
 import type { Poi } from "@/lib/poi";
 import type { MyAvatar } from "@/lib/avatar";
+/** From this zoom level the photos of monuments and venues are shown; farther away they are simple badges (level of detail). */
+const PHOTO_ZOOM = 16;
 const charTree = "/mascots/tree.png"; // modern 3D characters (made with AI)
 const charBench = "/mascots/bench.png";
 
@@ -163,7 +165,7 @@ function photoPin(color: string, url: string, big: boolean, symbol: string): Pin
   return {
     w: d,
     h: d,
-    html: `<span class="aura-photo-stop${big ? " aura-stop-big" : ""}" style="--pin:${color};width:${d}px;height:${d}px"><svg class="aura-photo-fallback" viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${symbol}</g></svg><img src="${encodeURI(url)}" alt="" loading="lazy" onerror="this.style.display='none'" /></span>`,
+    html: `<span class="aura-photo-stop${big ? " aura-stop-big" : ""}" style="--pin:${color};width:${d}px;height:${d}px"><svg class="aura-photo-fallback" viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${symbol}</g></svg><img src="${encodeURI(url)}" alt="" loading="lazy" decoding="async" onerror="this.style.display='none'" /></span>`,
   };
 }
 
@@ -215,6 +217,7 @@ export default function BraMap({ nodes, pos, kindLabel, placeLabel, appearance, 
   appearanceRef.current = appearance === "night" ? "night" : "day";
   const speakingRef = useRef(speakingId);
   const svcShown = useRef(new Map<string, maplibregl.Marker>());
+  const lodHigh = useRef<boolean | null>(null);
   const [mapReady, setMapReady] = useState(false); // the "you are here" marker needs the map to exist first
   const servicesRef = useRef(pois);
   servicesRef.current = pois;
@@ -286,7 +289,7 @@ export default function BraMap({ nodes, pos, kindLabel, placeLabel, appearance, 
     const color = garden ? cssVar(KIND_COLOR_VAR[n.kind] ?? "--primary") : st.color;
     const pin = garden
       ? charPin(color, n.kind)
-      : n.image_url && (monument || featured)
+      : n.image_url && (monument || featured) && (map.current?.getZoom() ?? 17) >= PHOTO_ZOOM
         ? photoPin(color, n.image_url, true, st.symbol)
         : stopPin(color, st.symbol, featured, monument);
     const { placeLabel: pl, talkLabel: tl } = propsRef.current;
@@ -388,6 +391,17 @@ export default function BraMap({ nodes, pos, kindLabel, placeLabel, appearance, 
     if (!m || !idx) return;
     const b = m.getBounds();
     const z = Math.round(m.getZoom());
+    // Level of detail: from far away places are plain badges (no photo to download or paint); the photos appear when you come closer.
+    const high = m.getZoom() >= PHOTO_ZOOM;
+    if (lodHigh.current !== null && lodHigh.current !== high) {
+      for (const [key, mk] of shown.current) {
+        if (key.startsWith("n:") && !gardens.current.some((g) => `n:${g.id}` === key)) {
+          mk.remove();
+          shown.current.delete(key);
+        }
+      }
+    }
+    lodHigh.current = high;
     const clusters = idx.getClusters([b.getWest() - 0.01, b.getSouth() - 0.01, b.getEast() + 0.01, b.getNorth() + 0.01], z);
     const keep = new Set<string>();
     for (const c of clusters) {

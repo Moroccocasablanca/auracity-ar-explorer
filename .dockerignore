@@ -1,0 +1,10 @@
+node_modules
+.output
+.git
+.github
+ios
+docs
+.voice-cache
+.daily-cache
+.wrangler
+.tanstack

@@ -4,6 +4,7 @@ import { hasNeuralVoice, isNeuralReady, speakNeural, stopNeural, warmNeuralVoice
 import { speechText, splitSentences, type Speakable } from "@/services/voice/text-speech";
 import { vlog } from "@/services/voice/voice-log";
 import { cachedJson } from "@/utils/cache";
+import { resolveCached } from "@/utils/assetCache";
 import { personaVoice, VoicePersona, type VoiceKind } from "@/services/voice/voice-persona";
 
 export type VoiceChoice = "female" | "male" | "device";
@@ -147,7 +148,7 @@ let clipList: Promise<Set<string>> | null = null;
 async function bundledClip(nodeId: string): Promise<string | null> {
   clipList ??= cachedJson<string[]>("/audio/manifest.json").then((l) => new Set(l ?? []));
   const file = `${nodeId}.m4a`;
-  return (await clipList).has(file) ? `/audio/${file}` : null;
+  return (await clipList).has(file) ? resolveCached(`/audio/${file}`) : null; // the local copy when it is already stored
 }
 
 /** Plays a clip with the chosen voice; falls back to the phone voice if the natural voice is unavailable. */

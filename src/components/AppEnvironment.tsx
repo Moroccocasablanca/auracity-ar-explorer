@@ -4,6 +4,11 @@ import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n";
 import { batterySaverPreference, POWER_EVENT } from "@/utils/power";
 import { systemConfig } from "@/config/systemConfig";
+import { cachedJson } from "@/utils/cache";
+import { cleanOldCaches, precacheAssets, whenIdle } from "@/utils/assetCache";
+
+/** Media that is always worth having ready on the phone: the mascots and the standard dish pictures. */
+const CORE_MEDIA = ["barista", "chef", "tree", "bench", "hunt-owl", "hunt-cube", "hunt-orb"].map((n) => `/mascots/${n}.png`);
 
 type BatteryManager = EventTarget & { level: number; charging: boolean };
 type BatteryNavigator = Navigator & { getBattery?: () => Promise<BatteryManager> };
@@ -11,6 +16,15 @@ type BatteryNavigator = Navigator & { getBattery?: () => Promise<BatteryManager>
 export function AppEnvironment() {
   const { t } = useI18n();
   const [installHint, setInstallHint] = useState(false);
+  // Pre-store the recorded voices and the mascots as soon as the phone is idle: playback is then instant, also offline.
+  useEffect(() => {
+    whenIdle(async () => {
+      await cleanOldCaches();
+      const clips = (await cachedJson<string[]>("/audio/manifest.json")) ?? [];
+      await precacheAssets(CORE_MEDIA);
+      await precacheAssets(clips.map((f) => `/audio/${f}`));
+    });
+  }, []);
   useEffect(() => {
     let battery: BatteryManager | undefined;
     const syncPower = () => {

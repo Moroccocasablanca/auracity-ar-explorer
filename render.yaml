@@ -1,0 +1,16 @@
+# Continuous deployment: every push to the main branch on GitHub (once the CI checks pass) is built and published automatically.
+# The iPhone app and the web version both load this site, so they update by themselves: nobody reinstalls anything.
+services:
+  - type: web
+    name: auracity
+    runtime: docker
+    plan: free
+    autoDeployTrigger: checksPass
+    healthCheckPath: /explore
+    envVars:
+      - key: GEMINI_API_KEY        # natural voices, daily quiz, AI promos (set in the hosting dashboard, never in the code)
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: LOVABLE_API_KEY       # only while the AI chat/translations still use the Lovable gateway
+        sync: false

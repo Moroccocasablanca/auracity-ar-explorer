@@ -45,7 +45,7 @@ export async function cachedJson<T>(url: string): Promise<T | null> {
 
 /** Runs `fn` at most once every `ms` (used for compass and scroll handlers). */
 export function throttle<A extends unknown[]>(fn: (...a: A) => void, ms: number) {
-  let last = 0;
+  let last = -Infinity; // the very first call always goes through
   return (...a: A) => {
     const now = performance.now();
     if (now - last >= ms) {

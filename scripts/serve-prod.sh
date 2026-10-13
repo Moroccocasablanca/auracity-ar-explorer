@@ -3,7 +3,7 @@
 # Much faster than "bun run dev", which sends hundreds of unbundled files through the tunnel.
 cd "$(dirname "$0")/.."
 export PATH="$HOME/.bun/bin:$PATH"
-lsof -ti :5173 | xargs kill 2>/dev/null
+lsof -ti tcp:5173 -sTCP:LISTEN | xargs kill 2>/dev/null # only the server, never the tunnel connected to it
 sleep 1
 NITRO_PRESET=bun bun run build > /tmp/aura-build.log 2>&1 || { tail -20 /tmp/aura-build.log; exit 1; }
 PORT=5173 nohup bun .output/server/index.mjs > /tmp/aura-prod.log 2>&1 &
