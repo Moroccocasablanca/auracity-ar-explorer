@@ -209,6 +209,7 @@ export default function BraMap({ nodes, pos, kindLabel, placeLabel, appearance, 
   appearanceRef.current = appearance === "night" ? "night" : "day";
   const speakingRef = useRef(speakingId);
   const svcShown = useRef(new Map<string, maplibregl.Marker>());
+  const [mapReady, setMapReady] = useState(false); // the "you are here" marker needs the map to exist first
   const servicesRef = useRef(pois);
   servicesRef.current = pois;
   const propsRef = useRef({ kindLabel, placeLabel, onTalk, talkLabel, readLabel, openLabel, poiText });
@@ -475,12 +476,18 @@ export default function BraMap({ nodes, pos, kindLabel, placeLabel, appearance, 
     });
     labels();
     map.current = m;
+    setMapReady(true);
     if (import.meta.env.DEV) (window as unknown as { __auraMap?: maplibregl.Map }).__auraMap = m;
     return () => {
       for (const mk of shown.current.values()) mk.remove();
       shown.current.clear();
+      for (const mk of svcShown.current.values()) mk.remove();
+      svcShown.current.clear();
+      me.current?.remove(); // the "you are here" marker belongs to this map: a new map must create its own
+      me.current = null;
       m.remove();
       map.current = null;
+      setMapReady(false);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -537,7 +544,7 @@ export default function BraMap({ nodes, pos, kindLabel, placeLabel, appearance, 
       d.innerHTML = `<span class="aura-me-acc"></span><span class="aura-me-cone"></span><span class="aura-me-body"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4.2" fill="#fff"/><path d="M4 21c0-4.6 3.6-7.6 8-7.6s8 3 8 7.6Z" fill="#fff"/></svg></span><span class="aura-me-tag"></span>`;
       me.current = new maplibregl.Marker({ element: d, anchor: "center" }).setLngLat([pos.lng, pos.lat]).addTo(m);
     } else me.current.setLngLat([pos.lng, pos.lat]);
-  }, [pos]);
+  }, [pos, mapReady]);
 
   // Label, GPS-error circle (true size on the map) and the direction you are facing.
   useEffect(() => {
@@ -577,11 +584,11 @@ export default function BraMap({ nodes, pos, kindLabel, placeLabel, appearance, 
     size();
     m.on("zoom", size);
     return () => void m.off("zoom", size);
-  }, [pos, meInfo.label, meInfo.name, meInfo.ring, meInfo.avatar, meInfo.accuracy, meInfo.heading]);
+  }, [pos, mapReady, meInfo.label, meInfo.name, meInfo.ring, meInfo.avatar, meInfo.accuracy, meInfo.heading]);
 
   useEffect(() => {
     if (recenter > 0 && pos) map.current?.flyTo({ center: [pos.lng, pos.lat], zoom: 17.5, pitch: 62, duration: 1400 });
-  }, [recenter, pos]);
+  }, [recenter, pos, mapReady]);
 
   const [flat, setFlat] = useState(savedView() === "2d");
   useEffect(() => {

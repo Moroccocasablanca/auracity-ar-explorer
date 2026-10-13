@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ClientOnly, createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Bell, ChevronRight, Crosshair, Dumbbell, Info, Landmark, LayoutGrid, Moon, ShieldPlus, Store, Sun, SunMoon, TreePine, Utensils } from "lucide-react";
@@ -58,6 +58,14 @@ function Explore() {
   const { pos } = loc;
   const { mode, appearance, selectMode } = useMapAppearance();
   const [recenter, setRecenter] = useState(0);
+  // The map shows "You are here" as soon as it opens: ask for the position right away instead of waiting for the locate button.
+  const askedOnce = useRef(false);
+  useEffect(() => {
+    if (askedOnce.current || loc.active) return;
+    askedOnce.current = true;
+    void loc.start().then(() => setRecenter((v) => v + 1));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const { data: nodes = [] } = useQuery(nodesQuery);
   const [kind, setKind] = useState<ExploreFilter>("all");
 
