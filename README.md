@@ -44,3 +44,5 @@ Prova sul telefono (tunnel temporaneo): vedi `docs/stato.md`. App iPhone (Capaci
 - Si lavora qui e su GitHub; Lovable non serve per modificare.
 - Ogni testo nuovo va in `src/lib/i18n.tsx` sia in italiano sia in inglese.
 - Nessuna chiave o password nel codice o in chat.
+- **Regola assoluta:** gli asset 3D premium (omini, avatar, piatti, voci registrate) non si sostituiscono né si peggiorano. Sono protetti da `assets.lock.json` e dal test `src/test/assets-lock.test.ts`: se un file cambia o sparisce, i test falliscono. Per aggiungerne di nuovi: `bun run scripts/assets-lock.mjs` (aggiunge, non sovrascrive).
+- Contenuti AI (offerte lampo, indovinelli, domande del giorno) hanno sempre un'alternativa pronta se l'AI è occupata: l'app non si blocca mai.

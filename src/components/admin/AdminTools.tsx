@@ -12,7 +12,7 @@ import { startPreviewAdmin } from "@/lib/account.functions";
 import { getInviteOverride, setInviteOverride } from "@/services/notifications/invites";
 import { classesToText, EXAMPLE, getVenueContent, GYM_EXAMPLE, menuToText, parseClasses, parseMenu, setVenueContent } from "@/lib/venue-content";
 import { ACTIVITIES, ACTIVITY_META } from "@/lib/activities";
-import { launchPromo, stopPromo, useDashboard, useFlash } from "@/lib/merchant";
+import { aiPromo, launchPromo, stopPromo, useDashboard, useFlash } from "@/lib/merchant";
 import { speakAny } from "@/services/voice/speech";
 import { VoicePersona } from "@/services/voice/voice-persona";
 import { useI18n } from "@/lib/i18n";
@@ -42,6 +42,7 @@ export function AdminTools() {
   const [photos, setPhotos] = useState<Record<string, string>>({}); // the owner's own dish photos, by dish name
   const [flashText, setFlashText] = useState("");
   const [flashMin, setFlashMin] = useState(30);
+  const [flashBusy, setFlashBusy] = useState(false);
   const flash = useFlash(venueId || "bucheria-default");
   const stats = useDashboard(venueId || "bucheria-default");
   const { data: nodes = [] } = useQuery(nodesQuery);
@@ -133,7 +134,12 @@ export function AdminTools() {
   };
   const launch = async () => {
     if (!venue || !flashText.trim()) return;
-    const p = launchPromo(venue.id, venue.name.split(" · ")[0]!, flashText, flashMin);
+    setFlashBusy(true);
+    const venueName = venue.name.split(" · ")[0]!;
+    const ai = await aiPromo(flashText, venueName, flashMin); // AI headline + announcement; the standard template if it is busy
+    setFlashBusy(false);
+    const p = launchPromo(venue.id, venueName, flashText, flashMin, ai);
+    toast(ai ? t("admin.flash.ai") : t("admin.flash.std"));
     await alerts.enable();
     // The announcement is spoken right away with the venue's chosen voice, then sent to followers who accepted far-away messages.
     void speakAny(p.aiGeneratedAudioResponse, "it", undefined, VoicePersona.BUSINESS_USER, voice);
@@ -193,7 +199,7 @@ export function AdminTools() {
         <input className={field} value={flashText} onChange={(e) => setFlashText(e.target.value)} placeholder={t("admin.flash.ph")} />
         <div className="grid grid-cols-2 gap-2">
           <select className={field} value={flashMin} onChange={(e) => setFlashMin(Number(e.target.value))}>{[15, 30, 45, 60, 120].map((m) => <option key={m} value={m}>{m} min</option>)}</select>
-          <button type="button" onClick={launch} className="rounded-full bg-amber-300 px-3 py-2.5 text-sm font-extrabold text-black">{t("admin.flash.go")}</button>
+          <button type="button" onClick={launch} disabled={flashBusy} className="rounded-full bg-amber-300 px-3 py-2.5 text-sm font-extrabold text-black disabled:opacity-60">{flashBusy ? t("admin.flash.wait") : t("admin.flash.go")}</button>
         </div>
         {flash && <p className="text-xs text-green-300">{t("admin.flash.on", { t: flash.rawTextFromOwner, m: flash.minutesLeft })} <button type="button" className="underline" onClick={() => venue && stopPromo(venue.id)}>{t("admin.flash.stop")}</button></p>}
       </div>

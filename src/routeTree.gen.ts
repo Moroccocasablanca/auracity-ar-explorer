@@ -18,6 +18,8 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as QuestRouteImport } from './routes/quest'
 import { Route as ApiDailyTriviaRouteImport } from './routes/api/daily-trivia'
 import { Route as ApiGuideRouteImport } from './routes/api/guide'
+import { Route as ApiHuntRiddlesRouteImport } from './routes/api/hunt-riddles'
+import { Route as ApiPromoRouteImport } from './routes/api/promo'
 import { Route as ApiTtsRouteImport } from './routes/api/tts'
 import { Route as AttivitaIdRouteImport } from './routes/attivita.$id'
 import { Route as NodeSlugRouteImport } from './routes/node.$slug'
@@ -67,6 +69,16 @@ const ApiGuideRoute = ApiGuideRouteImport.update({
   path: '/api/guide',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiHuntRiddlesRoute = ApiHuntRiddlesRouteImport.update({
+  id: '/api/hunt-riddles',
+  path: '/api/hunt-riddles',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPromoRoute = ApiPromoRouteImport.update({
+  id: '/api/promo',
+  path: '/api/promo',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiTtsRoute = ApiTtsRouteImport.update({
   id: '/api/tts',
   path: '/api/tts',
@@ -93,6 +105,8 @@ export interface FileRoutesByFullPath {
   '/quest': typeof QuestRoute
   '/api/daily-trivia': typeof ApiDailyTriviaRoute
   '/api/guide': typeof ApiGuideRoute
+  '/api/hunt-riddles': typeof ApiHuntRiddlesRoute
+  '/api/promo': typeof ApiPromoRoute
   '/api/tts': typeof ApiTtsRoute
   '/attivita/$id': typeof AttivitaIdRoute
   '/node/$slug': typeof NodeSlugRoute
@@ -107,6 +121,8 @@ export interface FileRoutesByTo {
   '/quest': typeof QuestRoute
   '/api/daily-trivia': typeof ApiDailyTriviaRoute
   '/api/guide': typeof ApiGuideRoute
+  '/api/hunt-riddles': typeof ApiHuntRiddlesRoute
+  '/api/promo': typeof ApiPromoRoute
   '/api/tts': typeof ApiTtsRoute
   '/attivita/$id': typeof AttivitaIdRoute
   '/node/$slug': typeof NodeSlugRoute
@@ -122,6 +138,8 @@ export interface FileRoutesById {
   '/quest': typeof QuestRoute
   '/api/daily-trivia': typeof ApiDailyTriviaRoute
   '/api/guide': typeof ApiGuideRoute
+  '/api/hunt-riddles': typeof ApiHuntRiddlesRoute
+  '/api/promo': typeof ApiPromoRoute
   '/api/tts': typeof ApiTtsRoute
   '/attivita/$id': typeof AttivitaIdRoute
   '/node/$slug': typeof NodeSlugRoute
@@ -138,6 +156,8 @@ export interface FileRouteTypes {
     | '/quest'
     | '/api/daily-trivia'
     | '/api/guide'
+    | '/api/hunt-riddles'
+    | '/api/promo'
     | '/api/tts'
     | '/attivita/$id'
     | '/node/$slug'
@@ -152,6 +172,8 @@ export interface FileRouteTypes {
     | '/quest'
     | '/api/daily-trivia'
     | '/api/guide'
+    | '/api/hunt-riddles'
+    | '/api/promo'
     | '/api/tts'
     | '/attivita/$id'
     | '/node/$slug'
@@ -166,6 +188,8 @@ export interface FileRouteTypes {
     | '/quest'
     | '/api/daily-trivia'
     | '/api/guide'
+    | '/api/hunt-riddles'
+    | '/api/promo'
     | '/api/tts'
     | '/attivita/$id'
     | '/node/$slug'
@@ -181,6 +205,8 @@ export interface RootRouteChildren {
   QuestRoute: typeof QuestRoute
   ApiDailyTriviaRoute: typeof ApiDailyTriviaRoute
   ApiGuideRoute: typeof ApiGuideRoute
+  ApiHuntRiddlesRoute: typeof ApiHuntRiddlesRoute
+  ApiPromoRoute: typeof ApiPromoRoute
   ApiTtsRoute: typeof ApiTtsRoute
   AttivitaIdRoute: typeof AttivitaIdRoute
   NodeSlugRoute: typeof NodeSlugRoute
@@ -251,6 +277,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiGuideRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/hunt-riddles': {
+      id: '/api/hunt-riddles'
+      path: '/api/hunt-riddles'
+      fullPath: '/api/hunt-riddles'
+      preLoaderRoute: typeof ApiHuntRiddlesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/promo': {
+      id: '/api/promo'
+      path: '/api/promo'
+      fullPath: '/api/promo'
+      preLoaderRoute: typeof ApiPromoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/tts': {
       id: '/api/tts'
       path: '/api/tts'
@@ -285,6 +325,8 @@ const rootRouteChildren: RootRouteChildren = {
   QuestRoute: QuestRoute,
   ApiDailyTriviaRoute: ApiDailyTriviaRoute,
   ApiGuideRoute: ApiGuideRoute,
+  ApiHuntRiddlesRoute: ApiHuntRiddlesRoute,
+  ApiPromoRoute: ApiPromoRoute,
   ApiTtsRoute: ApiTtsRoute,
   AttivitaIdRoute: AttivitaIdRoute,
   NodeSlugRoute: NodeSlugRoute,

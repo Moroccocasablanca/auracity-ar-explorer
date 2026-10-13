@@ -2,7 +2,7 @@
 // Needs GEMINI_API_KEY on the server (locally: ~/.auracity-gemini-key). If the AI is busy or has no quota, the app keeps using its own question bank.
 import { createFileRoute } from "@tanstack/react-router";
 
-const MODELS = ["gemini-3.8-flash", "gemini-3.8-flash-lite"];
+const MODELS = ["gemini-3.5-flash-lite", "gemini-3.1-flash-lite"]; // fastest ones that answer for our key (checked 2026-10-13)
 const TOPICS = ["italiano", "english", "storia", "geografia", "scienze", "mate", "arte", "civica", "modi", "locale"];
 let inflight: Promise<unknown[]> | null = null;
 

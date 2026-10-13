@@ -1,0 +1,158 @@
+{
+ "public/audio/303d32a5-8690-4bcc-92ad-ef1267fe314c.m4a": {
+  "bytes": 120858,
+  "sha256": "e520fda2534bc85726f10e4f13ee3f7d244ceb1e72460ef9a8b47359ad8e3305"
+ },
+ "public/audio/3f799da5-bf76-4c16-92e5-8877789a7c99.m4a": {
+  "bytes": 46876,
+  "sha256": "6e7ce485328ac5f91945344c06bd2d6fe128706634a784f24f28a9e91536f769"
+ },
+ "public/audio/59bbf316-4860-4a3c-970c-3d1761cf5650.m4a": {
+  "bytes": 99561,
+  "sha256": "ddbde01fcce54a3c09be51355462666e2f2bd58338e9ce0603da3aad04f55d6a"
+ },
+ "public/audio/8cd7d893-a04f-4192-aae5-76893f51319d.m4a": {
+  "bytes": 152394,
+  "sha256": "adbcf1483e1fb065e82fc725fd5ee62717123ace73545c46ce3ce1ffde03ee26"
+ },
+ "public/audio/c0121225-a732-4d8c-aeb4-48a523f2ef74.m4a": {
+  "bytes": 88765,
+  "sha256": "cf87ed123ca0a2fe11d2a8d3f6667a2e4001b46a936f96c59afce13916a2e5fe"
+ },
+ "public/audio/deaa7cf2-57bc-49a0-84e5-115d30cd8b42.m4a": {
+  "bytes": 65967,
+  "sha256": "b8d8fd969eac85ff2528d56374e8ecabba02e405c8bf48f62f35a580d97fc359"
+ },
+ "public/audio/df6c8273-a135-4c89-920a-85612849f856.m4a": {
+  "bytes": 40133,
+  "sha256": "fd2afaff56017fa16014b176f4c6217c9148635312bb0ccec20ff7fb515866c8"
+ },
+ "public/audio/ecce13da-4dce-4f1e-b180-73ed57501e44.m4a": {
+  "bytes": 77321,
+  "sha256": "05f0fd6e16158d711eb438a91caf16daf42c403ffe476c14fca48cb4288ac78f"
+ },
+ "public/audio/ef6452c4-44e3-4588-a44f-1d42efac89b0.m4a": {
+  "bytes": 71949,
+  "sha256": "b8a31c86db169fd2dc5696c1d3100f51ff60a9d75e07bd0a211644f1fddf53b0"
+ },
+ "public/audio/fef5a5e0-0c71-4286-80f0-4a7c5e128996.m4a": {
+  "bytes": 99511,
+  "sha256": "190d2fc3f859a406211934ec349fafc82680c466d3df1eac926f606504968623"
+ },
+ "public/avatars/a1.jpg": {
+  "bytes": 14142,
+  "sha256": "2b9a1cc13c4d85c27f9852db41a860f64c3d654eb1730ca99ab547e6fde3e0d5"
+ },
+ "public/avatars/a2.jpg": {
+  "bytes": 14146,
+  "sha256": "0ec3d356133a84441e3ecb924ce0be8de801b56d15f7eefbddc88ff2d1507df5"
+ },
+ "public/avatars/a3.jpg": {
+  "bytes": 15573,
+  "sha256": "7c3ac2cca4af8414f9a42af132ce9099d94ff8738ee08a29ea60cb29260f3144"
+ },
+ "public/avatars/a4.jpg": {
+  "bytes": 14444,
+  "sha256": "d7b067ac812c3f9b16c7f72b3ce9b4bb66a53cd659eb87c9c136be21e518ca67"
+ },
+ "public/avatars/a5.jpg": {
+  "bytes": 15650,
+  "sha256": "a955c799b4db606e68c54aa25eb3edb164cbf415990376f25ac0ea04e9a9dc36"
+ },
+ "public/avatars/a6.jpg": {
+  "bytes": 13479,
+  "sha256": "9efb1d700b3798d84a3aa6bcf856e92d8a1c133cf8151797cd231a1e2304aacc"
+ },
+ "public/avatars/a7.jpg": {
+  "bytes": 16693,
+  "sha256": "2d73ab1564e63302516741eb40fa447c03b25d2f9f19ce452d81ddd4d8c1ba48"
+ },
+ "public/avatars/a8.jpg": {
+  "bytes": 11566,
+  "sha256": "678065285e9c4d37e8812168c4152925a453dbb535f51f80a106f5962089161b"
+ },
+ "public/dishes/beer.png": {
+  "bytes": 43380,
+  "sha256": "1a96cbf27db58131623bd690730a3a91d3c2d44e15e99b36631f3729c29af43e"
+ },
+ "public/dishes/burger.png": {
+  "bytes": 73776,
+  "sha256": "8a9ebda43a12be565b298cb9e4df2ff2d82cb832f4e4d37ee3381443e7be6e5e"
+ },
+ "public/dishes/cappuccino.png": {
+  "bytes": 45752,
+  "sha256": "1998541165316bc0d6cbcbd8ef98b2fdbdd1ac052f5a75e4b6dc1f954b29e71c"
+ },
+ "public/dishes/coffee.png": {
+  "bytes": 41018,
+  "sha256": "4481bafac2b7007b95e66737a1a8c4f396282d383408cf4dbcc817345ed038ec"
+ },
+ "public/dishes/croissant.png": {
+  "bytes": 57160,
+  "sha256": "e227e94a670330d8cff422884ccb4c0bffa4f751ce2a6a63656b52aa6e033115"
+ },
+ "public/dishes/dessert.png": {
+  "bytes": 58579,
+  "sha256": "44cb050188b4ec52ad209403048ec709df0ba27580a53776e340f45b3de94797"
+ },
+ "public/dishes/gelato.png": {
+  "bytes": 35260,
+  "sha256": "b037280a8a0e347852eb09c181d30d943aeb9421e4036c2c1437320a0bcb1b57"
+ },
+ "public/dishes/panino.png": {
+  "bytes": 74669,
+  "sha256": "99c60e337dccc0f57dd0546c4a54521f4e98b4cdf78dfa2fd0ba6f245e5da663"
+ },
+ "public/dishes/pasta.png": {
+  "bytes": 56720,
+  "sha256": "b9938c9339e7957d85044c3464ed32dd5fe912552558a8b3c849949de00915b9"
+ },
+ "public/dishes/pizza.png": {
+  "bytes": 82916,
+  "sha256": "cf76ade92a786f36aadbc1b78fa6343b1ce190928c2897c346a45d1408609eb2"
+ },
+ "public/dishes/salad.png": {
+  "bytes": 59509,
+  "sha256": "c7e4508cc0766a2eaaa495efc558cf6715774d69611919ffd09d2031e086b52b"
+ },
+ "public/dishes/wine.png": {
+  "bytes": 24720,
+  "sha256": "beb681aa5471ef038b13f009931a61b6174488a474426100d35f097fb4f11bf9"
+ },
+ "public/mascots/barista.png": {
+  "bytes": 291120,
+  "sha256": "7415a282c310cadc21cd419da5cdc5f3c8e2d29e8079f0967aa237b903f713d5"
+ },
+ "public/mascots/bench.png": {
+  "bytes": 56649,
+  "sha256": "a5eba63e5acffd59240a538318a1e954b00b30271adbe801a3219ea4e3c2289b"
+ },
+ "public/mascots/chef.png": {
+  "bytes": 247117,
+  "sha256": "2cdc92850ebc03b25c608186c71be2e84b0e7e22c59c3e660cb417a4c07044e6"
+ },
+ "public/mascots/hunt-cube.png": {
+  "bytes": 43942,
+  "sha256": "9bfa33d06dbc4c90ef0c2bc85bef4260ad230a8a91129ef7093f199e56e86e7e"
+ },
+ "public/mascots/hunt-orb.png": {
+  "bytes": 39373,
+  "sha256": "743a8b1ae50b7c5580c7c517ad35e7cfda3dbfc7696c997c3e466da7df27b133"
+ },
+ "public/mascots/hunt-owl.png": {
+  "bytes": 57660,
+  "sha256": "0d684acfae90f8af56ec37d0a78e4f8cba4772ca664db1ac77ae151b796e2478"
+ },
+ "public/mascots/tree.png": {
+  "bytes": 67507,
+  "sha256": "d093cafcfffa14d2f88d801caffacb36e0fb50d99f15643e5e190ce97360b9bd"
+ },
+ "src/assets/char-bench.png": {
+  "bytes": 842744,
+  "sha256": "9732a74fbad1b401a7b22c7772e8570cdb4c32bd3e9f6f8bb0b859e5eac62409"
+ },
+ "src/assets/char-tree.png": {
+  "bytes": 861137,
+  "sha256": "011d8f2f23d65e788396717dfdca50557a75428de1737fd96c081756045b5d5d"
+ }
+}

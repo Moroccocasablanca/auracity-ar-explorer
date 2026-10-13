@@ -19,6 +19,9 @@ export interface FlashPromo {
   aiGeneratedAudioResponse: string; // the spoken announcement, generated automatically
   durationMinutes: number; // how long the offer lasts (e.g. 30)
   active: boolean;
+  /** short title written by the AI (optional) */
+  headline?: string | undefined;
+  tags?: string[] | undefined;
 }
 
 export interface MerchantDashboard {
@@ -55,12 +58,29 @@ export function composeFlashAudio(raw: string, venueName: string, minutes: numbe
   return `Offerta lampo da ${venueName}! ${text}. Solo per i prossimi ${minutes} minuti: vieni adesso!`;
 }
 
-export function launchPromo(venueId: string, venueName: string, rawText: string, durationMinutes: number): FlashPromo {
+export type AiPromo = { headline: string; script: string; tags: string[]; suggestedMinutes: number };
+
+/** Asks our server (AI) to write the headline and the spoken announcement; null when the AI is busy (the template is used then). */
+export async function aiPromo(rawText: string, venueName: string, minutes: number): Promise<AiPromo | null> {
+  try {
+    const ctrl = new AbortController();
+    const timer = window.setTimeout(() => ctrl.abort(), 9000);
+    const res = await fetch("/api/promo", { method: "POST", signal: ctrl.signal, headers: { "content-type": "application/json" }, body: JSON.stringify({ text: rawText, venue: venueName, minutes }) });
+    window.clearTimeout(timer);
+    return res.ok ? ((await res.json()) as AiPromo) : null;
+  } catch {
+    return null;
+  }
+}
+
+export function launchPromo(venueId: string, venueName: string, rawText: string, durationMinutes: number, ai?: AiPromo | null): FlashPromo {
   const p: StoredPromo = {
     promoId: `fp-${Date.now()}`,
     venueId,
     rawTextFromOwner: rawText.trim(),
-    aiGeneratedAudioResponse: composeFlashAudio(rawText, venueName, durationMinutes),
+    aiGeneratedAudioResponse: ai?.script ?? composeFlashAudio(rawText, venueName, durationMinutes),
+    headline: ai?.headline,
+    tags: ai?.tags,
     durationMinutes,
     active: true,
     startedAt: Date.now(),
