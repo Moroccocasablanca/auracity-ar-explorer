@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { VenueAvatar } from "@/components/VenueAvatar";
+import { placeStyleKey } from "@/lib/place-style";
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { AlertTriangle, ArrowUpRight, Crosshair, Lock, Power, Radio, ShieldCheck, Sparkles, Volume2 } from "lucide-react";
@@ -11,6 +13,10 @@ import { useNodeText } from "@/lib/use-node-text";
 import { markDiscovered } from "@/lib/discovered";
 import { GardenFace } from "./GardenCharacter";
 import { useNarrator } from "./ListenButton";
+import { MonumentModel, MonumentSubtitles } from "./MonumentOverlay";
+import { VoicePersona } from "@/lib/voice-persona";
+import { bump } from "@/lib/merchant";
+import { systemConfig } from "@/lib/systemConfig";
 
 const TALK_ANGLE = 12;
 const TALK_DIST = 80;
@@ -36,7 +42,7 @@ function AutoTalk({ node, play }: { node: NodeRow; play: ReturnType<typeof useNa
       } else {
         const text = `${tx.name}. ${tx.history || tx.description}`;
         talked.add(node.id);
-        play(node.id, { nodeId: node.id, source: "history" }, text);
+        play(node.id, { nodeId: node.id, source: "history", persona: VoicePersona.MONUMENT_FEMALE }, text);
       }
     }, 1200);
     return () => window.clearTimeout(timer);
@@ -131,6 +137,9 @@ export function ArView() {
 
   const inView = placed.filter((p) => Math.abs(angleDiff(p.b, loc.heading)) < FOV / 2 + 10);
   const selectedItem = placed.find((p) => p.n.id === selected) ?? null;
+  // autoPlayOnProximity: a monument starts telling its story once, when you are inside the radius (50 m).
+  const nearMonument = tooFast ? null : placed.filter((p) => p.n.kind === "monument" && p.d <= systemConfig.proximityLoadingRadiusMeters).sort((a, b) => a.d - b.d)[0]?.n ?? null;
+  const speakingMonument = placed.find((p) => p.n.kind === "monument" && playing === p.n.id)?.n ?? null;
   const focus = tooFast
     ? null
     : inView
@@ -250,10 +259,15 @@ export function ArView() {
             key={p.n.id}
             type="button"
             onPointerDown={(e) => e.stopPropagation()}
-            onClick={() => setSelected(sel ? null : p.n.id)}
+            onClick={() => { if (!sel && p.n.kind === "business") bump(p.n.id, "totalArViews"); setSelected(sel ? null : p.n.id); }}
             className={`kind-${p.n.kind} absolute -translate-x-1/2 -translate-y-full text-left`}
             style={{ left: `${left}%`, top: `${top}%`, transform: `translate(-50%, -100%) scale(${scale})` }}
           >
+            {p.n.kind === "business" && (
+              <div className="mx-auto mb-1 flex justify-center">
+                <VenueAvatar style={placeStyleKey(p.n)} speaking={playing === p.n.id} size={56} />
+              </div>
+            )}
             {isGardenObject(p.n) && (
               <div className="mx-auto mb-1 flex justify-center">
                 <GardenFace kind={p.n.kind} speaking={playing === p.n.id} size={56} />
@@ -333,6 +347,9 @@ export function ArView() {
         </div>
       )}
 
+      {nearMonument && !talked.has(nearMonument.id) && <AutoTalk node={nearMonument} play={play} />}
+      {speakingMonument && <MonumentSubtitles node={speakingMonument} bottomClass={selectedItem ? "bottom-[13.5rem]" : "bottom-28"} />}
+
       {/* Selected node card */}
       {selectedItem && (
         <div
@@ -346,6 +363,7 @@ export function ArView() {
               </p>
               <h3 className="truncate text-lg font-semibold">{selectedItem.n.name}</h3>
               <p className="truncate text-sm text-muted-foreground">{tagline(selectedItem.n, lang)}</p>
+              {selectedItem.n.kind === "monument" && <MonumentModel slug={selectedItem.n.slug} />}
             </div>
             <Link
               to="/node/$slug"

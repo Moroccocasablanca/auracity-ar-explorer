@@ -10,6 +10,8 @@ import { useSession } from "@/lib/auth";
 import { useI18n, type TKey } from "@/lib/i18n";
 import { PASSWORD_RULES, isStrongPassword } from "@/lib/password";
 import { FriendsPanel } from "@/components/FriendsPanel";
+import { AdminTools } from "@/components/AdminTools";
+import { LanguageSelect } from "@/components/LanguageSelect";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -139,6 +141,8 @@ function SignIn() {
   return (
     <div className="grid-backdrop flex min-h-screen items-center px-6 pb-32 pt-10">
       <div className="mx-auto w-full max-w-sm space-y-5">
+        <LanguageSelect />
+        <AdminTools />
         <header>
           <p className="mono-label">AURACITY</p>
           <h1 className="mt-1 text-3xl font-bold">{mode === "login" ? t("auth.title") : t("auth.signup")}</h1>
@@ -283,6 +287,8 @@ function Account({ userId, email }: { userId: string; email: string }) {
   return (
     <div className="grid-backdrop flex min-h-screen items-center px-6 pb-32">
       <div className="glass mx-auto w-full max-w-sm space-y-4 rounded-2xl p-6">
+        <LanguageSelect />
+        <AdminTools />
         <p className="text-sm text-muted-foreground">{t("auth.signed", { e: email })}</p>
         {profile && (
           <div>

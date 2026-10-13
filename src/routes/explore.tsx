@@ -1,18 +1,28 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { ClientOnly, createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Bell, ChevronRight, Crosshair, MapPin } from "lucide-react";
+import { Bell, ChevronRight, Crosshair, Dumbbell, Info, Landmark, LayoutGrid, Moon, ShieldPlus, Store, Sun, SunMoon, TreePine, Utensils } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { MapAppearanceControl, useMapAppearance } from "@/components/MapAppearanceControl";
+import { useMapAppearance } from "@/components/MapAppearanceControl";
+import type { MapMode } from "@/lib/map-appearance";
 import { useProximityAlerts } from "@/components/ProximityWatcher";
 import { distanceM, formatDistance } from "@/lib/geo";
 import { kindKey, useI18n } from "@/lib/i18n";
 import { useLocation } from "@/lib/location";
-import { history, description, messagesQuery, nodesQuery, tagline, type NodeRow } from "@/lib/nodes";
+import { placeStyle, PLACE_STYLE } from "@/lib/place-style";
+import { speakAny } from "@/lib/speech";
+import { VoicePersona } from "@/lib/voice-persona";
+import { contentLang, detectTextLang, greetingWithName, nameThenText } from "@/lib/text-speech";
+import { warmNeuralVoice } from "@/lib/neuralVoice";
+import { history, description, nodeMenu, promo, messagesQuery, nodesQuery, shortStory, tagline, type NodeRow } from "@/lib/nodes";
 import { explorePriority, matchesExploreFilter, type ExploreFilter } from "@/lib/explore-rules";
 import { useNarrator } from "@/components/ListenButton";
 import { isGardenObject } from "@/lib/node-rules";
 import { discovered, markDiscovered } from "@/lib/discovered";
+import { directionsUrl, isEssential, SERVICES, SERVICE_META, telHref, type ServicePlace } from "@/lib/services";
+import { ACTIVITIES, ACTIVITY_META } from "@/lib/activities";
+import type { Poi } from "@/lib/poi";
+import { logEvent } from "@/lib/quest";
 
 const BraMap = lazy(() => import("@/components/BraMap"));
 
@@ -52,6 +62,31 @@ function Explore() {
       .sort((a, b) => explorePriority(a.n) - explorePriority(b.n) || (a.d != null && b.d != null ? a.d - b.d : a.n.name.localeCompare(b.n.name)));
   }, [nodes, kind, pos]);
   const filtered = useMemo(() => list.map((x) => x.n), [list]);
+  // Services: essentials are always on the map; defibrillators only in the Services filter.
+  const mapServices = useMemo(() => (kind === "services" ? SERVICES : kind === "all" ? SERVICES.filter(isEssential) : []), [kind]);
+  // Activities: gyms, sports centres, playgrounds... (all in "Sport & leisure", playgrounds also under the kids' gardens)
+  const mapActivities = useMemo(
+    () => (kind === "activities" ? ACTIVITIES : kind === "gardens" ? ACTIVITIES.filter((a) => a.type === "playground") : kind === "all" ? ACTIVITIES.filter((a) => a.type === "gym" || a.type === "pool") : []),
+    [kind],
+  );
+  const pois = useMemo<Poi[]>(
+    () => [
+      ...mapServices.map((s) => {
+        const m = SERVICE_META[s.type];
+        return { id: s.id, lat: s.lat, lng: s.lng, title: s.name ?? null, tag: t(m.label), color: m.color, bg: m.bg, fg: m.fg, symbol: m.symbol, minZoom: kind === "services" ? 14 : 14.5, phone: s.phone, address: s.address, hours: s.hours };
+      }),
+      ...mapActivities.map((a) => {
+        const m = ACTIVITY_META[a.type];
+        return { id: a.id, lat: a.lat, lng: a.lng, title: a.name ?? t(m.label), tag: t(m.label), color: m.color, bg: m.color, fg: "#ffffff", symbol: m.symbol, minZoom: kind === "activities" ? 14 : m.minZoom, phone: a.phone, address: a.address, hours: a.hours, open: `/attivita/${a.id}` };
+      }),
+    ],
+    [mapServices, mapActivities, kind, t],
+  );
+  const serviceLabel = useCallback((s: ServicePlace) => (s.name ? s.name : t(SERVICE_META[s.type].label)), [t]);
+  const serviceList = useMemo(
+    () => SERVICES.map((s) => ({ s, d: pos ? distanceM(pos, s) : null })).sort((a, b) => (a.d ?? 0) - (b.d ?? 0) || a.s.type.localeCompare(b.s.type)).slice(0, 14),
+    [pos],
+  );
   const kindLabel = useCallback((k: string) => t(kindKey(k)), [t]);
   const alerts = useProximityAlerts();
   const qc = useQueryClient();
@@ -62,67 +97,90 @@ function Explore() {
   const onTalk = useCallback(
     async (n: NodeRow) => {
       if (playing === n.id) { stop(); return; }
+      if (n.kind === "business") {
+        const items = nodeMenu(n).slice(0, 6).map((m) => m.name).join(", ");
+        const body = [promo(n, lang), items && `${t("node.menu")}: ${items}`].filter(Boolean).join(". ");
+        void speakAny(nameThenText(n.name, body, contentLang(lang)), contentLang(lang), undefined, VoicePersona.BUSINESS_USER);
+        return;
+      }
       if (n.kind === "monument") {
-        play(n.id, { nodeId: n.id, source: "history" }, `${n.name}. ${history(n, lang) || description(n, lang)}`);
+        logEvent("monument", n.id);
+        play(n.id, { nodeId: n.id, source: "history", lang: contentLang(lang), persona: VoicePersona.MONUMENT_FEMALE }, nameThenText(n.name, shortStory(history(n, lang) || description(n, lang)), contentLang(lang)));
         return;
       }
       const msgs = await qc.fetchQuery(messagesQuery(n.id));
       const m = msgs[0];
       markDiscovered(n.id);
-      if (m) play(n.id, { nodeId: n.id, source: "message", messageId: m.id }, m.body);
-      else play(n.id, { nodeId: n.id, source: "history" }, `${n.name}. ${history(n, lang) || description(n, lang)}`);
+      if (!m) {
+        void speakAny(greetingWithName(t("garden.hello", { name: "§" }), n.name, lang, t("garden.empty")), lang);
+        return;
+      }
+      play(n.id, { nodeId: n.id, source: "message", messageId: m.id, persona: "kid", lang: detectTextLang(m.body, lang) }, m.body);
     },
     [qc, play, playing, stop, lang],
   );
+  useEffect(() => warmNeuralVoice(contentLang(lang)), [lang]);
   const talkLabel = t("garden.talk");
 
+  const [legend, setLegend] = useState(false);
+  const modes: MapMode[] = ["auto", "day", "night"];
+  const nextMode = modes[(modes.indexOf(mode) + 1) % 3]!;
+  const ModeIcon = mode === "auto" ? SunMoon : mode === "day" ? Sun : Moon;
+  const chips = ["all", "restaurants", "monument", "gardens", "business", "activities", "services"] as const;
+  const chipIcon = { all: LayoutGrid, restaurants: Utensils, monument: Landmark, gardens: TreePine, business: Store, activities: Dumbbell, services: ShieldPlus } as const;
+  const chipLabel = (k: (typeof chips)[number]) => (k === "all" ? t("all") : k === "restaurants" ? t("explore.restaurants") : k === "gardens" ? t("explore.gardens") : k === "services" ? t("explore.services") : k === "activities" ? t("explore.activities") : t(kindKey(k)));
+
   return (
-    <div className="grid-backdrop min-h-screen px-4 pb-32 pt-10">
-      <div className="mx-auto max-w-5xl">
-        <p className="mono-label">Bra · Piemonte</p>
-        <h1 className="mt-1 text-4xl font-bold">{t("explore.title")}</h1>
-        <p className="mt-2 text-muted-foreground">{t("explore.sub")}</p>
-        <p className="mono-label mt-2">{t("explore.count", { n: list.length })}</p>
+    <div className="min-h-screen pb-28">
+      {/* The map is the first thing you see: as tall as the screen, with its controls floating on top. */}
+      <div className="relative h-[calc(100dvh-5.4rem)] min-h-[26rem] w-full overflow-hidden bg-card/60">
+        <ClientOnly fallback={<div className="h-full w-full animate-pulse bg-card/60" />}>
+          <Suspense fallback={<div className="h-full w-full animate-pulse bg-card/60" />}>
+            <BraMap nodes={filtered} pos={pos} kindLabel={kindLabel} placeLabel={(n) => t(placeStyle(n).label)} appearance={appearance} recenter={recenter} onTalk={onTalk} talkLabel={talkLabel} pois={pois} poiText={{ call: t("svc.call"), directions: t("svc.directions"), open: t("act.open") }} readLabel={t("venue.read")} openLabel={(o) => t(o ? "node.open" : "node.closed")} speakingId={playing} />
+          </Suspense>
+        </ClientOnly>
+        <div className="absolute inset-x-0 top-0 z-[5] bg-gradient-to-b from-background/70 to-transparent px-3 pb-3 pt-[max(0.55rem,env(safe-area-inset-top))]">
+          <div className="chip-row -mx-3 flex gap-2 overflow-x-scroll px-3 pb-1" style={{ touchAction: "pan-x", overscrollBehaviorX: "contain" }}>
+            {chips.map((k) => {
+              const Icon = chipIcon[k];
+              const on = kind === k;
+              return (
+                <button
+                  key={k}
+                  type="button"
+                  onClick={() => setKind(k)}
+                  aria-pressed={on}
+                  className={`flex shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-2 text-[0.8rem] font-semibold shadow-lg backdrop-blur-md transition active:scale-95 ${on ? "border-transparent bg-gradient-to-r from-cyan-300 to-sky-400 text-slate-900" : "border-white/15 bg-card/80 text-foreground"}`}
+                >
+                  <Icon className="size-4" />
+                  {chipLabel(k)}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+        {legend && (
+          <div className="absolute inset-x-3 bottom-16 z-[6] rounded-2xl border border-border bg-card/95 p-3 text-xs shadow-xl backdrop-blur" onClick={() => setLegend(false)}>
+            <div className="grid grid-cols-2 gap-x-3 gap-y-1.5">
+              {(["restaurant", "streetfood", "cafe", "icecream", "bar", "church", "palace", "museum"] as const).map((k) => (
+                <span key={k} className="flex items-center gap-2"><i className="size-3 shrink-0 rounded-full border-2 border-white" style={{ background: PLACE_STYLE[k].color }} />{t(PLACE_STYLE[k].label)}</span>
+              ))}
+              <span className="flex items-center gap-2"><i className="size-3 shrink-0 rounded-full border-2 border-white bg-kind-bench" />{t("kind.bench")}</span>
+              <span className="flex items-center gap-2"><i className="size-3 shrink-0 rounded-full border-2 border-green-600 bg-white" />{t("svc.pharmacy")}</span>
+              <span className="flex items-center gap-2"><i className="size-3 shrink-0 rounded-full border-2 border-white bg-blue-700" />{t("svc.hospital")}</span>
+              <span className="flex items-center gap-2"><i className="size-3 shrink-0 rounded-full border-2 border-white bg-blue-900" />{t("svc.police")} / {t("svc.carabinieri")}</span>
+            </div>
+          </div>
+        )}
+        <div className="absolute right-3 top-14 z-[5] flex flex-col gap-2">
+          <button type="button" title={t("map.locate")} aria-label={t("map.locate")} onClick={() => { if (!loc.active) void loc.start(); setRecenter((v) => v + 1); }} className="flex size-11 items-center justify-center rounded-full border border-border bg-card/90 shadow-lg backdrop-blur"><Crosshair className="size-5" /></button>
+          <button type="button" title={t(mode === "auto" ? "map.auto" : mode === "day" ? "map.day" : "map.night")} aria-label={t("map.appearance")} onClick={() => selectMode(nextMode)} className="flex size-11 items-center justify-center rounded-full border border-border bg-card/90 shadow-lg backdrop-blur"><ModeIcon className="size-5" /></button>
+          <button type="button" aria-label={t("map.legend")} onClick={() => setLegend((v) => !v)} className={`flex size-11 items-center justify-center rounded-full border border-border shadow-lg backdrop-blur ${legend ? "bg-primary text-primary-foreground" : "bg-card/90"}`}><Info className="size-5" /></button>
+          <Link to="/quest" aria-label={t("quest.title")} className="flex size-11 items-center justify-center rounded-full border-2 border-yellow-300 bg-yellow-300 text-xl text-black shadow-lg">★</Link>
+        </div>
+      </div>
 
-        <div className="-mx-4 mt-6 flex gap-2 overflow-x-auto px-4 pb-1">
-          {(["all", "restaurants", "monument", "gardens", "business"] as const).map((k) => (
-            <Button
-              key={k}
-              type="button"
-              onClick={() => setKind(k)}
-              variant="outline"
-              aria-pressed={kind === k}
-              className={`shrink-0 rounded-md px-4 py-1.5 text-sm transition-colors ${
-                kind === k
-                  ? "border-primary bg-primary text-primary-foreground"
-                  : "border-border text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {k === "all" ? t("all") : k === "restaurants" ? t("explore.restaurants") : k === "gardens" ? t("explore.gardens") : t(kindKey(k))}
-            </Button>
-          ))}
-        </div>
-
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
-          <MapAppearanceControl mode={mode} onChange={selectMode} />
-          <Button size="icon" variant="outline" title={t("map.locate")} aria-label={t("map.locate")} onClick={() => {
-            if (!loc.active) void loc.start();
-            setRecenter((v) => v + 1);
-          }}><Crosshair /></Button>
-        </div>
-        <div className="relative mt-3 h-[58dvh] min-h-80 overflow-hidden rounded-lg border border-border">
-          <ClientOnly fallback={<div className="h-full w-full animate-pulse bg-card/60" />}>
-            <Suspense fallback={<div className="h-full w-full animate-pulse bg-card/60" />}>
-              <BraMap nodes={filtered} pos={pos} kindLabel={kindLabel} appearance={appearance} recenter={recenter} onTalk={onTalk} talkLabel={talkLabel} speakingId={playing} />
-            </Suspense>
-          </ClientOnly>
-          <span className="pointer-events-none absolute bottom-6 left-3 z-[500] inline-flex items-center gap-1 rounded-md bg-card px-2 py-1 text-xs text-foreground"><MapPin className="size-3" />Bra · {t(appearance === "day" ? "map.day" : "map.night")}</span>
-        </div>
-        <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground" aria-label={t("map.legend")}>
-          <span><i className="mr-1 inline-block size-2 rounded-sm bg-kind-monument" />{t("kind.monument")}</span>
-          <span><i className="mr-1 inline-block size-2 rounded-sm bg-kind-business" />{t("explore.restaurants")}</span>
-          <span><i className="mr-1 inline-block size-2 rounded-sm bg-kind-bench" />{t("kind.bench")}</span>
-        </div>
+      <div className="mx-auto max-w-5xl px-4 pt-3">
 
         {gardens.length > 0 && (
           <p className="mono-label mt-3">{t("garden.found", { n: found, t: gardens.length })}</p>
@@ -137,6 +195,32 @@ function Explore() {
             <Bell className="size-4 shrink-0 text-primary" />
             <span className="flex-1">{t("prox.enable")}</span>
           </button>
+        )}
+
+        {kind === "services" && (
+          <section className="mt-6">
+            <p className="mono-label">{t("svc.nearest")}</p>
+            <ul className="mt-3 space-y-2">
+              {serviceList.map(({ s, d }) => {
+                const meta = SERVICE_META[s.type];
+                return (
+                  <li key={s.id} className="glass flex items-center gap-3 rounded-2xl p-3">
+                    <span className="flex size-10 shrink-0 items-center justify-center rounded-full border-2 border-white" style={{ background: meta.color }}>
+                      <svg viewBox="0 0 24 24" className="size-5" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" dangerouslySetInnerHTML={{ __html: meta.symbol }} />
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-[0.65rem] font-semibold uppercase tracking-wider" style={{ color: meta.color }}>{t(meta.label)}</span>
+                      <span className="block font-semibold leading-snug">{s.name ?? t(meta.label)}</span>
+                      {s.address && <span className="block text-sm text-muted-foreground">{s.address}</span>}
+                    </span>
+                    {d != null && <span className="font-mono text-xs text-muted-foreground">{formatDistance(d)}</span>}
+                    {s.phone && <a href={telHref(s.phone)} className="rounded-full bg-primary px-3 py-1.5 text-xs font-bold text-primary-foreground">{t("svc.call")}</a>}
+                    <a href={directionsUrl(s)} target="_blank" rel="noopener" className="rounded-full border border-border px-3 py-1.5 text-xs font-bold">➤</a>
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
         )}
 
         <ul className="mt-6 space-y-3">
@@ -156,8 +240,8 @@ function Explore() {
                   <p className="mono-label !text-[0.58rem]" style={{ color: "var(--kind)" }}>
                     {t(kindKey(n.kind))}
                   </p>
-                  <p className="truncate font-semibold">{n.name}</p>
-                  <p className="truncate text-sm text-muted-foreground">{tagline(n, lang)}</p>
+                  <p className="font-semibold leading-snug">{n.name}</p>
+                  <p className="text-sm text-muted-foreground">{tagline(n, lang)}</p>
                 </div>
                 {d != null && <span className="font-mono text-xs text-muted-foreground">{formatDistance(d)}</span>}
                 <ChevronRight className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />

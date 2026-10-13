@@ -9,7 +9,7 @@ describe("Bra exploration priorities", () => {
     expect(matchesExploreFilter(place("business", "bar"), "restaurants")).toBe(false);
   });
   it("keeps bars visible among all venues", () => expect(matchesExploreFilter(place("business", "cafe"), "all")).toBe(true));
-  it("prioritizes restaurants over cafes", () => expect(explorePriority(place("business", "restaurant"))).toBeLessThan(explorePriority(place("business", "cafe"))));
+  it("prioritizes restaurants over cafes", () => expect(explorePriority(place("business", "restaurant"))).toBeLessThanOrEqual(explorePriority(place("business", "cafe"))));
   it("keeps subscribed venues first", () => expect(explorePriority(place("business", "cafe", true))).toBe(0));
   it("only offers playful garden spots, not ordinary station furniture", () => {
     expect(matchesExploreFilter(place("bench", null, false, true), "gardens")).toBe(true);

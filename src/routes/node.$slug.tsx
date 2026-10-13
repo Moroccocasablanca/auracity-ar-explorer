@@ -9,7 +9,20 @@ import { MessageBoard, PresenceBanner, ReviewBoard, usePresence } from "@/compon
 import { isOpenNow, formatDistance } from "@/lib/geo";
 import { kindKey, LOCALE_TAG, useI18n } from "@/lib/i18n";
 import { useNodeText } from "@/lib/use-node-text";
-import { nodeHours, nodeMenu, nodesQuery, specials, type NodeRow } from "@/lib/nodes";
+import { logEvent } from "@/lib/quest";
+import { nameThenText } from "@/lib/text-speech";
+import { VenueAvatar } from "@/components/VenueAvatar";
+import { VoicePersona } from "@/lib/voice-persona";
+import { MonumentModel } from "@/components/MonumentOverlay";
+import { STORY_SOURCES } from "@/data/story-sources";
+import { placeStyleKey } from "@/lib/place-style";
+import { useVenueContent } from "@/lib/venue-content";
+import { useFollowing } from "@/lib/follow";
+import { bump, useFlash } from "@/lib/merchant";
+import { Menu3D } from "@/components/Menu3D";
+import { speakAny, stopSpeaking } from "@/lib/speech";
+import { contentLang } from "@/lib/text-speech";
+import { nodeHours, nodeMenu, nodesQuery, shortStory, specials, type NodeRow } from "@/lib/nodes";
 import { allowsMessages, isGardenObject } from "@/lib/node-rules";
 import { GardenCharacter } from "@/components/GardenCharacter";
 import { venueFeaturesEnabled } from "@/lib/systemConfig";
@@ -63,16 +76,33 @@ function NodeDetail({
 }) {
   const { t, lang } = useI18n();
   const { dist, inRange } = usePresence(node);
+  // Visiting a restaurant in person (within 100 m) earns a passport stamp.
+  useEffect(() => {
+    if (node.kind === "business" && dist != null && dist <= 100) logEvent("stamp", node.id);
+  }, [node.kind, node.id, dist]);
   const hours = nodeHours(node);
   const open = isOpenNow(hours);
-  const menu = nodeMenu(node);
+  const vc = useVenueContent(node);
+  const menu = vc.menu?.length ? vc.menu : nodeMenu(node);
+  const [talking, setTalking] = useState(false);
+  const follow = useFollowing(node.id);
+  const flash = useFlash(node.id);
+  const [redeemed, setRedeemed] = useState(false);
   const tx = useNodeText(node);
-  const offer = tx.promo;
+  const offer = vc.offer ?? tx.promo;
   const isBiz = node.kind === "business" && venueFeaturesEnabled(node.subscribed);
   const unclaimed = node.kind === "business" && !venueFeaturesEnabled(node.subscribed);
   const story = tx.history;
-  const sourceLinks = Array.isArray(node.history_sources) ? node.history_sources.filter((url): url is string => typeof url === "string" && /^https?:\/\//.test(url)) : [];
-  const todaySpecials = specials(node, lang);
+  const verifiedLinks = Array.isArray(node.history_sources) ? node.history_sources.filter((url): url is string => typeof url === "string" && /^https?:\/\//.test(url)) : [];
+  const sourceLinks = verifiedLinks.length > 0 ? verifiedLinks : (STORY_SOURCES[node.slug] ?? []);
+  const unverified = verifiedLinks.length === 0;
+  const todaySpecials = vc.specials ?? specials(node, lang);
+  const tellVenue = () => {
+    if (talking) { stopSpeaking(); setTalking(false); return; }
+    const body = [todaySpecials, offer, menu.length ? `${t("node.menu")}: ${menu.slice(0, 5).map((m) => m.name.replace(/\s*\(esempio\)/i, "")).join(", ")}` : ""].filter(Boolean).join(". ");
+    setTalking(true);
+    void speakAny(nameThenText(node.name, body || t("prox.invite.default"), contentLang(lang)), contentLang(lang), () => setTalking(false), VoicePersona.BUSINESS_USER, vc.voice);
+  };
   const qc = useQueryClient();
   const refresh = useServerFn(refreshMenu);
 
@@ -137,14 +167,60 @@ function NodeDetail({
             <h2 className="mono-label inline-flex items-center gap-2" style={{ color: "var(--kind)" }}>
               <Landmark className="size-4" /> {t("node.history")}
             </h2>
-            <ListenButton text={`${tx.name}. ${story || tx.description}`} voice={{ nodeId: node.id, source: "history" }} />
+            <div className="flex flex-wrap items-center justify-end gap-2">
+              <ListenButton text={nameThenText(node.name, shortStory(story || tx.description), tx.speakLang)} voice={{ nodeId: node.id, source: "history", lang: tx.speakLang, persona: VoicePersona.MONUMENT_FEMALE }} />
+              {story && story.length > 260 && (
+                <ListenButton text={nameThenText(node.name, story, tx.speakLang)} voice={{ nodeId: node.id, source: "history", full: true, lang: tx.speakLang, persona: VoicePersona.MONUMENT_FEMALE }} label={t("audio.more")} />
+              )}
+            </div>
           </div>
-          {story && sourceLinks.length > 0 ? <p className="mt-3 whitespace-pre-line leading-relaxed text-foreground/90">{story}</p> : <p className="mt-3 text-muted-foreground">{t("node.history.soon")}</p>}
+          {story ? (
+            <>
+              <p className="mt-3 whitespace-pre-line leading-relaxed text-foreground/90">{shortStory(story)}</p>
+              {story.length > shortStory(story).length + 5 && (
+                <details className="mt-3 text-sm">
+                  <summary className="cursor-pointer font-semibold text-primary">{t("node.readmore")}</summary>
+                  <p className="mt-2 whitespace-pre-line leading-relaxed text-foreground/90">{story}</p>
+                </details>
+              )}
+            </>
+          ) : <p className="mt-3 text-muted-foreground">{t("node.history.soon")}</p>}
+          {story && unverified && <p className="mt-3 rounded-xl border border-dashed border-border px-3 py-2 text-xs text-muted-foreground">{t("node.unverified")}</p>}
           {sourceLinks.length > 0 && <details className="mt-4 text-sm text-muted-foreground">
             <summary className="cursor-pointer">{t("node.sources")}</summary>
             <ul className="mt-2 space-y-2">{sourceLinks.map((url) => <li key={url}><a href={url} target="_blank" rel="noopener noreferrer" className="break-all text-primary underline">{new URL(url).hostname.replace(/^www\./, "")}</a></li>)}</ul>
           </details>}
         </section>
+      )}
+
+      {node.kind === "business" && (
+        <div className="mt-6 flex items-center gap-4 rounded-3xl border border-border bg-card/60 p-4">
+          <VenueAvatar style={placeStyleKey(node)} speaking={talking} size={92} />
+          <div className="min-w-0 flex-1">
+            <p className="mono-label !text-[0.6rem]">{t("venue.avatar")}</p>
+            <p className="mt-1 text-sm text-muted-foreground">{t("venue.avatar.sub")}</p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              <button type="button" onClick={tellVenue} className="rounded-full bg-primary px-4 py-2 text-sm font-bold text-primary-foreground">{talking ? t("audio.stop") : t("venue.avatar.talk")}</button>
+              <button type="button" onClick={() => void follow.toggle(node.id)} className={`rounded-full border px-4 py-2 text-sm font-bold ${follow.following ? "border-green-400 bg-green-400/15 text-green-200" : "border-border"}`}>{follow.following ? "✓ " + t("follow.on") : t("follow.off")}</button>
+            </div>
+            {follow.following && follow.opts ? (
+              <div className="mt-2 space-y-1.5 rounded-xl border border-border p-2.5">
+                <label className="flex items-center justify-between gap-3 text-xs"><span>{t("follow.nearby")}</span><input type="checkbox" checked={follow.opts.nearby} onChange={(e) => follow.setOpt(node.id, "nearby", e.target.checked)} className="size-5" /></label>
+                <label className="flex items-center justify-between gap-3 text-xs"><span>{t("follow.remote")}</span><input type="checkbox" checked={follow.opts.remote} onChange={(e) => follow.setOpt(node.id, "remote", e.target.checked)} className="size-5" /></label>
+              </div>
+            ) : (
+              <p className="mt-2 text-xs text-muted-foreground">{t("follow.help")}</p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {flash && (
+        <div className="mt-6 rounded-3xl border-2 border-yellow-300 bg-gradient-to-r from-yellow-300/25 to-pink-400/20 p-4">
+          <p className="mono-label !text-[0.65rem]" style={{ color: "#fde047" }}>⚡ {t("flash.title")} · {t("flash.left", { m: flash.minutesLeft })}</p>
+          <p className="mt-1 text-xl font-bold leading-snug">{flash.rawTextFromOwner}</p>
+          <button type="button" disabled={redeemed} onClick={() => { bump(node.id, "promosRedeemed"); setRedeemed(true); }} className="mt-3 rounded-full bg-yellow-300 px-5 py-2.5 text-sm font-extrabold text-black disabled:opacity-60">{redeemed ? "✓ " + t("flash.redeemed") : t("flash.redeem")}</button>
+        </div>
       )}
 
       {isBiz && todaySpecials && (
@@ -171,6 +247,8 @@ function NodeDetail({
         </div>
       )}
 
+      {menu.length > 0 && vc.has3DMenu && <Menu3D items={menu} />}
+
       {menu.length > 0 && (
         <section className="mt-6">
           <h2 className="mono-label mb-2">{t("node.menu")}</h2>
@@ -183,7 +261,9 @@ function NodeDetail({
             ))}
           </ul>
           <p className="mt-2 text-xs text-muted-foreground">
-            {node.menu_source_url && node.menu_updated_at
+            {vc.menu?.length
+              ? t("venue.example")
+              : node.menu_source_url && node.menu_updated_at
               ? t("node.menu.auto", {
                   d: new Date(node.menu_updated_at).toLocaleDateString(LOCALE_TAG[lang]),
                 })
@@ -197,6 +277,26 @@ function NodeDetail({
           <span className="font-medium text-foreground">{t("venue.claim.title")}</span>
           <span className="mt-0.5 block text-muted-foreground">{t("venue.claim.body")}</span>
         </Link>
+      )}
+
+      {vc.reviews && vc.reviews.length > 0 && (
+        <section className="mt-6">
+          <h2 className="mono-label mb-2">{t("venue.reviews.verified")}</h2>
+          <ul className="space-y-2">
+            {vc.reviews.map((r) => (
+              <li key={r.author + r.when} className="rounded-2xl border border-border bg-card/60 p-3 text-sm">
+                <div className="flex items-center justify-between gap-2">
+                  <b>{r.author}</b>
+                  <span className="text-yellow-300">{"★".repeat(r.stars)}<span className="text-muted-foreground">{"★".repeat(5 - r.stars)}</span></span>
+                </div>
+                <p className="mt-1">{r.body}</p>
+                <button type="button" className="mt-1 text-xs font-semibold text-primary" onClick={() => { bump(node.id, "voiceReviewsListened"); void speakAny(`${r.author}: ${r.body}`, contentLang(lang)); }}>🔊 {t("audio.listen")}</button>
+                <p className="mt-1 flex items-center gap-1 text-xs text-green-300">✓ {t("venue.verified")} · <span className="text-muted-foreground">{r.when}</span></p>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-1 text-xs text-muted-foreground">{t("venue.reviews.how")}</p>
+        </section>
       )}
 
       {allowsMessages(node) && <section className="mt-8 space-y-4">

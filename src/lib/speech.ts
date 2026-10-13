@@ -1,5 +1,9 @@
 // Narration: natural AI voice (woman/man, cached per clip) with on-device speech as fallback.
 import { LOCALE_TAG, type Lang } from "./i18n";
+import { hasNeuralVoice, speakNeural, stopNeural } from "./neuralVoice";
+import { speechText, splitSentences, type Speakable } from "./text-speech";
+import { vlog } from "./voice-log";
+import { personaVoice, type VoiceKind } from "./voice-persona";
 
 export type VoiceChoice = "female" | "male" | "device";
 export const canSpeak = () => typeof window !== "undefined" && "speechSynthesis" in window;
@@ -17,31 +21,101 @@ function rate() {
 
 let current: HTMLAudioElement | null = null;
 
-export function speak(text: string, lang: Lang, onEnd?: () => void) {
-  if (!canSpeak()) return onEnd?.();
-  window.speechSynthesis.cancel();
-  const tag = LOCALE_TAG[lang];
-  const code = tag.slice(0, 2).toLowerCase();
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = tag;
-  const voices = window.speechSynthesis.getVoices().filter((v) => v.lang.toLowerCase().startsWith(code));
-  u.voice = voices.find((v) => /natural|premium|enhanced|neural/i.test(v.name)) ?? voices[0] ?? null;
-  u.rate = rate();
-  u.onend = () => onEnd?.();
-  u.onerror = () => onEnd?.();
-  window.speechSynthesis.speak(u);
+/** Ranks the phone's voices so the least robotic one wins (premium/neural/Siri/Google before basic ones). */
+function voiceScore(v: SpeechSynthesisVoice) {
+  const n = v.name;
+  let score = 0;
+  if (/premium|enhanced|natural|neural|studio|wavenet/i.test(n)) score += 50;
+  if (/siri|google|microsoft .*online/i.test(n)) score += 30;
+  if (/alice|federica|luca|paola|elsa|isabella|diego/i.test(n)) score += 20; // good Italian voices on Apple/Windows
+  if (/compact|espeak|robot|fred|zarvox|trinoids|whisper|bad news|bubbles/i.test(n)) score -= 100;
+  if (!v.localService) score += 10; // network voices are usually more natural
+  return score;
 }
 
-export type VoiceRequest = { nodeId: string; source: "history" | "message"; messageId?: string };
+export function pickDeviceVoice(tag: string) {
+  const code = tag.slice(0, 2).toLowerCase();
+  const all = window.speechSynthesis.getVoices().filter((v) => v.lang.toLowerCase().startsWith(code));
+  const exact = all.filter((v) => v.lang.toLowerCase().replace("_", "-") === tag.toLowerCase());
+  return [...(exact.length ? exact : all)].sort((a, b) => voiceScore(b) - voiceScore(a))[0] ?? null;
+}
+
+function sentences(text: string) {
+  return splitSentences(text);
+}
+
+/** Kept for callers; every voice now sounds like a guide telling a story. */
+export type Persona = string | undefined;
+
+export function speak(raw: string, lang: Lang, onEnd?: () => void, persona?: Persona) {
+  const text = speechText(raw, lang);
+  if (!canSpeak()) return onEnd?.();
+  const synth = window.speechSynthesis;
+  synth.cancel();
+  const tag = LOCALE_TAG[lang];
+  const voice = pickDeviceVoice(tag);
+  const parts = sentences(text);
+  if (parts.length === 0) return onEnd?.();
+  vlog(`telefono: ${parts.length} frasi, voce ${voice?.name ?? "predefinita"}`);
+  // Guide / storyteller delivery: calm pace, natural pitch (the persona flag is kept for callers but no longer raises the pitch).
+  void persona;
+  let finished = false;
+  const done = () => {
+    if (finished) return;
+    finished = true;
+    vlog("telefono: finito");
+    window.clearInterval(keepAlive);
+    onEnd?.();
+  };
+  // All sentences are queued at once: chaining them from "end" events stops half-way on iPhone Safari.
+  parts.forEach((p, i) => {
+    const u = new SpeechSynthesisUtterance(p);
+    u.lang = tag;
+    u.voice = voice;
+    u.rate = Math.min(1.1, rate() * 0.93);
+    u.pitch = 1;
+    if (i === parts.length - 1) {
+      u.onend = done;
+      u.onerror = done;
+    }
+    synth.speak(u);
+  });
+  // Chrome and Safari silently pause long speech: nudge it every few seconds until the last sentence ends.
+  const keepAlive = window.setInterval(() => {
+    if (!synth.speaking && !synth.pending) return done();
+    if (synth.paused) synth.resume();
+  }, 4000);
+}
+
+/** Best available voice: free on-device neural voice first, the phone's own voice only as a last resort. */
+export async function speakNatural(raw: string, lang: Lang, onEnd?: () => void, persona?: Persona, venueVoice?: VoiceKind) {
+  const text = speechText(raw, lang);
+  const pv = personaVoice(persona, venueVoice);
+  const choice = pv.kind && voiceChoice() !== "device" ? pv.kind : voiceChoice();
+  if (choice !== "device" && hasNeuralVoice(lang)) {
+    const res = await speakNeural(text, lang, choice, rate() * pv.rate, persona, () => onEnd?.());
+    if (res.ok) return;
+    // Carry on from the sentence where the neural voice failed, instead of starting over.
+    vlog(`passo alla voce del telefono dalla frase rimasta (${res.remaining.length} caratteri)`);
+    if (res.remaining.trim()) return speak(res.remaining, lang, onEnd, persona);
+    return onEnd?.();
+  }
+  speak(text, lang, onEnd, persona);
+}
+
+export type VoiceRequest = { nodeId: string; source: "history" | "message"; messageId?: string; persona?: Persona; /** language of the text being read (defaults to the app language) */ lang?: Lang; /** read the whole text from the client (the "tell me more" button) */ full?: boolean };
 type Fetcher = (req: VoiceRequest & { lang: Lang; voice: "female" | "male" }) => Promise<{ ok: boolean; url?: string }>;
 
 /** Plays a clip with the chosen voice; falls back to the phone voice if the natural voice is unavailable. */
-export async function narrate(fetcher: Fetcher, req: VoiceRequest, text: string, lang: Lang, onEnd: () => void) {
+export async function narrate(fetcher: Fetcher, request: VoiceRequest, text: Speakable, lang: Lang, onEnd: () => void) {
+  const { persona, full, lang: textLang, ...req } = request;
+  lang = textLang ?? lang;
   stopSpeaking();
   const choice = voiceChoice();
-  if (choice !== "device") {
+  if (choice !== "device" && persona !== "kid" && !full) {
     try {
       const res = await fetcher({ ...req, lang, voice: choice });
+      vlog(`voce AI del server: ${res.ok ? "ok" : "non disponibile"}`);
       if (res.ok && res.url) {
         const a = new Audio(res.url);
         a.playbackRate = rate();
@@ -52,13 +126,31 @@ export async function narrate(fetcher: Fetcher, req: VoiceRequest, text: string,
         return;
       }
     } catch {
-      /* fall back */
+      vlog("voce AI del server: errore, uso la voce gratuita");
     }
   }
-  speak(text, lang, onEnd);
+  void speakAny(text, lang, onEnd, persona);
 }
 
+let segRun = 0;
+
+/** Reads pieces in their own languages one after the other (e.g. an Italian place name inside an English sentence). */
+export async function speakSegments(segs: { text: string; lang: Lang }[], onEnd?: () => void, persona?: Persona, venueVoice?: VoiceKind) {
+  const my = ++segRun;
+  for (const seg of segs) {
+    if (my !== segRun) return;
+    if (!seg.text.trim()) continue;
+    await new Promise<void>((resolve) => void speakNatural(seg.text, seg.lang, resolve, persona, venueVoice));
+  }
+  if (my === segRun) onEnd?.();
+}
+
+export const speakAny = (x: Speakable, lang: Lang, onEnd?: () => void, persona?: Persona, venueVoice?: VoiceKind) =>
+  typeof x === "string" ? speakNatural(x, lang, onEnd, persona, venueVoice) : speakSegments(x, onEnd, persona, venueVoice);
+
 export function stopSpeaking() {
+  segRun++;
+  stopNeural();
   if (current) {
     current.pause();
     current = null;

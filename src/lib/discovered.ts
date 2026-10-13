@@ -9,7 +9,10 @@ export function discovered(): string[] {
   }
 }
 
+import { logEvent } from "./quest";
+
 export function markDiscovered(id: string) {
+  logEvent("char", id);
   const list = discovered();
   if (!list.includes(id)) localStorage.setItem(KEY, JSON.stringify([...list, id]));
 }

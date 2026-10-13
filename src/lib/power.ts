@@ -9,7 +9,7 @@ export function batterySaverPreference() {
 }
 
 export function useBatterySaver() {
-  const [enabled, setEnabledState] = useState(systemConfig.lowBatteryModeEnabled);
+  const [enabled, setEnabledState] = useState<boolean>(systemConfig.lowBatteryModeEnabled);
   useEffect(() => setEnabledState(batterySaverPreference()), []);
   const setEnabled = useCallback((next: boolean) => {
     localStorage.setItem(KEY, next ? "1" : "0");

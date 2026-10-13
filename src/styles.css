@@ -64,20 +64,20 @@
 }
 
 :root {
-  --radius: 0.875rem;
-  --background: oklch(0.15 0.025 255);
+  --radius: 1.1rem;
+  --background: oklch(0.2 0.05 285);
   --foreground: oklch(0.96 0.01 220);
-  --card: oklch(0.2 0.03 255);
+  --card: oklch(0.26 0.055 285);
   --card-foreground: oklch(0.96 0.01 220);
-  --popover: oklch(0.2 0.03 255);
+  --popover: oklch(0.26 0.055 285);
   --popover-foreground: oklch(0.96 0.01 220);
   --primary: oklch(0.84 0.14 205);
   --primary-foreground: oklch(0.17 0.03 250);
-  --secondary: oklch(0.26 0.03 255);
+  --secondary: oklch(0.31 0.05 285);
   --secondary-foreground: oklch(0.96 0.01 220);
-  --muted: oklch(0.24 0.03 255);
-  --muted-foreground: oklch(0.72 0.03 235);
-  --accent: oklch(0.28 0.04 240);
+  --muted: oklch(0.29 0.05 285);
+  --muted-foreground: oklch(0.78 0.04 280);
+  --accent: oklch(0.33 0.07 300);
   --accent-foreground: oklch(0.96 0.01 220);
   --destructive: oklch(0.7 0.19 25);
   --destructive-foreground: oklch(0.98 0 0);
@@ -232,6 +232,27 @@
 .is-speaking .aura-char img { animation: garden-sway .65s ease-in-out infinite; }
 .aura-pin-vip { width: 40px; height: 40px; }
 .aura-pin-vip span { inset: 11px !important; outline: 2px solid var(--background); }
+.venue-avatar .venue-eye { animation: aura-blink 4s infinite; transform-origin: center; transform-box: fill-box; }
+.venue-avatar { animation: aura-char-float 3.4s ease-in-out infinite; }
+.venue-avatar.is-speaking .venue-mouth { animation: venue-talk .24s ease-in-out infinite alternate; transform-origin: 50% 64px; }
+@keyframes venue-talk { from { transform: scaleY(1); } to { transform: scaleY(2.2); } }
+.aura-viewtoggle { position: absolute; left: 10px; top: 10px; z-index: 10; min-width: 44px; height: 36px; padding: 0 12px; border-radius: 9999px; font: 800 13px/1 "IBM Plex Mono", monospace; background: var(--card); color: var(--foreground); border: 2px solid var(--primary); box-shadow: 0 3px 8px oklch(0 0 0 / .35); }
+.aura-svc-badge { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 9999px; background: var(--pin); border: 3px solid var(--edge, #fff); box-shadow: 0 3px 8px oklch(0 0 0 / .4); }
+.aura-svc-badge svg { width: 24px; height: 24px; }
+.aura-label-svc { bottom: calc(100% + 1px); }
+.aura-svc-actions { display: flex; gap: 8px; margin-top: 8px; }
+.aura-svc-actions a { flex: 1; text-align: center; border-radius: 9999px; padding: 6px 8px; font-size: 13px; font-weight: 700; background: var(--primary); color: var(--primary-foreground); text-decoration: none; }
+.aura-open { display: inline-block; margin-bottom: 6px; padding: 2px 9px; border-radius: 9999px; font: 700 10px/1.5 "IBM Plex Mono", monospace; letter-spacing: .08em; text-transform: uppercase; }
+.aura-open.is-open { background: #22c55e; color: #052e16; }
+.aura-open.is-closed { background: #f87171; color: #450a0a; }
+.maplibregl-ctrl-attrib:not(.maplibregl-compact-show) { background: transparent !important; }
+.maplibregl-ctrl-attrib { background: color-mix(in oklab, var(--background) 70%, transparent) !important; color: var(--muted-foreground) !important; font-size: 9px; }
+.maplibregl-ctrl-attrib a { color: var(--muted-foreground) !important; }
+.maplibregl-ctrl-attrib-inner { font-size: 9px !important; }
+.aura-mk { position: relative; cursor: pointer; }
+.aura-me { width: 18px; height: 18px; border-radius: 9999px; background: #38bdf8; border: 3px solid #fff; box-shadow: 0 0 0 6px #38bdf855, 0 2px 6px #0006; }
+.aura-popup .maplibregl-popup-content { background: var(--card); color: var(--foreground); border: 1px solid var(--border); border-radius: 16px; padding: 10px; }
+.aura-popup .maplibregl-popup-tip { border-top-color: var(--card) !important; border-bottom-color: var(--card) !important; }
 .aura-pop-addr { margin-top: 2px; font-size: 12px; color: var(--muted-foreground); }
 .aura-pin span { position: absolute; inset: 8px; border-radius: 9999px; background: var(--pin); box-shadow: 0 0 14px var(--pin); }
 .aura-map .leaflet-popup-content-wrapper, .aura-map .leaflet-popup-tip { background: var(--card); color: var(--foreground); border: 1px solid var(--border); }
@@ -239,9 +260,35 @@
 .aura-pop img { width: 100%; height: 110px; object-fit: cover; border-radius: 10px; margin-bottom: 8px; }
 .aura-pop-kind { font-family: "IBM Plex Mono", monospace; font-size: 10px; letter-spacing: .14em; text-transform: uppercase; margin: 0 !important; }
 .aura-pop-title { font-weight: 600; font-size: 14px; color: var(--foreground); text-align: left; padding: 0; margin-top: 2px; }
-.aura-map-day .aura-tiles { filter: none; }
+.aura-map-day .aura-tiles { filter: saturate(1.45) hue-rotate(-6deg) brightness(1.05) contrast(.92); }
 .aura-map .leaflet-tile { max-width: none; max-height: none; }
-.aura-map-night .aura-tiles { filter: invert(1) hue-rotate(180deg) brightness(1.15) contrast(1.15) saturate(0.55); }
+.aura-map-night .aura-tiles { filter: invert(1) hue-rotate(185deg) brightness(.95) contrast(1.1) saturate(1.1); }
+.aura-map-night { background: #07131f; }
+/* Game-style stops */
+.aura-stop { position: relative; display: block; filter: drop-shadow(0 3px 4px oklch(0 0 0 / .45)); transition: transform .15s; }
+.aura-stop svg { width: 100%; height: 100%; overflow: visible; }
+.aura-stop-body { fill: var(--pin); stroke: #fff; stroke-width: 2.2; }
+.aura-stop-disc { fill: oklch(0 0 0 / .22); }
+.aura-stop:hover { transform: translateY(-2px) scale(1.06); }
+.aura-stop-big::before { content: ""; position: absolute; left: 50%; bottom: -3px; width: 30px; height: 10px; margin-left: -15px; border-radius: 50%; border: 2px solid var(--pin); animation: aura-char-ring 2.2s ease-out infinite; }
+.aura-cluster { display: flex; align-items: center; justify-content: center; border-radius: 9999px; color: #fff; font: 700 13px/1 "IBM Plex Mono", monospace;
+  background: radial-gradient(circle at 30% 30%, #b97cf5, #7a35c4); border: 3px solid #fff; box-shadow: 0 0 0 4px color-mix(in oklab, #9b51e0 35%, transparent), 0 4px 10px oklch(0 0 0 / .4); }
+.aura-photo-stop { position: relative; display: block; border-radius: 9999px; border: 3px solid var(--pin); background: color-mix(in oklab, var(--pin) 55%, #fff); box-shadow: 0 0 0 2px #fff, 0 4px 10px oklch(0 0 0 / .45), 0 0 14px color-mix(in oklab, var(--pin) 70%, transparent); }
+.aura-photo-fallback { position: absolute; inset: 22%; width: 56%; height: 56%; opacity: .9; }
+.aura-photo-stop img { position: relative; z-index: 1; width: 100%; height: 100%; border-radius: 9999px; object-fit: cover; display: block; }
+.aura-photo-stop::after { content: ""; position: absolute; left: 50%; bottom: -9px; margin-left: -6px; border: 6px solid transparent; border-top: 8px solid var(--pin); }
+.is-speaking .aura-photo-stop { box-shadow: 0 0 0 2px #fff, 0 0 18px #fff; }
+.aura-label { position: absolute; left: 50%; bottom: calc(100% + 2px); transform: translateX(-50%); z-index: 5; display: none; flex-direction: column; background: color-mix(in oklab, var(--card) 92%, transparent); color: var(--foreground); border: 1px solid color-mix(in oklab, var(--foreground) 22%, transparent);
+  border-radius: 12px; padding: 3px 9px 4px; box-shadow: 0 3px 8px oklch(0 0 0 / .35); text-align: center; white-space: nowrap; pointer-events: none; line-height: 1.15; }
+.aura-label small { font: 700 9px/1.2 "IBM Plex Mono", monospace; letter-spacing: .12em; text-transform: uppercase; }
+.aura-label em { font-style: normal; font-size: 10px; opacity: .8; max-width: 170px; white-space: normal; overflow-wrap: anywhere; }
+.aura-label b { font-weight: 700; font-size: 12px; max-width: 170px; white-space: normal; overflow-wrap: anywhere; line-height: 1.2; }
+.aura-labels .aura-label { display: flex; }
+.aura-label.aura-label-off { display: none !important; }
+.aura-labels-kids .aura-label-kid { display: flex; background: linear-gradient(135deg, #ffe14d, #ffb23d); color: #3a2a00; border-color: #fff; }
+.aura-label-kid small { color: #7a3d00 !important; }
+.marker-cluster, .marker-cluster div { background: none !important; }
+.is-speaking .aura-stop { filter: drop-shadow(0 0 10px #fff); }
 .aura-map .leaflet-control-attribution { font-size: 10px; }
 @media (prefers-reduced-motion: reduce) {
   .aura-pin::before, .animate-aura-pulse, .animate-aura-scan { animation: none; }
@@ -269,14 +316,78 @@
 @media (prefers-reduced-motion: reduce) { .aura-face-pin, .aura-face-pin i, .is-speaking .aura-face-pin b { animation: none; } }
 
 /* Map characters (garden objects) */
-.aura-char { position: relative; display: block; width: 72px; height: 84px; cursor: pointer; }
-.aura-char img { position: absolute; inset: 0 0 12px 0; width: 72px; height: 72px; object-fit: contain;
-  filter: drop-shadow(0 0 10px var(--pin)) drop-shadow(0 6px 6px oklch(0 0 0 / 0.5));
-  animation: aura-char-bob 2.4s ease-in-out infinite; transform-origin: 50% 100%; }
-.aura-char em { position: absolute; left: 50%; bottom: 2px; width: 40px; height: 12px; margin-left: -20px;
-  border-radius: 50%; border: 2px solid var(--pin); box-shadow: 0 0 12px var(--pin);
-  animation: aura-char-ring 2.4s ease-out infinite; }
+.aura-char { position: relative; display: block; width: 84px; height: 96px; cursor: pointer; perspective: 220px; }
+/* round sticker backdrop so the character always stands out from the map */
+.aura-char::before { content: ""; position: absolute; left: 6px; top: 2px; width: 72px; height: 72px; border-radius: 9999px; z-index: 1;
+  background: radial-gradient(circle at 35% 30%, #fff 0%, color-mix(in oklab, var(--pin) 35%, #fff) 70%); border: 3px solid #fff; box-shadow: 0 4px 10px oklch(0 0 0 / .35), 0 0 0 3px color-mix(in oklab, var(--pin) 80%, transparent); }
+.aura-char img { position: absolute; inset: 2px 4px 16px 4px; width: 76px; height: 76px; object-fit: contain; z-index: 2; transform-origin: 50% 100%;
+  filter: drop-shadow(1.5px 0 0 #fff) drop-shadow(-1.5px 0 0 #fff) drop-shadow(0 1.5px 0 #fff) drop-shadow(0 -1.5px 0 #fff) drop-shadow(0 4px 4px oklch(0 0 0 / .4));
+  animation: aura-char-float 3.2s ease-in-out infinite; }
+.aura-char em { position: absolute; left: 50%; bottom: 2px; width: 56px; height: 16px; margin-left: -28px; z-index: 1; border-radius: 50%;
+  background: radial-gradient(ellipse at 50% 40%, color-mix(in oklab, var(--pin) 85%, #fff) 0%, var(--pin) 45%, transparent 72%);
+  border: 2px solid #fff; box-shadow: 0 0 14px var(--pin), 0 6px 8px oklch(0 0 0 / .4); transform: rotateX(55deg); }
+.aura-char em::after { content: ""; position: absolute; inset: -8px; border-radius: 50%; border: 2px solid var(--pin); opacity: 0; }
+.aura-kid-star { position: absolute; top: -2px; right: 0; z-index: 3; font-style: normal; font-size: 16px; line-height: 1; color: #ffe14d; text-shadow: 0 0 6px #ff9f1c, 0 1px 2px #0008; animation: aura-twinkle 1.6s ease-in-out infinite; }
+.is-near .aura-char img, .is-speaking .aura-char img { animation: aura-char-bob 1.2s ease-in-out infinite; }
+.is-near .aura-char em::after, .is-speaking .aura-char em::after { animation: aura-char-ring 1.8s ease-out infinite; }
+@keyframes aura-char-float { 0%,100% { transform: translateY(0) rotate(-1.5deg); } 50% { transform: translateY(-5px) rotate(1.5deg); } }
+@keyframes aura-twinkle { 0%,100% { transform: scale(1) rotate(0); opacity: 1; } 50% { transform: scale(1.35) rotate(18deg); opacity: .75; } }
 @keyframes aura-char-bob { 0%,100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-6px) scale(1.04, 0.98); } }
 @keyframes aura-char-ring { 0% { transform: scale(0.7); opacity: 1; } 100% { transform: scale(1.6); opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .aura-char img, .aura-char em { animation: none; } }
-[data-low-power] .aura-char img, [data-low-power] .aura-char em, [data-low-power] .aura-pin::before, [data-low-power] .garden-character, [data-low-power] .garden-mouth { animation: none !important; }
+[data-low-power] .aura-stop-big::before, [data-low-power] .aura-char img, [data-low-power] .aura-char em, [data-low-power] .aura-pin::before, [data-low-power] .garden-character, [data-low-power] .garden-mouth { animation: none !important; }
+
+/* ---- Map-first, smaller markers ---- */
+.aura-badge { display: flex; align-items: center; justify-content: center; width: var(--sz); height: var(--sz); border-radius: 9999px; background: var(--pin); border: 2.5px solid #fff; box-shadow: 0 2px 6px oklch(0 0 0 / .45); }
+.aura-badge svg { width: 66%; height: 66%; }
+.aura-badge-mon { border-width: 3px; box-shadow: 0 0 0 3px var(--pin), 0 3px 8px oklch(0 0 0 / .5); }
+.aura-char { width: 46px; height: 54px; }
+.aura-char::before { left: 3px; top: 1px; width: 40px; height: 40px; border-width: 2.5px; box-shadow: 0 2px 6px oklch(0 0 0 / .35), 0 0 0 2px color-mix(in oklab, var(--pin) 80%, transparent); }
+.aura-char img { inset: 1px 2px 10px 2px; width: 42px; height: 42px; filter: drop-shadow(1px 0 0 #fff) drop-shadow(-1px 0 0 #fff) drop-shadow(0 1px 0 #fff) drop-shadow(0 -1px 0 #fff) drop-shadow(0 2px 2px oklch(0 0 0 / .4)); }
+.aura-char em { width: 32px; height: 9px; margin-left: -16px; bottom: 2px; }
+.aura-kid-star { font-size: 11px; top: -3px; right: -2px; }
+.aura-cluster { font-size: 11px; border-width: 2.5px; }
+.aura-photo-stop { border-width: 2.5px; }
+.aura-photo-stop::after { display: none; }
+.aura-viewtoggle { left: 10px; top: auto; bottom: 34px; }
+.aura-svc-badge { width: 30px; height: 30px; border-width: 2.5px; }
+.aura-svc-badge svg { width: 20px; height: 20px; }
+.maplibregl-ctrl-bottom-right { bottom: 28px; }
+
+.aura-label { padding: 2px 7px 3px; border-radius: 10px; }
+.aura-label b { font-size: 11px; max-width: 150px; }
+.aura-label small { font-size: 8px; }
+.aura-label-kid b { max-width: 130px; font-size: 10.5px; }
+.aura-label-kid em { display: none; }
+.aura-label-kid small { font-size: 8px; }
+
+.chip-row { scrollbar-width: none; scroll-snap-type: x proximity; scroll-padding-left: 12px; -webkit-overflow-scrolling: touch; scroll-behavior: smooth;
+  mask-image: linear-gradient(90deg, transparent 0, #000 14px, #000 calc(100% - 28px), transparent 100%); }
+.chip-row::-webkit-scrollbar { display: none; }
+
+/* the filter row must scroll freely with the finger: no snapping, no mask */
+.chip-row { scroll-snap-type: none !important; mask-image: none !important; -webkit-mask-image: none !important; scroll-behavior: auto !important; -webkit-overflow-scrolling: touch; }
+.chip-row > * { flex: 0 0 auto; }
+
+.aura-viewtoggle { display: none; }
+.aura-viewseg { position: absolute; left: 10px; bottom: 34px; z-index: 10; display: flex; padding: 3px; gap: 2px; border-radius: 9999px; background: color-mix(in oklab, var(--card) 90%, transparent); border: 1px solid var(--border); box-shadow: 0 3px 10px oklch(0 0 0 / .35); backdrop-filter: blur(6px); }
+.aura-viewseg button { min-width: 40px; height: 32px; border-radius: 9999px; font: 800 12px/1 "IBM Plex Mono", monospace; color: var(--muted-foreground); }
+.aura-viewseg button.is-on { background: var(--primary); color: var(--primary-foreground); }
+
+/* ---- smoothness and fit on phones ---- */
+html, body { max-width: 100vw; overflow-x: hidden; }
+body { -webkit-tap-highlight-color: transparent; }
+.aura-char img { animation: none; }
+.is-near .aura-char img, .is-speaking .aura-char img { animation: aura-char-bob 1.2s ease-in-out infinite; }
+.aura-stop-big::before { animation: none; }
+.aura-kid-star { animation: none; }
+.is-near .aura-kid-star { animation: aura-twinkle 1.6s ease-in-out infinite; }
+.aura-mk { contain: layout style; }
+.chip-row button, .aura-viewseg, .glass { backdrop-filter: none; -webkit-backdrop-filter: none; }
+/* the native app draws edge to edge: keep page content clear of the notch */
+.grid-backdrop { padding-top: calc(env(safe-area-inset-top, 0px) + 2.5rem) !important; }
+main.mx-auto { padding-top: calc(env(safe-area-inset-top, 0px) + 1.5rem) !important; }
+
+.aura-ring3d { animation: aura-ring3d 16s linear infinite; }
+@keyframes aura-ring3d { from { transform: rotateY(0deg); } to { transform: rotateY(-360deg); } }
+@media (prefers-reduced-motion: reduce) { .aura-ring3d { animation: none; } }

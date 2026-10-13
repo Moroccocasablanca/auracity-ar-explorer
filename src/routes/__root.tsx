@@ -18,6 +18,9 @@ import { BottomNav } from "../components/BottomNav";
 import { ProximityWatcher } from "../components/ProximityWatcher";
 import { Toaster } from "../components/ui/sonner";
 import { PrivacyConsent } from "../components/PrivacyConsent";
+import { TestPanel } from "../components/TestPanel";
+import { primeAudio } from "../lib/neuralVoice";
+import { registerServiceWorker } from "../lib/notify";
 import { AppEnvironment } from "../components/AppEnvironment";
 
 function NotFoundComponent() {
@@ -142,6 +145,10 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  useEffect(() => {
+    primeAudio();
+    void registerServiceWorker();
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -152,6 +159,7 @@ function RootComponent() {
           <BottomNav />
           <ProximityWatcher />
           <PrivacyConsent />
+          <TestPanel />
           <AppEnvironment />
           <Toaster theme="dark" position="top-center" />
         </LocationProvider>

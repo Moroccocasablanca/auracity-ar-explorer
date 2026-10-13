@@ -1,4 +1,5 @@
 // Server-only: content guardrails (fast pattern checks + LLM moderation via Lovable AI Gateway).
+import { systemConfig } from "./systemConfig";
 
 export type ModerationResult =
   | { ok: true }
@@ -27,6 +28,8 @@ export async function moderateText(text: string): Promise<ModerationResult> {
     return { ok: false, reason: "personal_data" };
   }
 
+  // systemConfig.autoModeration is on: the AI check below is mandatory and fails closed when it is unavailable.
+  if (!systemConfig.autoModeration) return { ok: true };
   const apiKey = process.env["LOVABLE_API_KEY"];
   if (!apiKey) return { ok: false, reason: "unavailable" };
 

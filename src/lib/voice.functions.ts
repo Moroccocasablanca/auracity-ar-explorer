@@ -20,6 +20,63 @@ async function sha(s: string) {
   return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
+
+type Clip = { bytes: Uint8Array; type: string; ext: string };
+
+/** Tries the narration providers in order and returns the first clip: Lovable AI gateway, then ElevenLabs, then OpenAI.
+ *  Optional providers only run when their key is set as a server secret (ELEVENLABS_API_KEY / OPENAI_API_KEY). */
+async function synthesize(text: string, style: string, voice: "female" | "male"): Promise<Clip | null> {
+  const lovable = process.env["LOVABLE_API_KEY"];
+  if (lovable) {
+    try {
+      const res = await fetch("https://ai.gateway.lovable.dev/v1/audio/speech", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${lovable}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: MODEL,
+          contents: [{ role: "user", parts: [{ text: style + text }] }],
+          generationConfig: { responseModalities: ["AUDIO"], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: VOICES[voice] } } } },
+          stream_format: "audio",
+        }),
+      });
+      if (res.ok) return { bytes: new Uint8Array(await res.arrayBuffer()), type: "audio/wav", ext: "wav" };
+      console.error("tts lovable status", res.status);
+    } catch (e) {
+      console.error("tts lovable", e);
+    }
+  }
+  const eleven = process.env["ELEVENLABS_API_KEY"];
+  if (eleven) {
+    try {
+      const id = voice === "female" ? "21m00Tcm4TlvDq8ikWAM" : "pNInz6obpgDQGcFmaJgB";
+      const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${id}?output_format=mp3_44100_128`, {
+        method: "POST",
+        headers: { "xi-api-key": eleven, "Content-Type": "application/json" },
+        body: JSON.stringify({ text, model_id: "eleven_multilingual_v2", voice_settings: { stability: 0.45, similarity_boost: 0.8, style: 0.35 } }),
+      });
+      if (res.ok) return { bytes: new Uint8Array(await res.arrayBuffer()), type: "audio/mpeg", ext: "mp3" };
+      console.error("tts elevenlabs status", res.status);
+    } catch (e) {
+      console.error("tts elevenlabs", e);
+    }
+  }
+  const openai = process.env["OPENAI_API_KEY"];
+  if (openai) {
+    try {
+      const res = await fetch("https://api.openai.com/v1/audio/speech", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${openai}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ model: "gpt-4o-mini-tts", voice: voice === "female" ? "nova" : "onyx", input: text, instructions: style, response_format: "mp3" }),
+      });
+      if (res.ok) return { bytes: new Uint8Array(await res.arrayBuffer()), type: "audio/mpeg", ext: "mp3" };
+      console.error("tts openai status", res.status);
+    } catch (e) {
+      console.error("tts openai", e);
+    }
+  }
+  return null;
+}
+
 export const naturalVoice = createServerFn({ method: "POST" })
   .inputValidator((d: z.input<typeof input>) => input.parse(d))
   .handler(async ({ data }): Promise<{ ok: true; url: string } | { ok: false }> => {
@@ -39,36 +96,25 @@ export const naturalVoice = createServerFn({ method: "POST" })
     } else {
       const { localizedNode } = await import("./translate.server");
       const loc = await localizedNode(node, data.lang);
-      text = `${loc.name}. ${loc.history || loc.description}`;
-      style = "Narrate clearly and warmly, like an expert local guide, in the language of the text: ";
+      const { shortStory } = await import("./nodes");
+      text = `${loc.name}. ${shortStory(loc.history || loc.description)}`;
+      style =
+        node.kind === "bench" || node.kind === "tree"
+          ? "Tell this like a warm, expressive storyteller, as a tour guide would: natural adult voice, calm pace, a gentle smile, in the language of the text: "
+          : "Narrate clearly and warmly, like an expert local guide, in the language of the text: ";
     }
+    const { speechText } = await import("./text-speech");
+    text = speechText(text, data.lang);
     if (!text.trim()) return { ok: false };
 
     const key = await sha(`${MODEL}|${data.voice}|${style}|${text}`);
-    const path = `${key}.wav`;
-    const { data: cached } = await supabaseAdmin.from("voice_cache").select("path").eq("key", key).maybeSingle();
-    if (!cached) {
-      const apiKey = process.env["LOVABLE_API_KEY"];
-      if (!apiKey) return { ok: false };
-      const res = await fetch("https://ai.gateway.lovable.dev/v1/audio/speech", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: MODEL,
-          contents: [{ role: "user", parts: [{ text: style + text }] }],
-          generationConfig: {
-            responseModalities: ["AUDIO"],
-            speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: VOICES[data.voice] } } },
-          },
-          stream_format: "audio",
-        }),
-      });
-      if (!res.ok) {
-        console.error("tts status", res.status);
-        return { ok: false };
-      }
-      const audio = new Uint8Array(await res.arrayBuffer());
-      const up = await supabaseAdmin.storage.from("voices").upload(path, audio, { contentType: "audio/wav", upsert: true });
+    const { data: cachedRow } = await supabaseAdmin.from("voice_cache").select("path").eq("key", key).maybeSingle();
+    let path = cachedRow?.path ?? "";
+    if (!path) {
+      const clip = await synthesize(text, style, data.voice);
+      if (!clip) return { ok: false };
+      path = `${key}.${clip.ext}`;
+      const up = await supabaseAdmin.storage.from("voices").upload(path, clip.bytes, { contentType: clip.type, upsert: true });
       if (up.error) {
         console.error(up.error);
         return { ok: false };

@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, isToolUIPart, getToolName } from "ai";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { MapPin, RotateCcw, Search } from "lucide-react";
 import { toast } from "sonner";
 import { Conversation, ConversationContent, ConversationScrollButton } from "@/components/ai-elements/conversation";
@@ -11,6 +11,7 @@ import { Shimmer } from "@/components/ai-elements/shimmer";
 import { Tool, ToolContent, ToolHeader, ToolInput, ToolOutput } from "@/components/ai-elements/tool";
 import { BottomNav } from "@/components/BottomNav";
 import { useI18n } from "@/lib/i18n";
+import { QuickGuide } from "@/components/QuickGuide";
 
 export const Route = createFileRoute("/guide")({
   head: () => ({
@@ -46,6 +47,7 @@ function GuidePage() {
     transport: transportRef.current,
     onError: () => toast.error(t("guide.error")),
   });
+  const [tab, setTab] = useState<"quick" | "ai">("quick");
   const busy = status === "submitted" || status === "streaming";
   const ask = (text: string) => {
     if (!text.trim() || busy) return;
@@ -72,7 +74,13 @@ function GuidePage() {
         )}
       </header>
 
-      <Conversation className="min-h-0 flex-1">
+      <div className="mb-3 grid grid-cols-2 gap-1 rounded-full border border-border p-1 text-sm font-semibold">
+        <button type="button" onClick={() => setTab("quick")} className={`rounded-full px-3 py-2 ${tab === "quick" ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>{t("guide.tab.quick")}</button>
+        <button type="button" onClick={() => setTab("ai")} className={`rounded-full px-3 py-2 ${tab === "ai" ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>{t("guide.tab.ai")}</button>
+      </div>
+      {tab === "quick" && <div className="min-h-0 flex-1 overflow-y-auto"><QuickGuide /></div>}
+
+      {tab === "ai" && <><Conversation className="min-h-0 flex-1">
         <ConversationContent>
           {messages.length === 0 && (
             <div className="flex flex-col gap-2 pt-6">
@@ -133,7 +141,7 @@ function GuidePage() {
         <PromptInputFooter className="justify-end">
           <PromptInputSubmit status={status} onStop={stop} />
         </PromptInputFooter>
-      </PromptInput>
+      </PromptInput></>}
       <BottomNav />
     </main>
   );

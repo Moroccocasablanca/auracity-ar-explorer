@@ -3,6 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 import type { Hours } from "./geo";
 import type { Lang } from "./i18n";
+import { cleanText } from "./jokes";
+import { splitSentences } from "./text-speech";
 
 export type NodeRow = Tables<"nodes">;
 export type MenuItem = { name: string; price: number };
@@ -44,8 +46,21 @@ export const reviewsQuery = (nodeId: string) =>
 const isIt = (lang: Lang) => lang === "it";
 export const nodeHours = (n: NodeRow) => n.hours as Hours;
 export const nodeMenu = (n: NodeRow) => (n.menu as MenuItem[] | null) ?? [];
+/** Short spoken version of a story: the first two sentences, never a long history lecture. */
+export function shortStory(text: string | null | undefined, max = 230) {
+  const clean = (text ?? "").replace(/\s+/g, " ").trim();
+  if (!clean) return "";
+  const sentences = splitSentences(clean);
+  let out = "";
+  for (const s of sentences.slice(0, 3)) {
+    if (out && (out + " " + s).length > max) break;
+    out += (out ? " " : "") + s;
+  }
+  return out.trim() || clean;
+}
+
 export const tagline = (n: NodeRow, lang: Lang) => (isIt(lang) ? n.tagline_it : n.tagline_en);
-export const description = (n: NodeRow, lang: Lang) => (isIt(lang) ? n.description_it : n.description_en);
+export const description = (n: NodeRow, lang: Lang) => cleanText(isIt(lang) ? n.description_it : n.description_en);
 export const promo = (n: NodeRow, lang: Lang) => (isIt(lang) ? n.promo_it : n.promo_en);
-export const history = (n: NodeRow, lang: Lang) => (isIt(lang) ? n.history_it : n.history_en);
+export const history = (n: NodeRow, lang: Lang) => cleanText(isIt(lang) ? n.history_it : n.history_en);
 export const specials = (n: NodeRow, lang: Lang) => (isIt(lang) ? n.specials_it : n.specials_en);

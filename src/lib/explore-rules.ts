@@ -2,7 +2,7 @@ import { isGardenObject } from "./node-rules";
 import { venueFeaturesEnabled } from "./systemConfig";
 
 type Place = { kind: string; venue_type?: string | null; subscribed?: boolean; garden_interactive: boolean };
-export type ExploreFilter = "all" | "restaurants" | "monument" | "gardens" | "business";
+export type ExploreFilter = "all" | "restaurants" | "monument" | "gardens" | "business" | "services" | "activities";
 
 export function isRestaurant(n: Pick<Place, "kind" | "venue_type">) {
   return n.kind === "business" && (n.venue_type === "restaurant" || n.venue_type === "fast_food");

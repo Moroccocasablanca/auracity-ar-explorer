@@ -16,8 +16,10 @@ import { Route as ExploreRouteImport } from './routes/explore'
 import { Route as GuideRouteImport } from './routes/guide'
 import { Route as McpRouteImport } from './routes/mcp'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as QuestRouteImport } from './routes/quest'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as ApiGuideRouteImport } from './routes/api/guide'
+import { Route as AttivitaIdRouteImport } from './routes/attivita.$id'
 import { Route as NodeSlugRouteImport } from './routes/node.$slug'
 
 const IndexRoute = IndexRouteImport.update({
@@ -55,6 +57,11 @@ const PrivacyRoute = PrivacyRouteImport.update({
   path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
+const QuestRoute = QuestRouteImport.update({
+  id: '/quest',
+  path: '/quest',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const Char91DotwellKnownChar93OauthProtectedResourceRoute =
   Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
     id: '/.well-known/oauth-protected-resource',
@@ -64,6 +71,11 @@ const Char91DotwellKnownChar93OauthProtectedResourceRoute =
 const ApiGuideRoute = ApiGuideRouteImport.update({
   id: '/api/guide',
   path: '/api/guide',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AttivitaIdRoute = AttivitaIdRouteImport.update({
+  id: '/attivita/$id',
+  path: '/attivita/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const NodeSlugRoute = NodeSlugRouteImport.update({
@@ -80,8 +92,10 @@ export interface FileRoutesByFullPath {
   '/guide': typeof GuideRoute
   '/mcp': typeof McpRoute
   '/privacy': typeof PrivacyRoute
+  '/quest': typeof QuestRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/api/guide': typeof ApiGuideRoute
+  '/attivita/$id': typeof AttivitaIdRoute
   '/node/$slug': typeof NodeSlugRoute
 }
 export interface FileRoutesByTo {
@@ -92,8 +106,10 @@ export interface FileRoutesByTo {
   '/guide': typeof GuideRoute
   '/mcp': typeof McpRoute
   '/privacy': typeof PrivacyRoute
+  '/quest': typeof QuestRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/api/guide': typeof ApiGuideRoute
+  '/attivita/$id': typeof AttivitaIdRoute
   '/node/$slug': typeof NodeSlugRoute
 }
 export interface FileRoutesById {
@@ -105,8 +121,10 @@ export interface FileRoutesById {
   '/guide': typeof GuideRoute
   '/mcp': typeof McpRoute
   '/privacy': typeof PrivacyRoute
+  '/quest': typeof QuestRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/api/guide': typeof ApiGuideRoute
+  '/attivita/$id': typeof AttivitaIdRoute
   '/node/$slug': typeof NodeSlugRoute
 }
 export interface FileRouteTypes {
@@ -119,8 +137,10 @@ export interface FileRouteTypes {
     | '/guide'
     | '/mcp'
     | '/privacy'
+    | '/quest'
     | '/.well-known/oauth-protected-resource'
     | '/api/guide'
+    | '/attivita/$id'
     | '/node/$slug'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -131,8 +151,10 @@ export interface FileRouteTypes {
     | '/guide'
     | '/mcp'
     | '/privacy'
+    | '/quest'
     | '/.well-known/oauth-protected-resource'
     | '/api/guide'
+    | '/attivita/$id'
     | '/node/$slug'
   id:
     | '__root__'
@@ -143,8 +165,10 @@ export interface FileRouteTypes {
     | '/guide'
     | '/mcp'
     | '/privacy'
+    | '/quest'
     | '/.well-known/oauth-protected-resource'
     | '/api/guide'
+    | '/attivita/$id'
     | '/node/$slug'
   fileRoutesById: FileRoutesById
 }
@@ -156,8 +180,10 @@ export interface RootRouteChildren {
   GuideRoute: typeof GuideRoute
   McpRoute: typeof McpRoute
   PrivacyRoute: typeof PrivacyRoute
+  QuestRoute: typeof QuestRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   ApiGuideRoute: typeof ApiGuideRoute
+  AttivitaIdRoute: typeof AttivitaIdRoute
   NodeSlugRoute: typeof NodeSlugRoute
 }
 
@@ -212,6 +238,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/quest': {
+      id: '/quest'
+      path: '/quest'
+      fullPath: '/quest'
+      preLoaderRoute: typeof QuestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/.well-known/oauth-protected-resource': {
       id: '/.well-known/oauth-protected-resource'
       path: '/.well-known/oauth-protected-resource'
@@ -224,6 +257,13 @@ declare module '@tanstack/react-router' {
       path: '/api/guide'
       fullPath: '/api/guide'
       preLoaderRoute: typeof ApiGuideRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/attivita/$id': {
+      id: '/attivita/$id'
+      path: '/attivita/$id'
+      fullPath: '/attivita/$id'
+      preLoaderRoute: typeof AttivitaIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/node/$slug': {
@@ -244,9 +284,11 @@ const rootRouteChildren: RootRouteChildren = {
   GuideRoute: GuideRoute,
   McpRoute: McpRoute,
   PrivacyRoute: PrivacyRoute,
+  QuestRoute: QuestRoute,
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
   ApiGuideRoute: ApiGuideRoute,
+  AttivitaIdRoute: AttivitaIdRoute,
   NodeSlugRoute: NodeSlugRoute,
 }
 export const routeTree = rootRouteImport

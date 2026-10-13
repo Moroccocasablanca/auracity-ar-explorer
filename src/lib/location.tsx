@@ -16,6 +16,8 @@ export type LocationState = {
   demoReason: "nogps" | "outside" | "manual" | null;
   active: boolean;
   start: (opts?: { demo?: boolean }) => Promise<void>;
+  /** Test tool: pretend to stand at a given point (owner testing without walking). */
+  simulate: (p: LatLng) => void;
   stop: () => void;
   setHeading: (h: number) => void;
 };
@@ -116,6 +118,20 @@ export function LocationProvider({ children }: { children: ReactNode }) {
     [goDemo, onOrientation, batterySaver],
   );
 
+  const simulate = useCallback((p: LatLng) => {
+    if (watchId.current != null) {
+      navigator.geolocation?.clearWatch(watchId.current);
+      watchId.current = null;
+    }
+    setActive(true);
+    // Counts as a real position so presence rules (reviews, messages, stamps) can be tested from the sofa.
+    setDemo(false);
+    setDemoReason(null);
+    setPos(p);
+    setAccuracy(5);
+    setSpeed(null);
+  }, []);
+
   const stop = useCallback(() => {
     if (watchId.current != null) navigator.geolocation?.clearWatch(watchId.current);
     watchId.current = null;
@@ -136,8 +152,8 @@ export function LocationProvider({ children }: { children: ReactNode }) {
   const setHeading = useCallback((h: number) => setHeadingState(((h % 360) + 360) % 360), []);
 
   const value = useMemo<LocationState>(
-    () => ({ pos, accuracy, heading, speed, demo, demoReason, active, start, stop, setHeading }),
-    [pos, accuracy, heading, speed, demo, demoReason, active, start, stop, setHeading],
+    () => ({ pos, accuracy, heading, speed, demo, demoReason, active, start, stop, setHeading, simulate }),
+    [pos, accuracy, heading, speed, demo, demoReason, active, start, stop, setHeading, simulate],
   );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

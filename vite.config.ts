@@ -11,7 +11,9 @@ export default defineConfig({
   // Pre-bundle these up front so the dev server never re-optimizes mid-session
   // (a late re-optimization can load a second React copy and blank the screen).
   vite: {
-    optimizeDeps: { include: ["sonner", "lucide-react"] },
+    optimizeDeps: { include: ["sonner", "lucide-react", "maplibre-gl", "supercluster"] },
+    // Lets the owner open the local dev server from a phone through a temporary Cloudflare tunnel.
+    server: { allowedHosts: [".trycloudflare.com"] },
     plugins: [mcpPlugin()],
   },
   tanstackStart: {

@@ -3,6 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useI18n } from "./i18n";
 import { description, history, promo, tagline, type NodeRow } from "./nodes";
 import { nodeText } from "./translate.functions";
+import { contentLang } from "./text-speech";
 
 /** Node texts in the current app language (AI translation for languages beyond IT/EN). */
 export function useNodeText(node: NodeRow) {
@@ -22,5 +23,6 @@ export function useNodeText(node: NodeRow) {
     enabled: needs,
     staleTime: Infinity,
   });
-  return needs && data ? data : base;
+  const speakLang = contentLang(lang, Boolean(needs && data));
+  return { ...(needs && data ? data : base), speakLang };
 }

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n";
 import { narrate, setVoiceChoice, stopSpeaking, voiceChoice, type VoiceChoice, type VoiceRequest } from "@/lib/speech";
 import { naturalVoice } from "@/lib/voice.functions";
+import { speakableIsEmpty, type Speakable } from "@/lib/text-speech";
 
 /** Shared narration state: natural voice with phone-voice fallback. */
 export function useNarrator() {
@@ -13,7 +14,7 @@ export function useNarrator() {
   const [playing, setPlaying] = useState<string | null>(null);
   useEffect(() => () => stopSpeaking(), []);
   const play = useCallback(
-    (id: string, req: VoiceRequest, text: string) => {
+    (id: string, req: VoiceRequest, text: Speakable) => {
       setPlaying(id);
       void narrate((d) => fetcher({ data: d }), req, text, lang, () => setPlaying((p) => (p === id ? null : p)));
     },
@@ -58,12 +59,12 @@ export function VoiceSettings() {
   );
 }
 
-export function ListenButton({ text, voice, compact = false }: { text: string; voice: VoiceRequest; compact?: boolean }) {
+export function ListenButton({ text, voice, compact = false, label }: { text: Speakable; voice: VoiceRequest; compact?: boolean; label?: string }) {
   const { t } = useI18n();
   const { playing, play, stop } = useNarrator();
   const [settings, setSettings] = useState(false);
-  if (!text) return null;
-  const id = `${voice.nodeId}:${voice.messageId ?? voice.source}`;
+  if (speakableIsEmpty(text)) return null;
+  const id = `${voice.nodeId}:${voice.messageId ?? voice.source}${voice.full ? ":full" : ""}`;
   const on = playing === id;
   const Icon = on ? Square : Volume2;
   return (
@@ -76,7 +77,7 @@ export function ListenButton({ text, voice, compact = false }: { text: string; v
         className={compact ? "size-8 rounded-full p-0" : "h-10 rounded-full px-4"}
       >
         <Icon className="size-4" />
-        {!compact && (on ? t("audio.stop") : t("audio.listen"))}
+        {!compact && (on ? t("audio.stop") : (label ?? t("audio.listen")))}
       </Button>
       {!compact && (
         <Button variant="ghost" size="icon" title={t("audio.voice")} aria-label={t("audio.voice")} aria-expanded={settings} onClick={() => setSettings((v) => !v)}>

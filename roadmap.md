@@ -30,3 +30,24 @@
 - [ ] Aggiungere consenso iniziale GDPR, pagina Privacy, download dati e cancellazione account.
 - [ ] Rifinire installazione iPhone con aree sicure e suggerimento Safari mostrato una volta.
 - [ ] Mostrare storia completa e fonte sui monumenti, con lo stato “prossimamente” se manca una fonte.
+
+## Aggiornamento locale (ottobre 2026)
+- [x] Mappa 3D MapLibre (OpenFreeMap), palazzine in rilievo anche da vicino, palette pastello giorno / indaco notte
+- [x] Pin puliti per categoria (oro monumenti, viola locali, ciano/giallo bambini), foto nel pin dei monumenti
+- [x] Marker raggruppati con numero; scritte con nome e indirizzo, senza sovrapposizioni
+- [x] Personaggi parlanti più grandi, su sticker rotondo con stellina
+- [x] Pagina Avventura: indovinelli letti ad alta voce, missioni del giorno, livelli, album, passaporto del gusto
+- [x] Scheda ristorante sulla mappa: aperto/chiuso, leggi menu e offerta
+- [x] Storie brevi (2 frasi) e voce dei personaggi simpatica (saluto + tono da cartone)
+- [x] Voce: ElevenLabs/OpenAI come alternative se Lovable non ha crediti (serve la chiave segreta)
+- [x] Voce neurale gratuita sul dispositivo (Piper, italiano/inglese/ecc.), senza crediti: provata, audio generato e riprodotto
+- [ ] Voce ancora più umana: crediti Lovable o chiave ElevenLabs/OpenAI (opzionale)
+- [ ] Scheda con foto che "parla" e pubblicità dedicata ai locali
+- [ ] Foto aggiornate di monumenti e locali (caricate dai titolari)
+- [ ] Riportare le modifiche su Lovable (ricollegare GitHub)
+- [x] Servizi e sicurezza sulla mappa (dati OpenStreetMap): farmacie, ospedale, carabinieri/polizia, medici, defibrillatori; filtro dedicato, chiama e indicazioni, banner 112
+- [x] Vista dall'alto pulita (palazzine piatte con contorno sotto i 15° di inclinazione) e pulsante 2D/3D
+- [x] Voce da guida/narratore (non da bambino), pause tra le frasi
+- [x] Pannello TEST ADMIN (solo localhost/anteprima): admin di prova, teletrasporto a ristoranti/monumenti/servizi, sblocco album e timbri
+- [ ] Scheda luogo a pannello con lettore audio (play/pausa, velocità, testo), percorso a piedi sulla mappa, "vicino a te"
+- [ ] Test sul telefono fuori casa: serve un indirizzo https pubblico (anteprima Lovable o tunnel dal Mac)

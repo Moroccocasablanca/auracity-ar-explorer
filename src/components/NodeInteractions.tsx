@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
+import { addLocalMessage } from "@/lib/local-messages";
+import { canUseTestAdmin } from "@/lib/systemConfig";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Loader2, MapPinOff, Navigation, ScanLine, Star } from "lucide-react";
@@ -91,7 +93,8 @@ export function MessageBoard({ node }: { node: NodeRow }) {
   const isBench = isGardenObject(node);
   const send = isBench ? sendBench : sendPublic;
   const { session, ready } = useSession();
-  const locked = isBench && ready && !session;
+  const testMode = typeof window !== "undefined" && canUseTestAdmin(window.location.hostname, import.meta.env.DEV);
+  const locked = isBench && ready && !session && !testMode;
   const { data: messages = [] } = useQuery(messagesQuery(node.id));
   const [name, setName] = useAuthorName();
   const [body, setBody] = useState("");
@@ -100,6 +103,14 @@ export function MessageBoard({ node }: { node: NodeRow }) {
   async function submit() {
     if (!loc.pos) return;
     setBusy(true);
+    // Test mode (owner's phone): messages on talking gardens are saved on this phone, so the whole flow can be tried.
+    if (isBench && testMode && !session) {
+      addLocalMessage(node.id, body.trim());
+      toast.success(t("msg.local"));
+      setBody("");
+      setBusy(false);
+      return;
+    }
     try {
       const res = await send({
         data: { nodeId: node.id, lat: loc.pos.lat, lng: loc.pos.lng, accuracy: loc.accuracy, author: name, body },
