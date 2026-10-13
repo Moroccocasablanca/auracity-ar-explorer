@@ -14,7 +14,7 @@ import { getNick } from "@/lib/leaderboard";
 import { placeStyle, PLACE_STYLE } from "@/lib/place-style";
 import { speakAny } from "@/services/voice/speech";
 import { VoicePersona } from "@/services/voice/voice-persona";
-import { contentLang, detectTextLang, greetingWithName, nameThenText } from "@/services/voice/text-speech";
+import { contentLang, detectTextLang, greetingWithName, nameLanguage, nameThenText } from "@/services/voice/text-speech";
 import { warmNeuralVoice } from "@/services/voice/neuralVoice";
 import { history, description, nodeMenu, promo, messagesQuery, nodesQuery, shortStory, tagline, type NodeRow } from "@/lib/nodes";
 import { explorePriority, matchesExploreFilter, type ExploreFilter } from "@/lib/explore-rules";
@@ -114,7 +114,7 @@ function Explore() {
       if (n.kind === "business") {
         const items = nodeMenu(n).slice(0, 6).map((m) => m.name).join(", ");
         const body = [promo(n, lang), items && `${t("node.menu")}: ${items}`].filter(Boolean).join(". ");
-        void speakAny(nameThenText(n.name, body, contentLang(lang)), contentLang(lang), undefined, VoicePersona.BUSINESS_USER);
+        void speakAny(nameThenText(n.name, body, contentLang(lang), nameLanguage(n.name, n.kind)), contentLang(lang), undefined, VoicePersona.BUSINESS_USER);
         return;
       }
       if (n.kind === "monument") {

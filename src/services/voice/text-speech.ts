@@ -109,19 +109,45 @@ export const contentLang = (appLang: Lang, translated = false): Lang => (appLang
 export type Segment = { text: string; lang: Lang };
 export type Speakable = string | Segment[];
 
-/** Place names are Italian: read the name with the Italian voice and the explanation in the reader's language. */
-export function nameThenText(name: string, body: string, bodyLang: Lang): Speakable {
-  if (bodyLang === "it") return `${name}. ${body}`;
-  return [{ text: `${name}.`, lang: "it" }, { text: body, lang: bodyLang }];
+const NAME_WORDS: Partial<Record<Lang, string>> = {
+  en: "pub house kitchen burger grill street garden club coffee roasters bakery diner steakhouse tavern inn lounge shop",
+  fr: "bistrot bistro brasserie chez boulangerie patisserie pâtisserie maison petit petite grande auberge",
+  de: "haus bier stube hof biergarten wirtshaus gasthaus bäckerei",
+  es: "taberna bodega tapas cervecería mesón",
+};
+/** Which language a place name is pronounced in. Monuments, churches and gardens are ALWAYS Italian; a venue keeps its own
+ *  language when the name is clearly foreign ("Harry's Bar", "Bistrot", "Chez Marie"), otherwise it is Italian. */
+export function nameLanguage(name: string, kind: string = "business"): Lang {
+  if (kind !== "business") return "it";
+  if (/[\u0600-\u06FF]/.test(name)) return "ar";
+  if (/\b\p{L}+['’]s\b/u.test(name)) return "en";
+  if (/ñ/i.test(name)) return "es";
+  if (/[äöüß]/i.test(name)) return "de";
+  if (/[çœ]/i.test(name)) return "fr";
+  const words = new Set(name.toLowerCase().match(/[\p{L}]+/gu) ?? []);
+  for (const [lang, list] of Object.entries(NAME_WORDS) as [Lang, string][]) if (list.split(" ").some((w) => words.has(w))) return lang;
+  return "it";
+}
+
+/** Makes sure a sentence ends with a full stop, so the voice never swallows the last syllable (e.g. "birra" → "bir"). */
+export function ensureEnding(text: string): string {
+  const t = text.trim();
+  return t && !/[.!?…:;]$/.test(t) ? `${t}.` : t;
+}
+
+/** The place name is read with its own pronunciation (Italian for monuments), the explanation in the reader's language. */
+export function nameThenText(name: string, body: string, bodyLang: Lang, nameLang: Lang = "it"): Speakable {
+  if (bodyLang === nameLang) return `${name}. ${body}`;
+  return [{ text: `${name}.`, lang: nameLang }, { text: body, lang: bodyLang }];
 }
 
 /** "Welcome! I'm {name}." with the name spoken in Italian. `tpl` is the translated sentence rendered with a "§" placeholder. */
-export function greetingWithName(tpl: string, name: string, uiLang: Lang, rest: string): Speakable {
-  if (uiLang === "it") return tpl.replace("§", name) + " " + rest;
+export function greetingWithName(tpl: string, name: string, uiLang: Lang, rest: string, nameLang: Lang = "it"): Speakable {
+  if (uiLang === nameLang) return tpl.replace("§", name) + " " + rest;
   const [before = "", after = ""] = tpl.split("§");
   return [
-    ...(before.trim() ? [{ text: before, lang: uiLang }] : []),
-    { text: name, lang: "it" as Lang },
+    ...(before.trim() ? [{ text: before.trim(), lang: uiLang }] : []),
+    { text: name, lang: nameLang },
     { text: `${after} ${rest}`.trim(), lang: uiLang },
   ];
 }

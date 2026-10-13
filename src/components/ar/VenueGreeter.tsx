@@ -11,7 +11,7 @@ import { inviteBody } from "@/services/notifications/invites";
 import { nodeMenu, specials, type NodeRow } from "@/lib/nodes";
 import { placeStyleKey } from "@/lib/place-style";
 import { speakAny, stopSpeaking } from "@/services/voice/speech";
-import { contentLang } from "@/services/voice/text-speech";
+import { contentLang, greetingWithName, nameLanguage } from "@/services/voice/text-speech";
 import { useVenueContent } from "@/lib/venue-content";
 import { VoicePersona } from "@/services/voice/voice-persona";
 
@@ -31,14 +31,16 @@ export function VenueGreeter({ node, onClose }: { node: NodeRow; onClose: () => 
 
   const script = useMemo(() => {
     const items = menu.slice(0, 5).map((m) => m.name.replace(/\s*\(esempio\)/i, "")).join(", ");
-    return [
-      who ? t("greet.hello.name", { who, name }) : t("greet.hello", { name }),
+    const rest = [
       flash ? `${t("flash.title")}: ${flash.rawTextFromOwner}.` : "",
       today ? `${t("node.specials")}: ${today}.` : "",
       offer ? `${offer}.` : "",
       items ? t("greet.menu", { items }) : "",
       inviteBody(node, lang, t("prox.invite.default")),
     ].filter(Boolean).join(" ");
+    // The venue's name is pronounced in its own language ("Harry's Bar" with an English accent), the rest in the visitor's.
+    const hello = who ? t("greet.hello.name", { who, name: "§" }) : t("greet.hello", { name: "§" });
+    return greetingWithName(hello, name, contentLang(lang), rest, nameLanguage(name, node.kind));
   }, [t, name, who, flash, today, offer, menu, node, lang]);
 
   const say = () => {

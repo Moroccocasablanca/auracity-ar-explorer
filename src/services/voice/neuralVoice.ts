@@ -2,7 +2,7 @@
 // The voice model (~60 MB) downloads once and is kept by the browser; until then the phone voice is used.
 import type { Lang } from "@/lib/i18n";
 import type { Persona } from "@/services/voice/speech";
-import { speechText, splitSentences } from "@/services/voice/text-speech";
+import { ensureEnding, speechText, splitSentences } from "@/services/voice/text-speech";
 import { vlog } from "@/services/voice/voice-log";
 
 type Pair = { female: string; male: string };
@@ -62,7 +62,7 @@ export function isNeuralReady(lang: Lang, kind: "female" | "male") {
 }
 
 function sentences(text: string) {
-  const parts = splitSentences(speechText(text));
+  const parts = splitSentences(speechText(text)).map(ensureEnding);
   const out: string[] = [];
   for (const p of parts) {
     const last = out[out.length - 1];

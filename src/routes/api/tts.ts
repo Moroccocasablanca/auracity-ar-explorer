@@ -5,6 +5,7 @@ import { createFileRoute } from "@tanstack/react-router";
 const VOICES = { female: "Kore", male: "Charon", young: "Puck" } as const;
 const MODEL = "gemini-2.5-flash-preview-tts";
 const MAX_CHARS = 700;
+const LANG_NAMES: Record<string, string> = { it: "Italian", en: "English", fr: "French", de: "German", es: "Spanish", ar: "Arabic" };
 const MAX_PER_DAY = 300;
 let day = "";
 let count = 0;
@@ -29,22 +30,31 @@ export const Route = createFileRoute("/api/tts")({
           try { key = fs.readFileSync(path.join(os.homedir(), ".auracity-gemini-key"), "utf8").replace(/\s/g, ""); } catch { /* no local key */ }
         }
         if (!key) return Response.json({ error: "no key" }, { status: 503 });
-        let body: { text?: string; voice?: string };
+        let body: { text?: string; voice?: string; lang?: string };
         try { body = await request.json(); } catch { return Response.json({ error: "bad request" }, { status: 400 }); }
         const text = String(body.text ?? "").replace(/\s+/g, " ").trim().slice(0, MAX_CHARS);
+        const lang = body.lang && body.lang in LANG_NAMES ? body.lang : "it";
         const voice = (body.voice && body.voice in VOICES ? body.voice : "male") as keyof typeof VOICES;
         if (!text) return Response.json({ error: "empty" }, { status: 400 });
 
         const dir = path.join(process.cwd(), ".voice-cache");
         fs.mkdirSync(dir, { recursive: true });
-        const file = path.join(dir, `${crypto.createHash("sha256").update(`${MODEL}|${voice}|${text}`).digest("hex")}.wav`);
+        const file = path.join(dir, `${crypto.createHash("sha256").update(`${MODEL}|${voice}|${lang}|${text}`).digest("hex")}.wav`);
         if (fs.existsSync(file)) return new Response(new Uint8Array(fs.readFileSync(file)), { headers: { "content-type": "audio/wav" } });
 
         const today = new Date().toISOString().slice(0, 10);
         if (day !== today) { day = today; count = 0; }
         if (++count > MAX_PER_DAY) return Response.json({ error: "daily limit" }, { status: 429 });
 
-        const style = voice === "young" ? "Leggi in italiano con voce giovane, curiosa e allegra, naturale: " : "Leggi in italiano con voce calda, naturale e cordiale, come un oste simpatico che accoglie un cliente, ritmo tranquillo: ";
+        const L = LANG_NAMES[lang]!;
+        // Place and brand names keep their own pronunciation: Italian names stay Italian, foreign ones keep their native accent.
+        const rules = `Pronounce every word exactly as a native ${L} speaker would; if a proper name is Italian (Palazzo Traversa, Chiesa di San Pietro) say it with perfect Italian phonetics, and if it is clearly foreign (Harry's Bar, Bistrot) keep its native accent. Pronounce Italian double consonants fully (birra, caffè, panna, mamma) and never cut the last syllable of a word. `;
+        const style =
+          voice === "young"
+            ? `Read aloud in ${L} with a playful, proud, curious youthful voice, lively but natural, never like a cartoon. ${rules}`
+            : voice === "female"
+              ? `Read aloud in ${L} with an elegant, warm, narrative female voice, like a refined local guide, calm pace. ${rules}`
+              : `Read aloud in ${L} with a warm, friendly welcoming male voice, like a cheerful host greeting a guest, easy pace. ${rules}`;
         const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`, {
           method: "POST",
           headers: { "x-goog-api-key": key, "content-type": "application/json" },

@@ -10,7 +10,7 @@ import { isOpenNow, formatDistance } from "@/utils/geo";
 import { kindKey, LOCALE_TAG, useI18n } from "@/lib/i18n";
 import { useNodeText } from "@/services/translate/use-node-text";
 import { logEvent } from "@/lib/quest";
-import { nameThenText } from "@/services/voice/text-speech";
+import { nameLanguage, nameThenText } from "@/services/voice/text-speech";
 import { VenueAvatar } from "@/components/ar/VenueAvatar";
 import { VoicePersona } from "@/services/voice/voice-persona";
 import { MonumentModel } from "@/components/ar/MonumentOverlay";
@@ -102,7 +102,7 @@ function NodeDetail({
     if (talking) { stopSpeaking(); setTalking(false); return; }
     const body = [todaySpecials, offer, menu.length ? `${t("node.menu")}: ${menu.slice(0, 5).map((m) => m.name.replace(/\s*\(esempio\)/i, "")).join(", ")}` : ""].filter(Boolean).join(". ");
     setTalking(true);
-    void speakAny(nameThenText(node.name, body || t("prox.invite.default"), contentLang(lang)), contentLang(lang), () => setTalking(false), VoicePersona.BUSINESS_USER, vc.voice);
+    void speakAny(nameThenText(node.name, body || t("prox.invite.default"), contentLang(lang), nameLanguage(node.name, node.kind)), contentLang(lang), () => setTalking(false), VoicePersona.BUSINESS_USER, vc.voice);
   };
   const qc = useQueryClient();
   const refresh = useServerFn(refreshMenu);
