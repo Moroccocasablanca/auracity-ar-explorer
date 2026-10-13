@@ -108,9 +108,9 @@ type Fetcher = (req: VoiceRequest & { lang: Lang; voice: "female" | "male" }) =>
 
 let clipList: Promise<Set<string>> | null = null;
 /** Stories recorded once with the natural voices and shipped inside the app (public/audio), so they play with no server and no cost. */
-async function bundledClip(nodeId: string, voice: "female" | "male"): Promise<string | null> {
+async function bundledClip(nodeId: string): Promise<string | null> {
   clipList ??= fetch("/audio/manifest.json").then((r) => (r.ok ? r.json() : [])).then((l: string[]) => new Set(l)).catch(() => new Set<string>());
-  const file = `${nodeId}-${voice}.m4a`;
+  const file = `${nodeId}.m4a`;
   return (await clipList).has(file) ? `/audio/${file}` : null;
 }
 
@@ -119,10 +119,11 @@ export async function narrate(fetcher: Fetcher, request: VoiceRequest, text: Spe
   const { persona, full, lang: textLang, ...req } = request;
   lang = textLang ?? lang;
   stopSpeaking();
-  const choice = voiceChoice();
+  const pk = personaVoice(persona).kind;
+  const choice = voiceChoice() !== "device" && pk ? pk : voiceChoice(); // monuments always get the woman, whatever the general setting
   if (choice !== "device" && persona !== "kid" && !full) {
     try {
-      const bundled = req.source === "history" && lang === "it" ? await bundledClip(req.nodeId, choice) : null;
+      const bundled = req.source === "history" && lang === "it" ? await bundledClip(req.nodeId) : null;
       if (bundled) {
         vlog("voce registrata nell'app");
         const a = new Audio(bundled);

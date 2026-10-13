@@ -5,17 +5,17 @@ import { shortStory } from "./src/lib/nodes.ts";
 import { speechText } from "./src/lib/text-speech.ts";
 const env = Object.fromEntries(fs.readFileSync(".env", "utf8").split("\n").filter((l) => l.includes("=")).map((l) => [l.split("=")[0], l.slice(l.indexOf("=") + 1).replace(/^"|"$/g, "")]));
 const K = fs.readFileSync(process.env.HOME + "/.auracity-gemini-key", "utf8").replace(/\s/g, "");
-const VOICES = { female: "Kore", male: "Charon" };
+const VOICES = { female: "Kore", young: "Puck" }; // monuments: the woman; garden characters (trees, benches): the young voice
 const only = process.argv[2];
 const nodes = await (await fetch(`${env.VITE_SUPABASE_URL}/rest/v1/nodes?select=id,name,kind,description_it,history_it&kind=in.(monument,tree,bench)`, { headers: { apikey: env.VITE_SUPABASE_PUBLISHABLE_KEY } })).json();
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-for (const voice of only ? [only] : ["female", "male"]) {
-  for (const n of nodes) {
-    const out = `public/audio/${n.id}-${voice}.m4a`;
+for (const voice of ["female", "young"]) {
+  for (const n of nodes.filter((x) => (voice === "female") === (x.kind === "monument"))) {
+    const out = `public/audio/${n.id}.m4a`;
     if (fs.existsSync(out)) continue;
     const text = speechText(`${n.name}. ${shortStory(n.history_it || n.description_it)}`, "it");
     if (!text.trim()) continue;
-    const style = n.kind === "monument" ? "Narra in italiano con voce calda e naturale, come una guida locale esperta, ritmo calmo: " : "Racconta in italiano come un narratore caldo ed espressivo, voce adulta naturale, ritmo calmo, con un leggero sorriso: ";
+    const style = voice === "young" ? "Racconta in italiano con la voce di un ragazzo giovane, curioso ed entusiasta, allegro ma naturale, non da cartone animato: " : n.kind === "monument" ? "Narra in italiano con voce calda e naturale, come una guida locale esperta, ritmo calmo: " : "Racconta in italiano come un narratore caldo ed espressivo, voce adulta naturale, ritmo calmo, con un leggero sorriso: ";
     for (let attempt = 0; attempt < 6; attempt++) {
       await sleep(attempt ? 30000 : 12000);
       const r = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent", {

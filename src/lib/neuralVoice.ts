@@ -69,6 +69,12 @@ function sentences(text: string) {
     if (last && last.length < 40) out[out.length - 1] = `${last} ${p}`;
     else out.push(p);
   }
+  // The first piece is kept short so the voice starts sooner (the rest is prepared while it plays).
+  const first = out[0];
+  if (first && first.length > 90) {
+    const cut = first.indexOf(", ", 35);
+    if (cut > 0 && cut < first.length - 25) out.splice(0, 1, first.slice(0, cut + 1), first.slice(cut + 2));
+  }
   return out;
 }
 
@@ -148,8 +154,10 @@ export async function speakNeural(text: string, lang: Lang, kind: "female" | "ma
         vlog(`neural: frase ${i + 1}/${parts.length} parte`);
         a.play().then(() => {
           // Safety net: some phones never fire "ended", so move on when the clip should have finished.
-          const d = Number.isFinite(a.duration) && a.duration > 0 ? a.duration : 12;
-          timer = window.setTimeout(finish, (d / Math.max(0.5, a.playbackRate)) * 1000 + 1500);
+          // If the length is not known yet, estimate it from the text so a long sentence is never cut off.
+          const guess = Math.max(12, parts[i]!.length * 0.09);
+          const d = Number.isFinite(a.duration) && a.duration > 0 ? a.duration : guess;
+          timer = window.setTimeout(finish, (d / Math.max(0.5, a.playbackRate)) * 1000 + 2500);
         }, reject);
       });
       URL.revokeObjectURL(a.src);

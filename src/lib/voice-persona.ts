@@ -1,7 +1,7 @@
 // Voice profiles: who speaks depends on what is speaking.
 export enum VoicePersona {
   MONUMENT_FEMALE = "FEMALE_NARRATIVE", // woman's narrating voice for monuments and history
-  BUSINESS_USER = "MERCHANT_CHOICE", // man or woman, chosen by the venue
+  BUSINESS_USER = "MERCHANT_CHOICE", // man by default, or the voice chosen by the venue
   HUNT_DYNAMIC = "TEEN_PLAYFUL", // young, lively voice for games
 }
 
@@ -13,7 +13,7 @@ export function personaVoice(p: unknown, venue?: VoiceKind): { kind: VoiceKind |
     case VoicePersona.MONUMENT_FEMALE:
       return { kind: "female", rate: 0.94, pitchUp: false };
     case VoicePersona.BUSINESS_USER:
-      return { kind: venue ?? "female", rate: 1, pitchUp: false };
+      return { kind: venue ?? "male", rate: 1, pitchUp: false }; // bars and restaurants: a man unless the owner picked a woman
     case VoicePersona.HUNT_DYNAMIC:
       return { kind: "female", rate: 1.1, pitchUp: true };
     default:
