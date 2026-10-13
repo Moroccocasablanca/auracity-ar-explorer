@@ -152,13 +152,8 @@ function Explore() {
   return (
     <div className="min-h-screen pb-28">
       {/* The map is the first thing you see: as tall as the screen, with its controls floating on top. */}
-      <div className="relative h-[calc(100dvh-5.4rem)] min-h-[26rem] w-full overflow-hidden bg-card/60">
-        <ClientOnly fallback={<div className="h-full w-full animate-pulse bg-card/60" />}>
-          <Suspense fallback={<div className="h-full w-full animate-pulse bg-card/60" />}>
-            <BraMap nodes={filtered} pos={pos} kindLabel={kindLabel} placeLabel={(n) => t(placeStyle(n).label)} appearance={appearance} recenter={recenter} onTalk={onTalk} talkLabel={talkLabel} pois={pois} poiText={{ call: t("svc.call"), directions: t("svc.directions"), open: t("act.open") }} readLabel={t("venue.read")} openLabel={(o) => t(o ? "node.open" : "node.closed")} speakingId={playing} me={{ label: t("map.me"), accuracy: loc.accuracy, heading: loc.heading, avatar: myAvatar, name: myName, ring: myRing }} />
-          </Suspense>
-        </ClientOnly>
-        <div className="absolute inset-x-0 top-0 z-[5] bg-gradient-to-b from-background/70 to-transparent px-3 pb-3 pt-[max(0.55rem,env(safe-area-inset-top))]">
+      <div className="flex h-[calc(100dvh-5.4rem)] min-h-[26rem] w-full flex-col bg-card/60">
+        <div className="relative z-[5] shrink-0 border-b border-border bg-card/95 px-3 pb-2 pt-[max(0.55rem,env(safe-area-inset-top))] backdrop-blur">
           <div className="chip-row -mx-3 flex gap-2 overflow-x-scroll px-3 pb-1" style={{ touchAction: "pan-x", overscrollBehaviorX: "contain" }}>
             {chips.map((k) => {
               const Icon = chipIcon[k];
@@ -178,6 +173,12 @@ function Explore() {
             })}
           </div>
         </div>
+        <div className="relative min-h-0 flex-1 overflow-hidden">
+        <ClientOnly fallback={<div className="h-full w-full animate-pulse bg-card/60" />}>
+          <Suspense fallback={<div className="h-full w-full animate-pulse bg-card/60" />}>
+            <BraMap nodes={filtered} pos={pos} kindLabel={kindLabel} placeLabel={(n) => t(placeStyle(n).label)} appearance={appearance} recenter={recenter} onTalk={onTalk} talkLabel={talkLabel} pois={pois} poiText={{ call: t("svc.call"), directions: t("svc.directions"), open: t("act.open") }} readLabel={t("venue.read")} openLabel={(o) => t(o ? "node.open" : "node.closed")} speakingId={playing} me={{ label: t("map.me"), accuracy: loc.accuracy, heading: loc.heading, avatar: myAvatar, name: myName, ring: myRing }} />
+          </Suspense>
+        </ClientOnly>
         {legend && (
           <div className="absolute inset-x-3 bottom-16 z-[6] rounded-2xl border border-border bg-card/95 p-3 text-xs shadow-xl backdrop-blur" onClick={() => setLegend(false)}>
             <div className="grid grid-cols-2 gap-x-3 gap-y-1.5">
@@ -191,11 +192,12 @@ function Explore() {
             </div>
           </div>
         )}
-        <div className="absolute right-3 top-14 z-[5] flex flex-col gap-2">
-          <button type="button" title={t("map.locate")} aria-label={t("map.locate")} onClick={() => { if (!loc.active) void loc.start(); setRecenter((v) => v + 1); }} className="flex size-11 items-center justify-center rounded-full border border-border bg-card/90 shadow-lg backdrop-blur"><Crosshair className="size-5" /></button>
-          <button type="button" title={t(mode === "auto" ? "map.auto" : mode === "day" ? "map.day" : "map.night")} aria-label={t("map.appearance")} onClick={() => selectMode(nextMode)} className="flex size-11 items-center justify-center rounded-full border border-border bg-card/90 shadow-lg backdrop-blur"><ModeIcon className="size-5" /></button>
-          <button type="button" aria-label={t("map.legend")} onClick={() => setLegend((v) => !v)} className={`flex size-11 items-center justify-center rounded-full border border-border shadow-lg backdrop-blur ${legend ? "bg-primary text-primary-foreground" : "bg-card/90"}`}><Info className="size-5" /></button>
-          <Link to="/quest" aria-label={t("quest.title")} className="flex size-11 items-center justify-center rounded-full border-2 border-yellow-300 bg-yellow-300 text-xl text-black shadow-lg">★</Link>
+        </div>
+        <div className="relative z-[5] flex shrink-0 items-center justify-center gap-3 border-t border-border bg-card/95 px-3 py-2 backdrop-blur">
+          <button type="button" title={t("map.locate")} aria-label={t("map.locate")} onClick={() => { if (!loc.active) void loc.start(); setRecenter((v) => v + 1); }} className="flex size-10 items-center justify-center rounded-full border border-border bg-card/90 shadow-lg backdrop-blur"><Crosshair className="size-5" /></button>
+          <button type="button" title={t(mode === "auto" ? "map.auto" : mode === "day" ? "map.day" : "map.night")} aria-label={t("map.appearance")} onClick={() => selectMode(nextMode)} className="flex size-10 items-center justify-center rounded-full border border-border bg-card/90 shadow-lg backdrop-blur"><ModeIcon className="size-5" /></button>
+          <button type="button" aria-label={t("map.legend")} onClick={() => setLegend((v) => !v)} className={`flex size-10 items-center justify-center rounded-full border border-border shadow-lg backdrop-blur ${legend ? "bg-primary text-primary-foreground" : "bg-card/90"}`}><Info className="size-5" /></button>
+          <Link to="/quest" aria-label={t("quest.title")} className="flex size-10 items-center justify-center rounded-full border-2 border-yellow-300 bg-yellow-300 text-xl text-black shadow-lg">★</Link>
         </div>
       </div>
 

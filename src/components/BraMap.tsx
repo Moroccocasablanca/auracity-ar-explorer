@@ -115,11 +115,10 @@ function declutter(shown: Map<string, maplibregl.Marker>, services?: Map<string,
   // Icons come first: a label is never allowed to sit on top of any icon (its own or a neighbour's), nor on another label.
   const icons = items.map((e) => ({ e, r: e.querySelector(":scope > :not(.aura-label)")?.getBoundingClientRect() })).filter((x): x is { e: HTMLElement; r: DOMRect } => !!x.r && x.r.width > 0);
   const taken: DOMRect[] = [];
-  // Parts of the screen that belong to buttons: no label may sit under the filter chips, the 2D/3D switch or the tool buttons.
+  // The filter chips and tool buttons now live outside the map; only the 2D/3D switch floats on it, so labels keep away from it.
   const box = items[0]?.closest(".maplibregl-map")?.getBoundingClientRect();
   const zones: DOMRect[] = [];
   if (box) {
-    zones.push(new DOMRect(box.left, box.top, box.width, 86), new DOMRect(box.right - 84, box.top + 86, 84, 340));
     const seg = document.querySelector(".aura-viewseg")?.getBoundingClientRect();
     if (seg) zones.push(new DOMRect(seg.left - 4, seg.top - 4, seg.width + 8, seg.height + 8));
   }
@@ -128,7 +127,7 @@ function declutter(shown: Map<string, maplibregl.Marker>, services?: Map<string,
     const lab = e.querySelector(".aura-label");
     if (!lab) continue;
     // Try above the icon first, then below it, and only hide the label if neither spot is free.
-    const blocked = (r: DOMRect) => taken.some((t) => overlap(r, t)) || icons.some((i) => i.e !== e && overlap(r, i.r, 2)) || zones.some((z) => overlap(r, z, 0)) || (!!box && (r.left < box.left + 2 || r.right > box.right - 2 || r.bottom > box.bottom - 78));
+    const blocked = (r: DOMRect) => taken.some((t) => overlap(r, t)) || icons.some((i) => i.e !== e && overlap(r, i.r, 2)) || zones.some((z) => overlap(r, z, 0)) || (!!box && (r.left < box.left + 2 || r.right > box.right - 2 || r.bottom > box.bottom - 10));
     lab.classList.remove("aura-label-below");
     let r = lab.getBoundingClientRect();
     if (r.width === 0) continue;
