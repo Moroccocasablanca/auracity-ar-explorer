@@ -16,7 +16,8 @@ import { useNarrator } from "./ListenButton";
 import { MonumentModel, MonumentSubtitles } from "./MonumentOverlay";
 import { VoicePersona } from "@/lib/voice-persona";
 import { bump } from "@/lib/merchant";
-import { systemConfig } from "@/lib/systemConfig";
+import { systemConfig, venueFeaturesEnabled } from "@/lib/systemConfig";
+import { VenueGreeter } from "@/components/VenueGreeter";
 
 const TALK_ANGLE = 12;
 const TALK_DIST = 80;
@@ -66,6 +67,7 @@ export function ArView() {
   const [selected, setSelected] = useState<string | null>(null);
   const drag = useRef<{ x: number; h: number } | null>(null);
   const [safetyAsk, setSafetyAsk] = useState(false);
+  const [closedGreet, setClosedGreet] = useState<string | null>(null);
   const { playing, play, stop } = useNarrator();
   const tooFast = !loc.demo && loc.speed != null && loc.speed > FAST_MPS;
   useEffect(() => {
@@ -139,6 +141,8 @@ export function ArView() {
   const selectedItem = placed.find((p) => p.n.id === selected) ?? null;
   // autoPlayOnProximity: a monument starts telling its story once, when you are inside the radius (50 m).
   const nearMonument = tooFast ? null : placed.filter((p) => p.n.kind === "monument" && p.d <= systemConfig.proximityLoadingRadiusMeters).sort((a, b) => a.d - b.d)[0]?.n ?? null;
+  // A bar or restaurant within reach: its mascot welcomes you and shows today's offer and 3D menu.
+  const nearBiz = tooFast ? null : placed.filter((p) => p.n.kind === "business" && venueFeaturesEnabled(p.n.subscribed) && p.d <= 60).sort((a, b) => a.d - b.d)[0]?.n ?? null;
   const speakingMonument = placed.find((p) => p.n.kind === "monument" && playing === p.n.id)?.n ?? null;
   const focus = tooFast
     ? null
@@ -349,6 +353,8 @@ export function ArView() {
 
       {nearMonument && !talked.has(nearMonument.id) && <AutoTalk node={nearMonument} play={play} />}
       {speakingMonument && <MonumentSubtitles node={speakingMonument} bottomClass={selectedItem ? "bottom-[13.5rem]" : "bottom-28"} />}
+
+      {nearBiz && closedGreet !== nearBiz.id && !selectedItem && <VenueGreeter key={nearBiz.id} node={nearBiz} onClose={() => setClosedGreet(nearBiz.id)} />}
 
       {/* Selected node card */}
       {selectedItem && (
