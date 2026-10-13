@@ -27,7 +27,24 @@ function all(): Record<string, VenueContent> {
     return {};
   }
 }
-export const getVenueContent = (id: string): VenueContent => all()[id] ?? {};
+/** Starting content for venues used in the pilot test (clearly examples, until the owner fills in the real ones). */
+const SEED: Record<string, VenueContent> = {
+  // Bar della Stazione
+  "2f658c55-615c-41ee-b876-3d5431d9c760": {
+    offer: "Caffè e brioche a 1,50 euro, dalle sette alle dieci",
+    specials: "Oggi: panino col prosciutto cotto e toast. Cappuccino e brioche appena fatta.",
+    menu: [
+      { name: "Caffè (esempio)", price: 1.1 },
+      { name: "Cappuccino (esempio)", price: 1.6 },
+      { name: "Brioche (esempio)", price: 1.4 },
+      { name: "Panino prosciutto (esempio)", price: 4.5 },
+      { name: "Toast (esempio)", price: 3.5 },
+    ],
+    voice: "male",
+    has3DMenu: true,
+  },
+};
+export const getVenueContent = (id: string): VenueContent => all()[id] ?? SEED[id] ?? {};
 export function setVenueContent(id: string, c: VenueContent) {
   const a = all();
   const empty = !c.offer && !c.specials && !(c.menu?.length) && !(c.reviews?.length) && !(c.classes?.length) && !c.has3DMenu;

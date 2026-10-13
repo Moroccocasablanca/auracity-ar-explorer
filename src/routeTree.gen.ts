@@ -19,6 +19,7 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as QuestRouteImport } from './routes/quest'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as ApiGuideRouteImport } from './routes/api/guide'
+import { Route as ApiTtsRouteImport } from './routes/api/tts'
 import { Route as AttivitaIdRouteImport } from './routes/attivita.$id'
 import { Route as NodeSlugRouteImport } from './routes/node.$slug'
 
@@ -73,6 +74,11 @@ const ApiGuideRoute = ApiGuideRouteImport.update({
   path: '/api/guide',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiTtsRoute = ApiTtsRouteImport.update({
+  id: '/api/tts',
+  path: '/api/tts',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AttivitaIdRoute = AttivitaIdRouteImport.update({
   id: '/attivita/$id',
   path: '/attivita/$id',
@@ -95,6 +101,7 @@ export interface FileRoutesByFullPath {
   '/quest': typeof QuestRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/api/guide': typeof ApiGuideRoute
+  '/api/tts': typeof ApiTtsRoute
   '/attivita/$id': typeof AttivitaIdRoute
   '/node/$slug': typeof NodeSlugRoute
 }
@@ -109,6 +116,7 @@ export interface FileRoutesByTo {
   '/quest': typeof QuestRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/api/guide': typeof ApiGuideRoute
+  '/api/tts': typeof ApiTtsRoute
   '/attivita/$id': typeof AttivitaIdRoute
   '/node/$slug': typeof NodeSlugRoute
 }
@@ -124,6 +132,7 @@ export interface FileRoutesById {
   '/quest': typeof QuestRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/api/guide': typeof ApiGuideRoute
+  '/api/tts': typeof ApiTtsRoute
   '/attivita/$id': typeof AttivitaIdRoute
   '/node/$slug': typeof NodeSlugRoute
 }
@@ -140,6 +149,7 @@ export interface FileRouteTypes {
     | '/quest'
     | '/.well-known/oauth-protected-resource'
     | '/api/guide'
+    | '/api/tts'
     | '/attivita/$id'
     | '/node/$slug'
   fileRoutesByTo: FileRoutesByTo
@@ -154,6 +164,7 @@ export interface FileRouteTypes {
     | '/quest'
     | '/.well-known/oauth-protected-resource'
     | '/api/guide'
+    | '/api/tts'
     | '/attivita/$id'
     | '/node/$slug'
   id:
@@ -168,6 +179,7 @@ export interface FileRouteTypes {
     | '/quest'
     | '/.well-known/oauth-protected-resource'
     | '/api/guide'
+    | '/api/tts'
     | '/attivita/$id'
     | '/node/$slug'
   fileRoutesById: FileRoutesById
@@ -183,6 +195,7 @@ export interface RootRouteChildren {
   QuestRoute: typeof QuestRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   ApiGuideRoute: typeof ApiGuideRoute
+  ApiTtsRoute: typeof ApiTtsRoute
   AttivitaIdRoute: typeof AttivitaIdRoute
   NodeSlugRoute: typeof NodeSlugRoute
 }
@@ -259,6 +272,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiGuideRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/tts': {
+      id: '/api/tts'
+      path: '/api/tts'
+      fullPath: '/api/tts'
+      preLoaderRoute: typeof ApiTtsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/attivita/$id': {
       id: '/attivita/$id'
       path: '/attivita/$id'
@@ -288,6 +308,7 @@ const rootRouteChildren: RootRouteChildren = {
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
   ApiGuideRoute: ApiGuideRoute,
+  ApiTtsRoute: ApiTtsRoute,
   AttivitaIdRoute: AttivitaIdRoute,
   NodeSlugRoute: NodeSlugRoute,
 }
