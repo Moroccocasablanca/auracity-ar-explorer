@@ -106,6 +106,14 @@ export async function speakNatural(raw: string, lang: Lang, onEnd?: () => void, 
 export type VoiceRequest = { nodeId: string; source: "history" | "message"; messageId?: string; persona?: Persona; /** language of the text being read (defaults to the app language) */ lang?: Lang; /** read the whole text from the client (the "tell me more" button) */ full?: boolean };
 type Fetcher = (req: VoiceRequest & { lang: Lang; voice: "female" | "male" }) => Promise<{ ok: boolean; url?: string }>;
 
+let clipList: Promise<Set<string>> | null = null;
+/** Stories recorded once with the natural voices and shipped inside the app (public/audio), so they play with no server and no cost. */
+async function bundledClip(nodeId: string, voice: "female" | "male"): Promise<string | null> {
+  clipList ??= fetch("/audio/manifest.json").then((r) => (r.ok ? r.json() : [])).then((l: string[]) => new Set(l)).catch(() => new Set<string>());
+  const file = `${nodeId}-${voice}.m4a`;
+  return (await clipList).has(file) ? `/audio/${file}` : null;
+}
+
 /** Plays a clip with the chosen voice; falls back to the phone voice if the natural voice is unavailable. */
 export async function narrate(fetcher: Fetcher, request: VoiceRequest, text: Speakable, lang: Lang, onEnd: () => void) {
   const { persona, full, lang: textLang, ...req } = request;
@@ -114,6 +122,17 @@ export async function narrate(fetcher: Fetcher, request: VoiceRequest, text: Spe
   const choice = voiceChoice();
   if (choice !== "device" && persona !== "kid" && !full) {
     try {
+      const bundled = req.source === "history" && lang === "it" ? await bundledClip(req.nodeId, choice) : null;
+      if (bundled) {
+        vlog("voce registrata nell'app");
+        const a = new Audio(bundled);
+        a.playbackRate = rate();
+        current = a;
+        a.onended = () => onEnd();
+        a.onerror = () => onEnd();
+        await a.play();
+        return;
+      }
       const res = await fetcher({ ...req, lang, voice: choice });
       vlog(`voce AI del server: ${res.ok ? "ok" : "non disponibile"}`);
       if (res.ok && res.url) {
