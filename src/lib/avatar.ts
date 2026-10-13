@@ -3,7 +3,10 @@
 import { useEffect, useState } from "react";
 
 export type MyAvatar = { kind: "default" } | { kind: "emoji"; value: string } | { kind: "photo"; value: string };
-export const EMOJIS = ["😀", "😎", "🤠", "🦊", "🐼", "🐱", "🐶", "🦄", "🚀", "⭐", "🍕", "🎸"];
+/** Ready-made characters (made with AI, modern 3D look). The user can always use their own photo instead. */
+export const AVATARS = [1, 2, 3, 4, 5, 6, 7, 8].map((n) => `/avatars/a${n}.jpg`);
+/** Colour of the ring around you on the map. */
+export const RINGS = ["#22d3ee", "#a78bfa", "#f472b6", "#fb923c", "#facc15", "#4ade80", "#f8fafc", "#f43f5e"];
 
 const KEY = "aura_my_avatar";
 const EVENT = "aura-avatar";
@@ -26,6 +29,25 @@ export function setAvatar(a: MyAvatar) {
     /* storage full or blocked */
   }
   window.dispatchEvent(new Event(EVENT));
+}
+
+const RING_KEY = "aura_my_ring";
+export const getRing = () => {
+  try { return localStorage.getItem(RING_KEY) || RINGS[0]!; } catch { return RINGS[0]!; }
+};
+export function setRing(c: string) {
+  try { localStorage.setItem(RING_KEY, c); } catch { /* ignore */ }
+  window.dispatchEvent(new Event(EVENT));
+}
+export function useRing(): string {
+  const [c, setC] = useState(RINGS[0]!);
+  useEffect(() => {
+    const read = () => setC(getRing());
+    read();
+    window.addEventListener(EVENT, read);
+    return () => window.removeEventListener(EVENT, read);
+  }, []);
+  return c;
 }
 
 export function useAvatar(): MyAvatar {

@@ -115,12 +115,20 @@ function declutter(shown: Map<string, maplibregl.Marker>, services?: Map<string,
   // Icons come first: a label is never allowed to sit on top of any icon (its own or a neighbour's), nor on another label.
   const icons = items.map((e) => ({ e, r: e.querySelector(":scope > :not(.aura-label)")?.getBoundingClientRect() })).filter((x): x is { e: HTMLElement; r: DOMRect } => !!x.r && x.r.width > 0);
   const taken: DOMRect[] = [];
+  // Parts of the screen that belong to buttons: no label may sit under the filter chips, the 2D/3D switch or the tool buttons.
+  const box = items[0]?.closest(".maplibregl-map")?.getBoundingClientRect();
+  const zones: DOMRect[] = [];
+  if (box) {
+    zones.push(new DOMRect(box.left, box.top, box.width, 86), new DOMRect(box.right - 84, box.top + 86, 84, 340));
+    const seg = document.querySelector(".aura-viewseg")?.getBoundingClientRect();
+    if (seg) zones.push(new DOMRect(seg.left - 4, seg.top - 4, seg.width + 8, seg.height + 8));
+  }
   const overlap = (r: DOMRect, t: DOMRect, pad = 4) => r.left < t.right + pad && r.right > t.left - pad && r.top < t.bottom + pad && r.bottom > t.top - pad;
   for (const e of items) {
     const lab = e.querySelector(".aura-label");
     if (!lab) continue;
     // Try above the icon first, then below it, and only hide the label if neither spot is free.
-    const blocked = (r: DOMRect) => taken.some((t) => overlap(r, t)) || icons.some((i) => i.e !== e && overlap(r, i.r, 2));
+    const blocked = (r: DOMRect) => taken.some((t) => overlap(r, t)) || icons.some((i) => i.e !== e && overlap(r, i.r, 2)) || zones.some((z) => overlap(r, z, 0)) || (!!box && (r.left < box.left + 2 || r.right > box.right - 2 || r.bottom > box.bottom - 78));
     lab.classList.remove("aura-label-below");
     let r = lab.getBoundingClientRect();
     if (r.width === 0) continue;
@@ -185,7 +193,7 @@ type Props = {
   poiText: { call: string; directions: string; open: string };
   speakingId: string | null;
   /** the visitor: label, GPS error in metres and compass heading */
-  me: { label: string; accuracy: number; heading: number; avatar: MyAvatar; name: string };
+  me: { label: string; accuracy: number; heading: number; avatar: MyAvatar; name: string; ring: string };
 };
 
 export default function BraMap({ nodes, pos, kindLabel, placeLabel, appearance, recenter, onTalk, talkLabel, readLabel, openLabel, pois, poiText, speakingId, me: meInfo }: Props) {
@@ -307,7 +315,7 @@ export default function BraMap({ nodes, pos, kindLabel, placeLabel, appearance, 
       e.className = "aura-mk aura-svc";
       e.style.width = e.style.height = "30px";
       e.style.zIndex = "5";
-      e.innerHTML = `<span class="aura-svc-badge" style="--pin:${s.bg};--edge:${s.color};color:${s.fg}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${s.symbol}</svg></span><span class="aura-label aura-label-svc">${s.title ? `<small style="color:${s.color}">${esc(s.tag)}</small><b>${esc(s.title)}</b>` : `<b style="color:${s.color}">${esc(s.tag)}</b>`}</span>`;
+      e.innerHTML = `<span class="aura-svc-badge" style="--pin:${s.bg};--edge:${s.color};color:${s.fg}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${s.symbol}</svg></span><span class="aura-label aura-label-svc">${s.title ? `<small style="color:color-mix(in oklab, ${s.color} 40%, #fff)">${esc(s.tag)}</small><b>${esc(s.title)}</b>` : `<b>${esc(s.tag)}</b>`}</span>`;
       const pop = document.createElement("div");
       pop.className = "aura-pop";
       const k = document.createElement("p");
@@ -430,6 +438,7 @@ export default function BraMap({ nodes, pos, kindLabel, placeLabel, appearance, 
     };
     m.on("zoomend", labels);
     m.on("pitch", () => syncPitch(m));
+    m.on("idle", () => requestAnimationFrame(() => declutter(shown.current, svcShown.current)));
     m.on("moveend", () => {
       refresh();
       refreshServices();
@@ -537,6 +546,7 @@ export default function BraMap({ nodes, pos, kindLabel, placeLabel, appearance, 
     if (!m || !el || !pos) return;
     const tag = el.querySelector<HTMLElement>(".aura-me-tag");
     if (tag) tag.textContent = meInfo.name ? `${meInfo.name} · ${meInfo.label}` : meInfo.label;
+    el.style.setProperty("--ring", meInfo.ring);
     const body = el.querySelector<HTMLElement>(".aura-me-body");
     if (body) {
       const a = meInfo.avatar;
@@ -567,7 +577,7 @@ export default function BraMap({ nodes, pos, kindLabel, placeLabel, appearance, 
     size();
     m.on("zoom", size);
     return () => void m.off("zoom", size);
-  }, [pos, meInfo.label, meInfo.name, meInfo.avatar, meInfo.accuracy, meInfo.heading]);
+  }, [pos, meInfo.label, meInfo.name, meInfo.ring, meInfo.avatar, meInfo.accuracy, meInfo.heading]);
 
   useEffect(() => {
     if (recenter > 0 && pos) map.current?.flyTo({ center: [pos.lng, pos.lat], zoom: 17.5, pitch: 62, duration: 1400 });

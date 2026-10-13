@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { Camera } from "lucide-react";
-import { EMOJIS, photoToAvatar, setAvatar, useAvatar } from "@/lib/avatar";
+import { AVATARS, RINGS, photoToAvatar, setAvatar, setRing, useAvatar, useRing } from "@/lib/avatar";
 import { useI18n } from "@/lib/i18n";
 import { getNick, setNick } from "@/lib/leaderboard";
 
@@ -8,6 +8,7 @@ import { getNick, setNick } from "@/lib/leaderboard";
 export function AvatarPicker() {
   const { t } = useI18n();
   const av = useAvatar();
+  const ring = useRing();
   const file = useRef<HTMLInputElement>(null);
   const [nick, setNickState] = useState(() => (typeof localStorage === "undefined" ? "" : getNick()));
   const [err, setErr] = useState(false);
@@ -16,7 +17,7 @@ export function AvatarPicker() {
       <p className="text-sm font-semibold">{t("avatar.title")}</p>
       <div className="flex items-center gap-3">
         <span className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-full border-4 border-white bg-gradient-to-br from-cyan-400 to-indigo-500 text-3xl shadow">
-          {av.kind === "photo" ? <img src={av.value} alt="" className="size-full object-cover" /> : av.kind === "emoji" ? av.value : "🙂"}
+          {av.kind === "photo" ? <img src={av.value} alt="" className="size-full object-cover" /> : av.kind === "emoji" ? av.value : <span className="text-2xl">👤</span>}
         </span>
         <input
           value={nick}
@@ -26,10 +27,20 @@ export function AvatarPicker() {
           className="min-w-0 flex-1 rounded-xl border border-input bg-secondary/70 px-3 py-2.5 text-sm"
         />
       </div>
-      <div className="grid grid-cols-6 gap-2">
-        {EMOJIS.map((e) => (
-          <button key={e} type="button" onClick={() => setAvatar({ kind: "emoji", value: e })} className={`rounded-xl border py-2 text-2xl ${av.kind === "emoji" && av.value === e ? "border-primary bg-primary/15" : "border-border"}`} aria-label={e}>{e}</button>
+      <div className="grid grid-cols-4 gap-2">
+        {AVATARS.map((src) => (
+          <button key={src} type="button" onClick={() => setAvatar({ kind: "photo", value: src })} className={`aspect-square overflow-hidden rounded-full border-4 ${av.kind === "photo" && av.value === src ? "border-primary" : "border-transparent"}`} aria-label="avatar">
+            <img src={src} alt="" className="size-full object-cover" loading="lazy" />
+          </button>
         ))}
+      </div>
+      <div>
+        <p className="mb-1.5 text-xs font-semibold text-muted-foreground">{t("avatar.ring")}</p>
+        <div className="flex gap-2">
+          {RINGS.map((c) => (
+            <button key={c} type="button" onClick={() => setRing(c)} aria-label={c} className={`size-8 rounded-full border-2 ${ring === c ? "border-white ring-2 ring-primary" : "border-transparent"}`} style={{ background: c }} />
+          ))}
+        </div>
       </div>
       <div className="flex gap-2">
         <button type="button" onClick={() => file.current?.click()} className="flex flex-1 items-center justify-center gap-2 rounded-full bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground">
