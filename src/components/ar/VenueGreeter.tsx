@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { ArrowUpRight, Volume2, X } from "lucide-react";
 import { Menu3D } from "@/components/ar/Menu3D";
+import { TalkingMascot } from "@/components/ar/TalkingMascot";
 import { getNick, setNick } from "@/lib/leaderboard";
 import { useI18n } from "@/lib/i18n";
 import { bump, useFlash } from "@/lib/merchant";
@@ -63,11 +64,7 @@ export function VenueGreeter({ node, onClose }: { node: NodeRow; onClose: () => 
 
   return (
     <div className="absolute inset-x-2 bottom-24 z-30 mx-auto flex max-w-md items-end gap-1" onPointerDown={(e) => e.stopPropagation()}>
-      <img
-        src={placeStyleKey(node) === "restaurant" ? "/mascots/chef.png" : "/mascots/barista.png"}
-        alt=""
-        className={`h-64 w-auto shrink-0 self-end drop-shadow-2xl ${talking ? "mascot-talk" : "mascot-idle"}`}
-      />
+      <TalkingMascot src={placeStyleKey(node) === "restaurant" ? "/mascots/chef.png" : "/mascots/barista.png"} speaking={talking} className="h-64 w-auto" />
       <div className="glass relative min-w-0 flex-1 rounded-3xl p-3">
       <button type="button" aria-label={t("greet.close")} onClick={() => { stopSpeaking(); onClose(); }} className="absolute right-3 top-3 rounded-full p-1.5 text-muted-foreground">
         <X className="size-4" />
