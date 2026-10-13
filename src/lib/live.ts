@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { getMoonIllumination } from "suncalc";
 import type { Lang } from "./i18n";
-import { romeDate } from "./geo";
+import { romeDate } from "@/utils/geo";
 
 export type Today = {
   tempNow: number;

@@ -1,5 +1,5 @@
 import { isGardenObject } from "./node-rules";
-import { venueFeaturesEnabled } from "./systemConfig";
+import { venueFeaturesEnabled } from "@/config/systemConfig";
 
 type Place = { kind: string; venue_type?: string | null; subscribed?: boolean; garden_interactive: boolean };
 export type ExploreFilter = "all" | "restaurants" | "monument" | "gardens" | "business" | "services" | "activities";

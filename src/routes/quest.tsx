@@ -1,22 +1,21 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { BookOpen, Brain, Calculator, Check, CheckCircle2, Dices, FlaskConical, Flame, Gift, Globe2, Landmark, Languages, Map as MapIcon, MapPin, MessagesSquare, Palette, PartyPopper, Scale, Sparkles, Star, Store, Volume2, TreePine, XCircle, type LucideIcon } from "lucide-react";
+import { Check, Gift, Landmark, Sparkles, Star, Store, Volume2, TreePine } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n";
 import { nodesQuery, promo, type NodeRow } from "@/lib/nodes";
 import { isGardenObject } from "@/lib/node-rules";
 import { isRestaurant } from "@/lib/explore-rules";
-import { speakNatural, stopSpeaking } from "@/lib/speech";
-import { VoicePersona } from "@/lib/voice-persona";
-import { warmNeuralVoice } from "@/lib/neuralVoice";
-import { contentLang } from "@/lib/text-speech";
+import { speakNatural, stopSpeaking } from "@/services/voice/speech";
+import { VoicePersona } from "@/services/voice/voice-persona";
+import { warmNeuralVoice } from "@/services/voice/neuralVoice";
+import { contentLang } from "@/services/voice/text-speech";
 import { buildLiveQuestions, moonName, useToday, weatherWord, type LiveQuestion } from "@/lib/live";
-import { isOpenNow } from "@/lib/geo";
-import { TOPICS, bandLabel, getBand, loadDailyTrivia, nextTrivia, setBand, shuffled, type Band, type Topic, type Trivia } from "@/lib/trivia";
+import { isOpenNow } from "@/utils/geo";
+import { HuntCard } from "@/components/hunt/HuntCard";
+import { TriviaCard } from "@/components/hunt/TriviaCard";
 import { getNick, setNick, useLeaderboard } from "@/lib/leaderboard";
-import { romeDate } from "@/lib/geo";
-import { AVATAR_IMG, buildHunt, huntDone, markHuntDone, rewardName, weekKey } from "@/lib/hunt";
 import { nodeHours } from "@/lib/nodes";
 import { challengesOfDay, countToday, level, logEvent, randomRiddle, rankKey, riddleOfDay, riddleText, stars, uniqueIds, type Riddle } from "@/lib/quest";
 
@@ -47,50 +46,6 @@ function useQuestState() {
     return () => window.removeEventListener("aura-quest", read);
   }, []);
   return state;
-}
-
-function HuntCard() {
-  const { t, lang } = useI18n();
-  const { data: nodes = [] } = useQuery(nodesQuery);
-  const items = useMemo(() => buildHunt(nodes), [nodes]);
-  const [done, setDone] = useState<string[]>([]);
-  const [wrong, setWrong] = useState<string | null>(null);
-  useEffect(() => setDone(huntDone()), []);
-  if (!items.length) return null;
-  const found = items.filter((h) => done.includes(h.elementId)).length;
-  const pick = (h: (typeof items)[number], id: string) => {
-    if (id === h.nodeId) { markHuntDone(h.elementId); logEvent("riddle", h.elementId); setDone(huntDone()); setWrong(null); } else setWrong(h.elementId);
-  };
-  const listen = (h: (typeof items)[number]) => { stopSpeaking(); void speakNatural(lang === "it" ? h.riddle.it : h.riddle.en, contentLang(lang), undefined, VoicePersona.HUNT_DYNAMIC); };
-  return (
-    <section className="rounded-3xl border-2 border-fuchsia-300/50 bg-gradient-to-br from-fuchsia-400/15 to-amber-300/10 p-5">
-      <p className="mono-label flex items-center gap-1.5"><MapIcon className="size-4" /> {t("treasure.title")} · {weekKey()}</p>
-      <p className="mt-1 text-sm text-muted-foreground">{t("treasure.sub", { n: found, m: items.length })}</p>
-      <div className="mt-3 space-y-3">
-        {items.map((h) => {
-          const ok = done.includes(h.elementId);
-          return (
-            <div key={h.elementId} className="rounded-2xl border border-border bg-card/70 p-3">
-              <div className="flex items-start gap-3">
-                <img src={AVATAR_IMG[h.currentAvatarType]} alt="" className="size-16 shrink-0 object-contain drop-shadow-lg" />
-                <p className="flex-1 text-sm font-semibold leading-snug">{lang === "it" ? h.riddle.it : h.riddle.en}</p>
-                <button type="button" aria-label={t("audio.listen")} onClick={() => listen(h)}><Volume2 className="size-5" /></button>
-              </div>
-              {ok ? (
-                <p className="mt-2 flex items-center gap-1.5 text-sm font-bold text-green-300"><PartyPopper className="size-4" /> {t("treasure.reward", { r: rewardName(h, lang) })}</p>
-              ) : (
-                <div className="mt-2 grid gap-2">
-                  {h.options.map((o) => <button key={o.id} type="button" onClick={() => pick(h, o.id)} className="rounded-xl border border-border px-3 py-2 text-left text-sm active:scale-[.98]">{o.name}</button>)}
-                  {wrong === h.elementId && <p className="text-sm text-red-300">{t("quest.retry")}</p>}
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
-      <p className="mt-3 text-xs text-muted-foreground">{t("treasure.note")}</p>
-    </section>
-  );
 }
 
 function RiddleCard({ audience }: { audience: "kids" | "adults" }) {
@@ -236,78 +191,6 @@ function Challenges() {
           );
         })}
       </ul>
-    </section>
-  );
-}
-
-const TOPIC_ICON: Record<string, LucideIcon> = { mix: Dices, italiano: BookOpen, english: Languages, storia: Landmark, geografia: Globe2, scienze: FlaskConical, mate: Calculator, arte: Palette, civica: Scale, modi: MessagesSquare, locale: MapPin };
-const topicIcon = (id: string, cls: string) => {
-  const I = TOPIC_ICON[id] ?? Sparkles;
-  return <I className={`${cls} shrink-0`} />;
-};
-
-function TriviaCard() {
-  const { t } = useI18n();
-  const [band, setBandState] = useState<Band>("adult");
-  const [topic, setTopic] = useState<Topic | "mix">("mix");
-  const [item, setItem] = useState<Trivia | null>(null);
-  const [opts, setOpts] = useState<{ text: string; right: boolean }[]>([]);
-  const [picked, setPicked] = useState<number | null>(null);
-  const [streak, setStreak] = useState(0);
-  const load = useCallback((b: Band, tp: Topic | "mix") => {
-    const q = nextTrivia(b, tp);
-    setItem(q);
-    setOpts(shuffled(q));
-    setPicked(null);
-  }, []);
-  useEffect(() => {
-    const b = getBand();
-    setBandState(b);
-    load(b, "mix");
-    void loadDailyTrivia(); // today's fresh AI questions join the pool for the next ones
-  }, [load]);
-  if (!item) return null;
-  const answer = (i: number) => {
-    if (picked != null) return;
-    setPicked(i);
-    if (opts[i]?.right) {
-      setStreak((s) => s + 1);
-      logEvent("riddle", `trivia-${item.id}`);
-    } else setStreak(0);
-  };
-  const right = picked != null && opts[picked]?.right;
-  const topicInfo = TOPICS.find((x) => x.id === item.topic);
-  return (
-    <section className="rounded-3xl border-2 border-emerald-300/40 bg-gradient-to-br from-emerald-400/15 to-sky-400/10 p-5">
-      <div className="flex items-center justify-between gap-2">
-        <p className="mono-label flex items-center gap-1.5"><Brain className="size-4" /> {t("trivia.title")}</p>
-        {streak > 1 && <span className="rounded-full bg-yellow-300 px-2.5 py-0.5 text-xs font-extrabold text-black"><Flame className="mr-0.5 inline size-3.5" />{streak}</span>}
-      </div>
-      <div className="mt-3 flex gap-2">
-        {(["kids", "teen", "adult"] as Band[]).map((b) => (
-          <button key={b} type="button" onClick={() => { setBand(b); setBandState(b); load(b, topic); }} className={`rounded-full border px-3 py-1.5 text-xs font-semibold ${band === b ? "border-transparent bg-primary text-primary-foreground" : "border-border"}`}>{bandLabel[b]}</button>
-        ))}
-      </div>
-      <div className="chip-row -mx-1 mt-3 flex gap-2 overflow-x-auto px-1 pb-1">
-        {[{ id: "mix" as const, label: t("trivia.mix"), icon: "mix" }, ...TOPICS].map((tp) => (
-          <button key={tp.id} type="button" onClick={() => { setTopic(tp.id); load(band, tp.id); }} className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold ${topic === tp.id ? "border-transparent bg-foreground text-background" : "border-border"}`}>{topicIcon(tp.icon, "size-3.5")}{tp.label}</button>
-        ))}
-      </div>
-      <p className="mt-4 flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">{topicIcon(topicInfo?.icon ?? "", "size-3.5")}{topicInfo?.label}{item.ai && <span className="ml-1 rounded-full bg-violet-400/25 px-2 py-0.5 text-[0.65rem] text-violet-200">{t("trivia.ai")}</span>}</p>
-      <p className="mt-1 text-lg font-semibold leading-snug">{item.q}</p>
-      <div className="mt-4 grid gap-2">
-        {opts.map((o, i) => {
-          const state = picked == null ? "" : o.right ? "border-green-400 bg-green-400/20" : picked === i ? "border-red-400 bg-red-400/15" : "opacity-60";
-          return <button key={o.text} type="button" onClick={() => answer(i)} className={`rounded-2xl border border-border bg-card/70 px-4 py-3 text-left text-base font-medium active:scale-[.98] ${state}`}>{o.text}</button>;
-        })}
-      </div>
-      {picked != null && (
-        <div className={`mt-3 rounded-2xl p-3 text-sm ${right ? "bg-green-400/15" : "bg-red-400/10"}`}>
-          <p className="flex items-center gap-1.5 font-bold">{right ? <><CheckCircle2 className="size-5 text-green-400" /> {t("quest.right")}</> : <><XCircle className="size-5 text-red-400" /> {t("trivia.wrong")}</>}</p>
-          <p className="mt-1">{!right && <b>{opts.find((o) => o.right)?.text}. </b>}{item.why}</p>
-          <Button type="button" className="mt-3 rounded-full" onClick={() => load(band, topic)}>{t("trivia.next")}</Button>
-        </div>
-      )}
     </section>
   );
 }

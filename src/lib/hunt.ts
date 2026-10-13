@@ -2,7 +2,7 @@
 // and builds a riddle from the place's own text (name hidden). No manual work, nothing to pay.
 import type { Lang } from "./i18n";
 import type { NodeRow } from "./nodes";
-import { splitSentences } from "./text-speech";
+import { splitSentences } from "@/services/voice/text-speech";
 
 export type HuntAvatar = "CUBE_MAGIC" | "ANIMAL_MASCOT" | "MYSTERY_OBJECT";
 

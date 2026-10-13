@@ -3,19 +3,19 @@ import { ClientOnly, createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Bell, ChevronRight, Crosshair, Dumbbell, Info, Landmark, LayoutGrid, Moon, ShieldPlus, Store, Sun, SunMoon, TreePine, Utensils } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useMapAppearance } from "@/components/MapAppearanceControl";
+import { useMapAppearance } from "@/components/map/MapAppearanceControl";
 import type { MapMode } from "@/lib/map-appearance";
 import { useProximityAlerts } from "@/components/ProximityWatcher";
-import { distanceM, formatDistance } from "@/lib/geo";
+import { distanceM, formatDistance } from "@/utils/geo";
 import { kindKey, useI18n } from "@/lib/i18n";
 import { useLocation } from "@/lib/location";
 import { useAvatar, useRing } from "@/lib/avatar";
 import { getNick } from "@/lib/leaderboard";
 import { placeStyle, PLACE_STYLE } from "@/lib/place-style";
-import { speakAny } from "@/lib/speech";
-import { VoicePersona } from "@/lib/voice-persona";
-import { contentLang, detectTextLang, greetingWithName, nameThenText } from "@/lib/text-speech";
-import { warmNeuralVoice } from "@/lib/neuralVoice";
+import { speakAny } from "@/services/voice/speech";
+import { VoicePersona } from "@/services/voice/voice-persona";
+import { contentLang, detectTextLang, greetingWithName, nameThenText } from "@/services/voice/text-speech";
+import { warmNeuralVoice } from "@/services/voice/neuralVoice";
 import { history, description, nodeMenu, promo, messagesQuery, nodesQuery, shortStory, tagline, type NodeRow } from "@/lib/nodes";
 import { explorePriority, matchesExploreFilter, type ExploreFilter } from "@/lib/explore-rules";
 import { useNarrator } from "@/components/ListenButton";
@@ -26,7 +26,7 @@ import { ACTIVITIES, ACTIVITY_META } from "@/lib/activities";
 import type { Poi } from "@/lib/poi";
 import { logEvent } from "@/lib/quest";
 
-const BraMap = lazy(() => import("@/components/BraMap"));
+const BraMap = lazy(() => import("@/components/map/BraMap"));
 
 export const Route = createFileRoute("/explore")({
   head: () => ({

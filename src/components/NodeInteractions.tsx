@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { addLocalMessage } from "@/lib/local-messages";
-import { canUseTestAdmin } from "@/lib/systemConfig";
+import { canUseTestAdmin } from "@/config/systemConfig";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Loader2, MapPinOff, Navigation, ScanLine, Star } from "lucide-react";
@@ -9,7 +9,7 @@ import { Link } from "@tanstack/react-router";
 import { postBenchMessage, postMessage, postReview, type ActionResult } from "@/lib/auracity.functions";
 import { useSession } from "@/lib/auth";
 import { ListenButton } from "./ListenButton";
-import { distanceM, isOpenNow } from "@/lib/geo";
+import { distanceM, isOpenNow } from "@/utils/geo";
 import { LOCALE_TAG, useI18n, type Lang } from "@/lib/i18n";
 import { useLocation } from "@/lib/location";
 import { messagesQuery, nodeHours, reviewsQuery, type NodeRow } from "@/lib/nodes";

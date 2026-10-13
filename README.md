@@ -16,15 +16,21 @@ Prova sul telefono (tunnel temporaneo): vedi `docs/stato.md`. App iPhone (Capaci
 
 | Cartella | Contenuto |
 |---|---|
-| `src/routes/` | Pagine: mappa (`explore`), AR (`index`), avventura (`quest`), account (`auth`), locali (`business`, `node.$slug`), API (`api/`) |
-| `src/components/` | Schermate e pezzi di interfaccia: mappa (`BraMap`), AR (`ArView`), omino (`VenueGreeter`), avatar, pannelli admin/test |
-| `src/lib/` | Logica: posizione (`location`), voce (`speech`, `neuralVoice`, `voice.functions`), contenuti dei locali (`venue-content`, `merchant`), caccia al tesoro (`hunt`), testi (`i18n`) |
-| `src/data/` | Dati fissi: servizi, attività, modelli dei monumenti |
-| `public/` | File pubblici: `audio/` (storie registrate), `mascots/` (omini), `avatars/`, voci offline (`piper/`, `ort/`) |
-| `scripts/` | Programmi di servizio (es. `genaudio.mjs` registra le storie con la voce Google) |
-| `supabase/`, `drizzle/` | Database e sue regole |
-| `ios/` | App iPhone (Capacitor) |
-| `docs/` | Stato del lavoro e roadmap |
+| `src/routes/` | Pagine (obbligatoriamente qui): mappa `explore`, AR `index`, avventura `quest`, account `auth`, locali `business` e `node.$slug`, API in `api/` |
+| `src/config/` | Impostazioni della città (`bra.ts`: centro, fuso, raggi) e del sistema (`systemConfig.ts`: GDPR, raggio di 50 m, funzioni a pagamento) |
+| `src/services/voice/` | Motore voce: Google (`api/tts`), voce del telefono (Web Speech), voce offline (Piper), personaggi vocali |
+| `src/services/notifications/` | Avvisi dei locali, preferiti, inviti, notifiche |
+| `src/services/ai/`, `translate/`, `mcp/`, `platform/` | Servizi server (moderazione, menu, traduzioni, MCP) e funzioni del telefono (Capacitor) |
+| `src/models3d/` | Modelli 3D: monumenti e caricatore di file `.glb` con cache (`loader.ts`) |
+| `src/components/ar/` | Vista AR, omino di benvenuto, menu 3D, personaggi parlanti |
+| `src/components/map/` | Mappa interattiva |
+| `src/components/hunt/` | Caccia al tesoro settimanale e quiz |
+| `src/components/admin/` | Pannello del locale (offerte lampo, menu, foto) e strumenti di prova |
+| `src/components/account/` | Avatar, lingua, amici, privacy |
+| `src/utils/` | Strumenti: geografia e orari (`geo`), cache e throttle (`cache`), risparmio batteria (`power`) |
+| `src/lib/` | Logica dei contenuti: quiz, caccia, missioni, locali, testi (`i18n`), posizione |
+| `public/` | `audio/` storie registrate, `mascots/` omini, `dishes/` piatti 3D, `avatars/`, voci offline |
+| `scripts/` | `serve-prod.sh` (versione veloce per il telefono), `genaudio.mjs` (registra le storie) |
 
 ## Voci
 

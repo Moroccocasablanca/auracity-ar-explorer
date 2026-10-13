@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n";
-import { batterySaverPreference, POWER_EVENT } from "@/lib/power";
-import { systemConfig } from "@/lib/systemConfig";
+import { batterySaverPreference, POWER_EVENT } from "@/utils/power";
+import { systemConfig } from "@/config/systemConfig";
 
 type BatteryManager = EventTarget & { level: number; charging: boolean };
 type BatteryNavigator = Navigator & { getBattery?: () => Promise<BatteryManager> };

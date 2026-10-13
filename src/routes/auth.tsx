@@ -9,9 +9,9 @@ import type { Tables } from "@/integrations/supabase/types";
 import { useSession } from "@/lib/auth";
 import { useI18n, type TKey } from "@/lib/i18n";
 import { PASSWORD_RULES, isStrongPassword } from "@/lib/password";
-import { FriendsPanel } from "@/components/FriendsPanel";
-import { AdminTools } from "@/components/AdminTools";
-import { LanguageSelect } from "@/components/LanguageSelect";
+import { FriendsPanel } from "@/components/account/FriendsPanel";
+import { AdminTools } from "@/components/admin/AdminTools";
+import { LanguageSelect } from "@/components/account/LanguageSelect";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({

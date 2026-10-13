@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { ArView } from "@/components/ArView";
+import { ArView } from "@/components/ar/ArView";
 
 export const Route = createFileRoute("/")({
   head: () => ({

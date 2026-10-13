@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n";
 import { ACTIVITY_META, classesNow, findActivity } from "@/lib/activities";
 import { useVenueContent } from "@/lib/venue-content";
-import { useFollowing } from "@/lib/follow";
+import { useFollowing } from "@/services/notifications/follow";
 import { directionsUrl, telHref } from "@/lib/services";
 
 export const Route = createFileRoute("/attivita/$id")({

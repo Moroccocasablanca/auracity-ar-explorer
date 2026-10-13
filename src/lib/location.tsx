@@ -1,9 +1,10 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { distanceM, type LatLng } from "./geo";
-import { batterySaverPreference, POWER_EVENT } from "./power";
+import { distanceM, type LatLng } from "@/utils/geo";
+import { batterySaverPreference, POWER_EVENT } from "@/utils/power";
 
-export const BRA_CENTER: LatLng = { lat: 44.6985, lng: 7.8538 };
-const MAX_DIST_FROM_BRA_M = 8000;
+import { BRA_CENTER, cityConfig } from "@/config/bra";
+export { BRA_CENTER };
+const MAX_DIST_FROM_BRA_M = cityConfig.maxDistanceFromCenterM;
 
 /** Smooths the jumpy GPS dot: a precise fix moves the position a lot, a poor one only a little (a light Kalman filter). */
 type GpsFilter = { lat: number; lng: number; variance: number; at: number };

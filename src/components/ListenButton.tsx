@@ -3,9 +3,9 @@ import { useServerFn } from "@tanstack/react-start";
 import { Settings2, Square, Volume2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n";
-import { narrate, setVoiceChoice, stopSpeaking, voiceChoice, type VoiceChoice, type VoiceRequest } from "@/lib/speech";
-import { naturalVoice } from "@/lib/voice.functions";
-import { speakableIsEmpty, type Speakable } from "@/lib/text-speech";
+import { narrate, setVoiceChoice, stopSpeaking, voiceChoice, type VoiceChoice, type VoiceRequest } from "@/services/voice/speech";
+import { naturalVoice } from "@/services/voice/voice.functions";
+import { speakableIsEmpty, type Speakable } from "@/services/voice/text-speech";
 
 /** Shared narration state: natural voice with phone-voice fallback. */
 export function useNarrator() {

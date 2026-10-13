@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { romeDate } from "@/lib/geo";
+import { romeDate } from "@/utils/geo";
 
 describe("daily menu refresh day boundary (Europe/Rome)", () => {
   it("23:30 UTC in summer is already the next day in Bra", () => {

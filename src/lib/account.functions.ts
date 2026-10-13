@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { canUseTestAdmin } from "./systemConfig";
+import { canUseTestAdmin } from "@/config/systemConfig";
 
 const TEST_ADMIN_EMAIL = "auracity.preview.admin@lovable.test";
 

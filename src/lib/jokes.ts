@@ -1,6 +1,6 @@
 // Complete jokes for the talking trees and benches (setup + punchline), so a character never leaves a joke unfinished.
 import type { Lang } from "./i18n";
-import { romeDate } from "./geo";
+import { romeDate } from "@/utils/geo";
 
 type Joke = { q: { it: string; en: string }; a: { it: string; en: string } };
 

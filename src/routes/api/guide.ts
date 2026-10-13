@@ -2,8 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { createAnthropic } from "@ai-sdk/anthropic";
 import { convertToModelMessages, stepCountIs, streamText, tool, type UIMessage } from "ai";
 import { z } from "zod";
-import { supabaseAnon } from "@/lib/mcp/supabase";
-import { createLovableAiGatewayRunIdFetch, withRunIdHeader } from "@/lib/guide/run-id";
+import { supabaseAnon } from "@/services/mcp/supabase";
+import { createLovableAiGatewayRunIdFetch, withRunIdHeader } from "@/services/ai/guide/run-id";
 
 const LANGS = ["it", "en", "es", "fr", "de", "ar", "ro", "sq", "hi"] as const;
 const MAX_MESSAGES = 40;

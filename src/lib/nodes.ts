@@ -1,10 +1,10 @@
 import { queryOptions } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
-import type { Hours } from "./geo";
+import type { Hours } from "@/utils/geo";
 import type { Lang } from "./i18n";
 import { cleanText } from "./jokes";
-import { splitSentences } from "./text-speech";
+import { splitSentences } from "@/services/voice/text-speech";
 
 export type NodeRow = Tables<"nodes">;
 export type MenuItem = { name: string; price: number; /** owner's own photo (small data URL); otherwise a standard 3D illustration is used */ img?: string | undefined };

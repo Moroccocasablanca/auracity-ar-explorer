@@ -1,9 +1,9 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { distanceM, isOpenNow, romeDate, type Hours } from "./geo";
+import { distanceM, isOpenNow, romeDate, type Hours } from "@/utils/geo";
 import { allowsMessages, isGardenObject } from "./node-rules";
-import { venueFeaturesEnabled } from "./systemConfig";
+import { venueFeaturesEnabled } from "@/config/systemConfig";
 
 export type ActionError =
   | "too_far"
@@ -48,7 +48,7 @@ export const postMessage = createServerFn({ method: "POST" })
   .inputValidator((input: z.input<typeof messageSchema>) => messageSchema.parse(input))
   .handler(async ({ data }): Promise<ActionResult> => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { moderateText } = await import("./moderation.server");
+    const { moderateText } = await import("@/services/ai/moderation.server");
 
     const { data: node } = await supabaseAdmin
       .from("nodes")
@@ -81,7 +81,7 @@ export const postReview = createServerFn({ method: "POST" })
   .inputValidator((input: z.input<typeof reviewSchema>) => reviewSchema.parse(input))
   .handler(async ({ data }): Promise<ActionResult> => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { moderateText } = await import("./moderation.server");
+    const { moderateText } = await import("@/services/ai/moderation.server");
 
     const { data: node } = await supabaseAdmin
       .from("nodes")
@@ -143,7 +143,7 @@ export const postBenchMessage = createServerFn({ method: "POST" })
   .inputValidator((input: z.input<typeof benchSchema>) => benchSchema.parse(input))
   .handler(async ({ data, context }): Promise<ActionResult> => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { moderateText } = await import("./moderation.server");
+    const { moderateText } = await import("@/services/ai/moderation.server");
 
     const { data: node } = await supabaseAdmin
       .from("nodes")
@@ -193,7 +193,7 @@ export const refreshMenu = createServerFn({ method: "POST" })
     if (!claimed || claimed.length === 0) return { updated: false };
 
     try {
-      const { extractMenuFromUrl } = await import("./menu.server");
+      const { extractMenuFromUrl } = await import("@/services/ai/menu.server");
       const menu = await extractMenuFromUrl(node.menu_source_url, today);
       if (!menu) return { updated: false };
       await supabaseAdmin

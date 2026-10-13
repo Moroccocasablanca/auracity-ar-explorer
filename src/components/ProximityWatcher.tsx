@@ -2,16 +2,16 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
-import { distanceM } from "@/lib/geo";
+import { distanceM } from "@/utils/geo";
 import { useI18n } from "@/lib/i18n";
 import { useLocation } from "@/lib/location";
 import { nodesQuery } from "@/lib/nodes";
-import { inviteBody } from "@/lib/invites";
-import { showSystemNotice } from "@/lib/notify";
-import { isNative, onNoticeTap, startBackgroundWatch } from "@/lib/native";
+import { inviteBody } from "@/services/notifications/invites";
+import { showSystemNotice } from "@/services/notifications/notify";
+import { isNative, onNoticeTap, startBackgroundWatch } from "@/services/platform/native";
 import { ACTIVITIES, activityInvite, findActivity } from "@/lib/activities";
-import { markNotified, mayNotify } from "@/lib/notify-prefs";
-import { systemConfig, venueFeaturesEnabled } from "@/lib/systemConfig";
+import { markNotified, mayNotify } from "@/services/notifications/notify-prefs";
+import { systemConfig, venueFeaturesEnabled } from "@/config/systemConfig";
 
 /** Distance at which a place "calls" you (wider than the interaction radius). */
 export const ALERT_RADIUS_M = systemConfig.proximityLoadingRadiusMeters;

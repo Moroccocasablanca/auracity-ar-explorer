@@ -14,10 +14,8 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as BusinessRouteImport } from './routes/business'
 import { Route as ExploreRouteImport } from './routes/explore'
 import { Route as GuideRouteImport } from './routes/guide'
-import { Route as McpRouteImport } from './routes/mcp'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as QuestRouteImport } from './routes/quest'
-import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as ApiDailyTriviaRouteImport } from './routes/api/daily-trivia'
 import { Route as ApiGuideRouteImport } from './routes/api/guide'
 import { Route as ApiTtsRouteImport } from './routes/api/tts'
@@ -49,11 +47,6 @@ const GuideRoute = GuideRouteImport.update({
   path: '/guide',
   getParentRoute: () => rootRouteImport,
 } as any)
-const McpRoute = McpRouteImport.update({
-  id: '/mcp',
-  path: '/mcp',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
@@ -64,12 +57,6 @@ const QuestRoute = QuestRouteImport.update({
   path: '/quest',
   getParentRoute: () => rootRouteImport,
 } as any)
-const Char91DotwellKnownChar93OauthProtectedResourceRoute =
-  Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
-    id: '/.well-known/oauth-protected-resource',
-    path: '/.well-known/oauth-protected-resource',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 const ApiDailyTriviaRoute = ApiDailyTriviaRouteImport.update({
   id: '/api/daily-trivia',
   path: '/api/daily-trivia',
@@ -102,10 +89,8 @@ export interface FileRoutesByFullPath {
   '/business': typeof BusinessRoute
   '/explore': typeof ExploreRoute
   '/guide': typeof GuideRoute
-  '/mcp': typeof McpRoute
   '/privacy': typeof PrivacyRoute
   '/quest': typeof QuestRoute
-  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/api/daily-trivia': typeof ApiDailyTriviaRoute
   '/api/guide': typeof ApiGuideRoute
   '/api/tts': typeof ApiTtsRoute
@@ -118,10 +103,8 @@ export interface FileRoutesByTo {
   '/business': typeof BusinessRoute
   '/explore': typeof ExploreRoute
   '/guide': typeof GuideRoute
-  '/mcp': typeof McpRoute
   '/privacy': typeof PrivacyRoute
   '/quest': typeof QuestRoute
-  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/api/daily-trivia': typeof ApiDailyTriviaRoute
   '/api/guide': typeof ApiGuideRoute
   '/api/tts': typeof ApiTtsRoute
@@ -135,10 +118,8 @@ export interface FileRoutesById {
   '/business': typeof BusinessRoute
   '/explore': typeof ExploreRoute
   '/guide': typeof GuideRoute
-  '/mcp': typeof McpRoute
   '/privacy': typeof PrivacyRoute
   '/quest': typeof QuestRoute
-  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/api/daily-trivia': typeof ApiDailyTriviaRoute
   '/api/guide': typeof ApiGuideRoute
   '/api/tts': typeof ApiTtsRoute
@@ -153,10 +134,8 @@ export interface FileRouteTypes {
     | '/business'
     | '/explore'
     | '/guide'
-    | '/mcp'
     | '/privacy'
     | '/quest'
-    | '/.well-known/oauth-protected-resource'
     | '/api/daily-trivia'
     | '/api/guide'
     | '/api/tts'
@@ -169,10 +148,8 @@ export interface FileRouteTypes {
     | '/business'
     | '/explore'
     | '/guide'
-    | '/mcp'
     | '/privacy'
     | '/quest'
-    | '/.well-known/oauth-protected-resource'
     | '/api/daily-trivia'
     | '/api/guide'
     | '/api/tts'
@@ -185,10 +162,8 @@ export interface FileRouteTypes {
     | '/business'
     | '/explore'
     | '/guide'
-    | '/mcp'
     | '/privacy'
     | '/quest'
-    | '/.well-known/oauth-protected-resource'
     | '/api/daily-trivia'
     | '/api/guide'
     | '/api/tts'
@@ -202,10 +177,8 @@ export interface RootRouteChildren {
   BusinessRoute: typeof BusinessRoute
   ExploreRoute: typeof ExploreRoute
   GuideRoute: typeof GuideRoute
-  McpRoute: typeof McpRoute
   PrivacyRoute: typeof PrivacyRoute
   QuestRoute: typeof QuestRoute
-  Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   ApiDailyTriviaRoute: typeof ApiDailyTriviaRoute
   ApiGuideRoute: typeof ApiGuideRoute
   ApiTtsRoute: typeof ApiTtsRoute
@@ -250,13 +223,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GuideRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/mcp': {
-      id: '/mcp'
-      path: '/mcp'
-      fullPath: '/mcp'
-      preLoaderRoute: typeof McpRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/privacy': {
       id: '/privacy'
       path: '/privacy'
@@ -269,13 +235,6 @@ declare module '@tanstack/react-router' {
       path: '/quest'
       fullPath: '/quest'
       preLoaderRoute: typeof QuestRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/.well-known/oauth-protected-resource': {
-      id: '/.well-known/oauth-protected-resource'
-      path: '/.well-known/oauth-protected-resource'
-      fullPath: '/.well-known/oauth-protected-resource'
-      preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/daily-trivia': {
@@ -322,11 +281,8 @@ const rootRouteChildren: RootRouteChildren = {
   BusinessRoute: BusinessRoute,
   ExploreRoute: ExploreRoute,
   GuideRoute: GuideRoute,
-  McpRoute: McpRoute,
   PrivacyRoute: PrivacyRoute,
   QuestRoute: QuestRoute,
-  Char91DotwellKnownChar93OauthProtectedResourceRoute:
-    Char91DotwellKnownChar93OauthProtectedResourceRoute,
   ApiDailyTriviaRoute: ApiDailyTriviaRoute,
   ApiGuideRoute: ApiGuideRoute,
   ApiTtsRoute: ApiTtsRoute,

@@ -1,5 +1,5 @@
 // Adventure progress (missions, stars, riddles, venue stamps). Lives on the phone only: no accounts, no tracking.
-import { romeDate } from "./geo";
+import { romeDate } from "@/utils/geo";
 import type { Lang } from "./i18n";
 
 export type QuestEventType = "char" | "monument" | "stamp" | "riddle";

@@ -17,10 +17,10 @@ import { LocationProvider } from "../lib/location";
 import { BottomNav } from "../components/BottomNav";
 import { ProximityWatcher } from "../components/ProximityWatcher";
 import { Toaster } from "../components/ui/sonner";
-import { PrivacyConsent } from "../components/PrivacyConsent";
-import { TestPanel } from "../components/TestPanel";
-import { primeAudio } from "../lib/neuralVoice";
-import { registerServiceWorker } from "../lib/notify";
+import { PrivacyConsent } from "@/components/account/PrivacyConsent";
+import { TestPanel } from "@/components/admin/TestPanel";
+import { primeAudio } from "@/services/voice/neuralVoice";
+import { registerServiceWorker } from "@/services/notifications/notify";
 import { AppEnvironment } from "../components/AppEnvironment";
 
 function NotFoundComponent() {
