@@ -106,10 +106,10 @@ function syncPitch(m: maplibregl.Map) {
 }
 
 /** Hides map labels that would overlap a more important one, so the map never fills with text. */
-function declutter(shown: Map<string, maplibregl.Marker>) {
-  const items = [...shown.values()]
-    .map((mk) => mk.getElement())
-    .sort((a, b) => Number(b.style.zIndex || 0) - Number(a.style.zIndex || 0));
+function declutter(shown: Map<string, maplibregl.Marker>, services?: Map<string, maplibregl.Marker>) {
+  // Places first (by importance), then services such as pharmacies: the lesser label is the one that gives way.
+  const byZ = (m: Map<string, maplibregl.Marker>) => [...m.values()].map((mk) => mk.getElement()).sort((a, b) => Number(b.style.zIndex || 0) - Number(a.style.zIndex || 0));
+  const items = [...byZ(shown), ...(services ? byZ(services) : [])];
   for (const e of items) e.querySelector(".aura-label")?.classList.remove("aura-label-off");
   // Icons come first: a label is never allowed to sit on top of any icon (its own or a neighbour's), nor on another label.
   const icons = items.map((e) => ({ e, r: e.querySelector(":scope > :not(.aura-label)")?.getBoundingClientRect() })).filter((x): x is { e: HTMLElement; r: DOMRect } => !!x.r && x.r.width > 0);
@@ -118,10 +118,16 @@ function declutter(shown: Map<string, maplibregl.Marker>) {
   for (const e of items) {
     const lab = e.querySelector(".aura-label");
     if (!lab) continue;
-    const r = lab.getBoundingClientRect();
+    // Try above the icon first, then below it, and only hide the label if neither spot is free.
+    const blocked = (r: DOMRect) => taken.some((t) => overlap(r, t)) || icons.some((i) => i.e !== e && overlap(r, i.r, 2));
+    lab.classList.remove("aura-label-below");
+    let r = lab.getBoundingClientRect();
     if (r.width === 0) continue;
-    const hit = taken.some((t) => overlap(r, t)) || icons.some((i) => i.e !== e && overlap(r, i.r, 2));
-    if (hit) lab.classList.add("aura-label-off");
+    if (blocked(r)) {
+      lab.classList.add("aura-label-below");
+      r = lab.getBoundingClientRect();
+    }
+    if (blocked(r)) lab.classList.add("aura-label-off");
     else taken.push(r);
   }
 }
@@ -300,7 +306,7 @@ export default function BraMap({ nodes, pos, kindLabel, placeLabel, appearance, 
       e.className = "aura-mk aura-svc";
       e.style.width = e.style.height = "30px";
       e.style.zIndex = "5";
-      e.innerHTML = `<span class="aura-svc-badge" style="--pin:${s.bg};--edge:${s.color};color:${s.fg}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${s.symbol}</svg></span><span class="aura-label aura-label-svc"><small style="color:${s.color}">${esc(s.tag)}</small>${s.title ? `<b>${esc(s.title)}</b>` : ""}</span>`;
+      e.innerHTML = `<span class="aura-svc-badge" style="--pin:${s.bg};--edge:${s.color};color:${s.fg}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${s.symbol}</svg></span><span class="aura-label aura-label-svc">${s.title ? `<small style="color:${s.color}">${esc(s.tag)}</small><b>${esc(s.title)}</b>` : `<b style="color:${s.color}">${esc(s.tag)}</b>`}</span>`;
       const pop = document.createElement("div");
       pop.className = "aura-pop";
       const k = document.createElement("p");
@@ -426,7 +432,7 @@ export default function BraMap({ nodes, pos, kindLabel, placeLabel, appearance, 
     m.on("moveend", () => {
       refresh();
       refreshServices();
-      requestAnimationFrame(() => declutter(shown.current));
+      requestAnimationFrame(() => declutter(shown.current, svcShown.current));
     });
     m.on("zoom", () => labels());
     m.on("load", () => {
@@ -455,7 +461,7 @@ export default function BraMap({ nodes, pos, kindLabel, placeLabel, appearance, 
       labels();
       refresh();
       refreshServices();
-      requestAnimationFrame(() => declutter(shown.current));
+      requestAnimationFrame(() => declutter(shown.current, svcShown.current));
     });
     labels();
     map.current = m;

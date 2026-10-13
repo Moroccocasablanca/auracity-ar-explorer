@@ -411,3 +411,5 @@ main.mx-auto { padding-top: calc(env(safe-area-inset-top, 0px) + 1.5rem) !import
 /* Labels keep their natural width (they were squeezed to the width of the icon and broke words in two). */
 .aura-label { width: max-content; max-width: 150px; text-align: center; }
 .aura-label b, .aura-label em { overflow-wrap: normal; word-break: normal; hyphens: auto; }
+
+.aura-label.aura-label-below { bottom: auto; top: calc(100% + 4px); }
