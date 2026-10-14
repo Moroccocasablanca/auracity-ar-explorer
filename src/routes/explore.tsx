@@ -86,7 +86,7 @@ function Explore() {
     () => [
       ...mapServices.map((s) => {
         const m = SERVICE_META[s.type];
-        return { id: s.id, lat: s.lat, lng: s.lng, title: s.name ?? null, tag: t(m.label), color: m.color, bg: m.bg, fg: m.fg, symbol: m.symbol, icon: m.icon, minZoom: kind === "services" ? 14 : 14.5, phone: s.phone, address: s.address, hours: s.hours };
+        return { id: s.id, lat: s.lat, lng: s.lng, title: s.name ?? null, tag: t(m.label), color: m.color, bg: m.bg, fg: m.fg, symbol: m.symbol, icon: m.icon, minZoom: Math.max(m.minZoom ?? 0, kind === "services" ? 14 : 14.5), phone: s.phone, address: s.address, hours: s.hours };
       }),
       ...mapActivities.map((a) => {
         const m = ACTIVITY_META[a.type];
@@ -179,7 +179,7 @@ function Explore() {
               {(["church", "palace", "townhall", "museum", "castle", "memorial", "park", "restaurant", "streetfood", "cafe", "icecream", "bar", "shop"] as const).map((k) => (
                 <span key={k} className="flex items-center gap-2"><i className="aura-legend-ico" style={{ background: PLACE_STYLE[k].color }}><img src={`/icons3d/${PLACE_STYLE[k].icon}.png`} alt="" /></i>{t(PLACE_STYLE[k].label)}</span>
               ))}
-              {(["pharmacy", "hospital", "police", "carabinieri", "fire", "aed"] as const).map((k) => (
+              {(["pharmacy", "hospital", "police", "carabinieri", "fire", "aed", "bank", "post", "deli", "wine"] as const).map((k) => (
                 <span key={k} className="flex items-center gap-2"><i className="aura-legend-ico" style={{ background: SERVICE_META[k].color }}><img src={`/icons3d/${SERVICE_META[k].icon}.png`} alt="" /></i>{t(SERVICE_META[k].label)}</span>
               ))}
             </div>

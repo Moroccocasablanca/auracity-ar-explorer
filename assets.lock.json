@@ -195,6 +195,10 @@
   "bytes": 34339,
   "sha256": "e5f536d18ce2303368a2aceed3c3cadde00576e21f49b2aeebe1605c3727fefa"
  },
+ "public/icons3d/bank.png": {
+  "bytes": 33076,
+  "sha256": "473d5915495f0ff1f3d21de3ca9bce34de1df43459c8cbea8ac4480195b3d301"
+ },
  "public/icons3d/bar.png": {
   "bytes": 22343,
   "sha256": "322dbcb00c556ed349adeb5b791607f57336718a45e51c14258dad0185fd0e46"
@@ -222,6 +226,10 @@
  "public/icons3d/clinic.png": {
   "bytes": 34743,
   "sha256": "9f6770212a0a5c2ce9262657e5aca9ae0962a4e926acf191358fb5e5090c511f"
+ },
+ "public/icons3d/deli.png": {
+  "bytes": 42007,
+  "sha256": "8b8dcdd690943276aab980241b4c575ce1d9b9ef1611e536455809ddddf96a16"
  },
  "public/icons3d/fire.png": {
   "bytes": 51818,
@@ -271,6 +279,10 @@
   "bytes": 36957,
   "sha256": "016f56f77eac3a0582244422e73264ba682d46a5017524fc26d294326fa0aa8c"
  },
+ "public/icons3d/post.png": {
+  "bytes": 30150,
+  "sha256": "2ec5f7fc710fcf2fcf152eb16dcdc47cbdce9cdcfab7b3dc8e67b591aa9b98e8"
+ },
  "public/icons3d/restaurant.png": {
   "bytes": 28836,
   "sha256": "f6cfcf1594a5b625f97741d65b0d8fc2fbfb9f6e81869d9b77575e1e537f9806"
@@ -294,6 +306,10 @@
  "public/icons3d/townhall.png": {
   "bytes": 42715,
   "sha256": "3ae124009be16bb0cb6a0db9e83207cf1a535efd67b891249ff6cf393cf6ae33"
+ },
+ "public/icons3d/wine.png": {
+  "bytes": 21323,
+  "sha256": "b1c60195372d48d2abf429f201273d90c0f543fe141e9afd71d51f9f9e126c96"
  },
  "public/mascots/barista.png": {
   "bytes": 291120,
