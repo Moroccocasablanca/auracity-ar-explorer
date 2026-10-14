@@ -1,7 +1,7 @@
-import { ExternalLink, Moon, Navigation, Phone, Sun } from "lucide-react";
+import { ExternalLink, Moon, Navigation, Phone, Pill, Sun } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { directionsUrl, telHref } from "@/lib/services";
-import type { DutyData, DutyNow } from "@/lib/duty";
+import { dutyNow, useDuty, type DutyData, type DutyNow } from "@/lib/duty";
 
 /** Which pharmacy is on duty now and today (night, weekends, holidays), straight from the official calendar. */
 export function DutyCard({ duty, list, full }: { duty: DutyData | null; list: DutyNow[]; full: boolean }) {
@@ -35,5 +35,30 @@ export function DutyCard({ duty, list, full }: { duty: DutyData | null; list: Du
       {full && !list.length && <p className="mt-2 text-sm">{t("duty.unsure")}</p>}
       <p className="mt-2 text-[0.7rem] leading-snug text-muted-foreground">{t("duty.note")} <a className="inline-flex items-center gap-0.5 underline" href={link} target="_blank" rel="noopener">{t("duty.calendar")}<ExternalLink className="size-3" /></a></p>
     </section>
+  );
+}
+
+/** One compact line for the "today" cards (next to the weather and "on this day"): who is on duty right now. */
+export function DutyLine({ className = "" }: { className?: string }) {
+  const { t } = useI18n();
+  const duty = useDuty();
+  if (!duty || duty.status === "pending") return null;
+  if (duty.status === "unavailable") return <a href={duty.calendar} target="_blank" rel="noopener" className={`flex items-center gap-2 rounded-2xl bg-green-600/15 p-3 text-sm font-semibold ${className}`}><Pill className="size-4 shrink-0 text-green-400" />{t("duty.title")}: {t("duty.calendar")}</a>;
+  const list = dutyNow(duty);
+  const pick = list.filter((d) => d.active);
+  const shown = pick.length ? pick : list.slice(0, 2);
+  if (!shown.length) return <a href={duty.calendar} target="_blank" rel="noopener" className={`flex items-center gap-2 rounded-2xl bg-green-600/15 p-3 text-sm font-semibold ${className}`}><Pill className="size-4 shrink-0 text-green-400" />{t("duty.unsure")}</a>;
+  return (
+    <div className={`rounded-2xl bg-green-600/15 p-3 text-sm ${className}`}>
+      <p className="flex items-center gap-2 font-bold text-green-400"><Pill className="size-4 shrink-0" />{t("duty.title")}</p>
+      <ul className="mt-1 space-y-1">
+        {shown.map((d) => (
+          <li key={`${d.kind}-${d.name}`} className="flex items-center gap-2">
+            <span className="min-w-0 flex-1 font-semibold">{d.name}{d.town && !/^bra$/i.test(d.town) ? ` (${d.town})` : ""} <span className="font-normal text-muted-foreground">· {d.kind === "night" ? t("duty.night") : t("duty.day")} {d.hours}</span></span>
+            <a href={d.place ? directionsUrl(d.place) : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`Farmacia ${d.name} ${d.town ?? "Bra"}`)}`} target="_blank" rel="noopener" aria-label="directions" className="flex size-8 shrink-0 items-center justify-center rounded-full border border-border"><Navigation className="size-4" /></a>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }

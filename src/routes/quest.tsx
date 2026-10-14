@@ -13,6 +13,7 @@ import { contentLang } from "@/services/voice/text-speech";
 import { moonName, useToday, weatherWord } from "@/lib/live";
 import { isOpenNow } from "@/utils/geo";
 import { HuntCard } from "@/components/hunt/HuntCard";
+import { DutyLine } from "@/components/DutyCard";
 import { TriviaCard } from "@/components/hunt/TriviaCard";
 import { getNick, setNick, useLeaderboard } from "@/lib/leaderboard";
 import { nodeHours } from "@/lib/nodes";
@@ -114,6 +115,7 @@ function TodayCard() {
         <li>{t("live.moon", { m: moonName(d.moon, lang) })}</li>
         <li>{t("live.open", { n: open })}</li>
       </ul>
+      <DutyLine className="mt-3" />
       {d.saints[0] && <p className="mt-3 rounded-2xl bg-yellow-300/15 p-3 text-sm font-semibold">{t("live.auguri", { s: d.saints[0].title, n: [...new Set(d.saints.slice(0, 3).map((x) => x.name))].join(", ") })}</p>}
       {d.saintInfo && <p className="mt-2 text-sm text-foreground/90">{d.saintInfo}</p>}
       {d.event && <p className="mt-3 rounded-2xl bg-black/20 p-3 text-sm"><b>{t("live.event", { y: d.event.year })}</b> {d.event.text}</p>}

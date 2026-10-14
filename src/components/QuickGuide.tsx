@@ -19,6 +19,7 @@ import { contentLang, nameThenText } from "@/services/voice/text-speech";
 import { useToday, weatherWord } from "@/lib/live";
 import { ACTIVITIES, ACTIVITY_META, classesNow } from "@/lib/activities";
 import { getVenueContent } from "@/lib/venue-content";
+import { DutyLine } from "@/components/DutyCard";
 
 const card = "rounded-2xl border border-border bg-card/60 p-4";
 
@@ -65,6 +66,7 @@ export function QuickGuide() {
           <p className="mono-label">{t("live.title")}</p>
           <p className="mt-1 text-lg font-semibold">{t("live.now", { t: today.tempNow, w: weatherWord(today.code, lang) })}</p>
           <p className="text-sm text-muted-foreground">{t("live.sun", { a: today.sunrise, b: today.sunset })}</p>
+          <DutyLine className="mt-3" />
         </div>
       )}
 
