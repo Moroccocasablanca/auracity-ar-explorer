@@ -13,7 +13,7 @@ import { contentLang } from "@/services/voice/text-speech";
 import { moonName, useToday, weatherWord } from "@/lib/live";
 import { isOpenNow } from "@/utils/geo";
 import { HuntCard } from "@/components/hunt/HuntCard";
-import { DutyLine } from "@/components/DutyCard";
+import { DutyLine, useClock } from "@/components/DutyCard";
 import { TriviaCard } from "@/components/hunt/TriviaCard";
 import { getNick, setNick, useLeaderboard } from "@/lib/leaderboard";
 import { nodeHours } from "@/lib/nodes";
@@ -103,11 +103,12 @@ function TodayCard() {
   const { data: d, failed } = useToday();
   const { data: nodes = [] } = useQuery(nodesQuery);
   const open = nodes.filter((n) => n.kind === "business" && isOpenNow(nodeHours(n))).length;
+  const clock = useClock();
   if (failed) return <p className="rounded-2xl border border-border p-4 text-sm text-muted-foreground">{t("live.fail")}</p>;
   if (!d) return <div className="h-32 animate-pulse rounded-3xl bg-card/60" />;
   return (
     <section className="rounded-3xl border-2 border-sky-300/40 bg-gradient-to-br from-sky-400/15 to-indigo-400/10 p-5">
-      <p className="mono-label">{t("live.title")}</p>
+      <p className="flex items-center justify-between"><span className="mono-label">{t("live.title")}</span><span className="rounded-full bg-black/25 px-3 py-1 font-mono text-sm font-bold">{t("live.clock")} {clock}</span></p>
       <p className="mt-2 text-3xl font-bold">{t("live.now", { t: d.tempNow, w: weatherWord(d.code, lang) })}</p>
       <ul className="mt-3 space-y-1 text-sm text-foreground/90">
         <li>{t("live.range", { a: d.tempMin, b: d.tempMax })} · {t("live.rain", { p: d.rainPct })}</li>

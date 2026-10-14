@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { ExternalLink, Moon, Navigation, Phone, Pill, Sun } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { directionsUrl, telHref } from "@/lib/services";
@@ -22,7 +23,7 @@ export function DutyCard({ duty, list, full }: { duty: DutyData | null; list: Du
             <li key={`${d.kind}-${d.name}`} className="flex items-center gap-3 rounded-xl bg-card/70 p-2.5">
               <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-green-600 text-white"><Icon className="size-5" /></span>
               <span className="min-w-0 flex-1">
-                <span className="block text-[0.65rem] font-semibold uppercase tracking-wider text-green-400">{t(d.kind === "night" ? "duty.night" : "duty.day")} · {d.hours}{d.active ? ` · ${t("duty.now")}` : ""}</span>
+                <span className="block text-[0.65rem] font-semibold uppercase tracking-wider text-green-400">{t(d.kind === "night" ? "duty.night" : "duty.day")} · {range(t, d.hours)}{d.active ? ` · ${t("duty.now")}` : ""}</span>
                 <span className="block font-semibold leading-snug">{d.name}{d.town && !/^bra$/i.test(d.town) ? ` (${d.town})` : ""}</span>
                 {d.place?.address && <span className="block text-sm text-muted-foreground">{d.place.address}</span>}
               </span>
@@ -36,6 +37,17 @@ export function DutyCard({ duty, list, full }: { duty: DutyData | null; list: Du
       <p className="mt-2 text-[0.7rem] leading-snug text-muted-foreground">{t("duty.note")} <a className="inline-flex items-center gap-0.5 underline" href={link} target="_blank" rel="noopener">{t("duty.calendar")}<ExternalLink className="size-3" /></a></p>
     </section>
   );
+}
+
+/** "12:30-15:30" -> "dalle 12:30 alle 15:30" (in the app language). */
+const range = (t: ReturnType<typeof useI18n>["t"], h: string) => { const [a = "", b = ""] = h.split("-"); return t("duty.range", { a, b }); };
+
+/** The time of day, kept right by itself. */
+export function useClock(): string {
+  const fmt = () => new Intl.DateTimeFormat("it-IT", { timeZone: "Europe/Rome", hour: "2-digit", minute: "2-digit", hour12: false }).format(new Date());
+  const [now, setNow] = useState(fmt);
+  useEffect(() => { const id = setInterval(() => setNow(fmt()), 15_000); return () => clearInterval(id); }, []);
+  return now;
 }
 
 /** One compact line for the "today" cards (next to the weather and "on this day"): who is on duty right now. */
@@ -54,7 +66,7 @@ export function DutyLine({ className = "" }: { className?: string }) {
       <ul className="mt-1 space-y-1">
         {shown.map((d) => (
           <li key={`${d.kind}-${d.name}`} className="flex items-center gap-2">
-            <span className="min-w-0 flex-1 font-semibold">{d.name}{d.town && !/^bra$/i.test(d.town) ? ` (${d.town})` : ""} <span className="font-normal text-muted-foreground">· {d.kind === "night" ? t("duty.night") : t("duty.day")} {d.hours}</span></span>
+            <span className="min-w-0 flex-1 font-semibold">{d.name}{d.town && !/^bra$/i.test(d.town) ? ` (${d.town})` : ""} <span className="font-normal text-muted-foreground">· {d.kind === "night" ? t("duty.night") : t("duty.day")} {range(t, d.hours)}</span></span>
             <a href={d.place ? directionsUrl(d.place) : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`Farmacia ${d.name} ${d.town ?? "Bra"}`)}`} target="_blank" rel="noopener" aria-label="directions" className="flex size-8 shrink-0 items-center justify-center rounded-full border border-border"><Navigation className="size-4" /></a>
           </li>
         ))}

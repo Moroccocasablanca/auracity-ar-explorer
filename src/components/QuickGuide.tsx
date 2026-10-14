@@ -19,7 +19,7 @@ import { contentLang, nameThenText } from "@/services/voice/text-speech";
 import { useToday, weatherWord } from "@/lib/live";
 import { ACTIVITIES, ACTIVITY_META, classesNow } from "@/lib/activities";
 import { getVenueContent } from "@/lib/venue-content";
-import { DutyLine } from "@/components/DutyCard";
+import { DutyLine, useClock } from "@/components/DutyCard";
 
 const card = "rounded-2xl border border-border bg-card/60 p-4";
 
@@ -29,6 +29,7 @@ export function QuickGuide() {
   const here = pos ?? BRA_CENTER;
   const { data: nodes = [] } = useQuery(nodesQuery);
   const { data: today } = useToday();
+  const clock = useClock();
 
   const withDist = (list: NodeRow[]) => list.map((n) => ({ n, d: distanceM(here, n) })).sort((a, b) => a.d - b.d);
   const eat = useMemo(() => withDist(nodes.filter((n) => (isRestaurant(n) || ["cafe", "ice_cream", "fast_food", "bar", "pub"].includes(n.venue_type ?? "")) && isOpenNow(nodeHours(n)))).slice(0, 5), [nodes, here.lat, here.lng]);
@@ -63,7 +64,7 @@ export function QuickGuide() {
 
       {today && (
         <div className={card}>
-          <p className="mono-label">{t("live.title")}</p>
+          <p className="flex items-center justify-between"><span className="mono-label">{t("live.title")}</span><span className="font-mono text-sm font-bold">{t("live.clock")} {clock}</span></p>
           <p className="mt-1 text-lg font-semibold">{t("live.now", { t: today.tempNow, w: weatherWord(today.code, lang) })}</p>
           <p className="text-sm text-muted-foreground">{t("live.sun", { a: today.sunrise, b: today.sunset })}</p>
           <DutyLine className="mt-3" />
