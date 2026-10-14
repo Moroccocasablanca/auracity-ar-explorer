@@ -123,6 +123,17 @@ function declutter(shown: Map<string, maplibregl.Marker>, services?: Map<string,
     const hit = placeIcons.some((p) => p.r.left < i.r.right + 2 && p.r.right > i.r.left - 2 && p.r.top < i.r.bottom + 2 && p.r.bottom > i.r.top - 2);
     i.e.classList.toggle("aura-mk-off", hit);
   }
+  // Places never pile on top of each other either: the most important one stays, the others step aside until you zoom in.
+  const keptIcons: DOMRect[] = [];
+  for (const e of items) {
+    if (e.classList.contains("aura-svc")) continue;
+    e.classList.remove("aura-mk-off");
+    const r = e.getBoundingClientRect(); // the marker's own box: it does not shrink while the pop-in animation is running
+    if (r.width === 0) continue;
+    const hit = keptIcons.some((k) => k.left < r.right + 3 && k.right > r.left - 3 && k.top < r.bottom + 3 && k.bottom > r.top - 3);
+    e.classList.toggle("aura-mk-off", hit);
+    if (!hit) keptIcons.push(r);
+  }
   const taken: DOMRect[] = [];
   // The filter chips and tool buttons now live outside the map; only the 2D/3D switch floats on it, so labels keep away from it.
   const box = items[0]?.closest(".maplibregl-map")?.getBoundingClientRect();
@@ -154,7 +165,7 @@ const icon3d = (name: string) => `<img class="aura-ico3d" src="/icons3d/${name}.
 
 /** Small round badge in the category colour with a white symbol: easy to read at small size. Monuments get a double ring. */
 function stopPin(color: string, symbol: string, big: boolean, mon = false, icon?: string): Pin {
-  const sz = mon ? 38 : big ? 34 : 30;
+  const sz = mon ? 40 : big ? 38 : 34;
   return {
     w: sz,
     h: sz,
@@ -300,7 +311,7 @@ export default function BraMap({ nodes, pos, kindLabel, placeLabel, appearance, 
     e.className = "aura-mk";
     e.style.width = `${pin.w}px`;
     e.style.height = `${pin.h}px`;
-    e.style.zIndex = String(featured ? 4 : garden ? 3 : monument ? 2 : 1);
+    e.style.zIndex = String(monument ? 5 : featured ? 4 : garden ? 3 : 1);
     e.innerHTML = `${pin.html}<span class="aura-label${garden ? " aura-label-kid" : ""}"><small style="color:${color}">${esc(garden ? tl : pl(n))}</small><b>${esc(n.name)}</b>${n.address ? `<em>${esc(n.address.replace(/,?\s*Bra\s*$/i, ""))}</em>` : ""}</span>`;
     const popup = popupFor(n, color, garden, monument);
     // The card slides up from the bottom, so the place glides up above it instead of hiding behind it.
@@ -470,11 +481,17 @@ export default function BraMap({ nodes, pos, kindLabel, placeLabel, appearance, 
     };
     m.on("zoomend", labels);
     m.on("pitch", () => syncPitch(m));
-    m.on("idle", () => requestAnimationFrame(() => declutter(shown.current, svcShown.current)));
+    // Markers get their screen position one frame after they are added, so tidy up again a little later too.
+    const tidy = () => {
+      requestAnimationFrame(() => declutter(shown.current, svcShown.current));
+      setTimeout(() => declutter(shown.current, svcShown.current), 250);
+      setTimeout(() => declutter(shown.current, svcShown.current), 900);
+    };
+    m.on("idle", tidy);
     m.on("moveend", () => {
       refresh();
       refreshServices();
-      requestAnimationFrame(() => declutter(shown.current, svcShown.current));
+      tidy();
     });
     m.on("zoom", () => labels());
     m.on("load", () => {
@@ -529,7 +546,7 @@ export default function BraMap({ nodes, pos, kindLabel, placeLabel, appearance, 
     byId.current = new Map(items.map((n) => [n.id, n]));
     gardens.current = items.filter(isGardenObject);
     const clusterable = items.filter((n) => !isGardenObject(n));
-    const idx = new Supercluster({ radius: 44, maxZoom: 15 }) /* shops and places are never hidden in a number bubble once you are in town */;
+    const idx = new Supercluster({ radius: 44, maxZoom: 14 }) /* shops and places are never hidden in a number bubble once you are in town */;
     idx.load(
       clusterable.map((n) => ({
         type: "Feature" as const,

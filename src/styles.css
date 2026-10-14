@@ -526,12 +526,20 @@ button:not(:disabled):active { transform: scale(.96); }
 @media (prefers-reduced-motion: reduce) { .mascot-idle, .mascot-waves i { animation: none; } }
 
 /* 3D icons inside the colour-coded markers: the colour says the category, the little 3D object says what it is. */
-.aura-ico3d { width: 128%; height: 128%; max-width: none; margin: -14% 0 0; object-fit: contain; pointer-events: none; filter: drop-shadow(0 2px 2px rgb(0 0 0 / .35)); }
+.aura-ico3d { width: 100%; height: 100%; max-width: none; margin: 0; object-fit: contain; pointer-events: none; filter: drop-shadow(0 2px 2px rgb(0 0 0 / .35)); }
 .aura-badge, .aura-svc-badge { overflow: visible; }
 .aura-badge:has(.aura-ico3d) { background: radial-gradient(circle at 30% 25%, color-mix(in oklab, var(--pin) 55%, #fff), var(--pin) 70%); }
 .aura-svc-badge:has(.aura-ico3d) { background: radial-gradient(circle at 30% 25%, #fff, color-mix(in oklab, var(--edge, #fff) 35%, #fff) 80%); }
 .aura-photo-chip { position: absolute; z-index: 2; right: -9px; bottom: -7px; width: 22px; height: 22px; border-radius: 9999px; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at 30% 25%, color-mix(in oklab, var(--pin) 50%, #fff), var(--pin) 75%); border: 2px solid #fff; box-shadow: 0 2px 5px rgb(0 0 0 / .4); }
-.aura-photo-chip .aura-ico3d { width: 124%; height: 124%; margin: -12% 0 0; }
+.aura-photo-chip .aura-ico3d { width: 100%; height: 100%; margin: 0; }
 .aura-photo-stop img.aura-ico3d { position: static; border-radius: 0; }
 .aura-legend-ico { width: 22px; height: 22px; flex: none; border-radius: 9999px; display: inline-flex; align-items: center; justify-content: center; border: 2px solid #fff; box-shadow: 0 1px 3px rgb(0 0 0 / .35); }
-.aura-legend-ico img { width: 124%; height: 124%; max-width: none; margin-top: -12%; }
+.aura-legend-ico img { width: 100%; height: 100%; }
+
+/* Clear colours: every category has its own strong colour, so a cup of coffee and a cocktail are never mixed up. */
+.aura-badge { background: linear-gradient(155deg, color-mix(in oklab, var(--pin) 78%, #fff) 0%, var(--pin) 55%, color-mix(in oklab, var(--pin) 78%, #000) 100%); border: 2px solid #fff; }
+.aura-badge:has(.aura-ico3d) { background: radial-gradient(circle at 30% 25%, color-mix(in oklab, var(--pin) 80%, #fff), var(--pin) 65%, color-mix(in oklab, var(--pin) 80%, #000)); }
+.aura-mk.aura-mk-off { transition: opacity .15s; }
+.aura-badge:has(.aura-ico3d) { padding: 12%; box-sizing: border-box; }
+.aura-svc-badge:has(.aura-ico3d) { padding: 12%; box-sizing: border-box; }
+.aura-legend-ico { padding: 2px; box-sizing: border-box; }
