@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n";
 import { batterySaverPreference, POWER_EVENT } from "@/utils/power";
 import { systemConfig } from "@/config/systemConfig";
+import { toast } from "sonner";
 import { cachedJson } from "@/utils/cache";
 import { cleanOldCaches, precacheAssets, whenIdle } from "@/utils/assetCache";
 
@@ -16,6 +17,17 @@ type BatteryNavigator = Navigator & { getBattery?: () => Promise<BatteryManager>
 export function AppEnvironment() {
   const { t } = useI18n();
   const [installHint, setInstallHint] = useState(false);
+  // No robot voice exists any more: when the natural voice cannot be made, the visitor is told instead of hearing a worse one.
+  useEffect(() => {
+    let last = 0;
+    const on = () => {
+      if (Date.now() - last < 20_000) return;
+      last = Date.now();
+      toast(t("voice.off"));
+    };
+    window.addEventListener("aura-voice-unavailable", on);
+    return () => window.removeEventListener("aura-voice-unavailable", on);
+  }, [t]);
   // Pre-store the recorded voices and the mascots as soon as the phone is idle: playback is then instant, also offline.
   useEffect(() => {
     whenIdle(async () => {

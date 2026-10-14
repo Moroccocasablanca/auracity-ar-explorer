@@ -1,6 +1,6 @@
-// Narration. Natural voices only: recorded stories first (instant), then our server voice (Google), and the phone's own
-// voice only as a last resort when nothing else works. Who speaks is decided by `voice-persona.ts`, never by a general setting.
-import { LOCALE_TAG, type Lang } from "@/lib/i18n";
+// Narration. Natural voices only: recorded stories first (instant), then our server voice (Google). There is no robot or
+// phone voice at all: if nothing natural is available the app stays quiet. Who speaks is decided by `voice-persona.ts`.
+import { type Lang } from "@/lib/i18n";
 import { speechText, splitSentences, type Speakable } from "@/services/voice/text-speech";
 import { vlog } from "@/services/voice/voice-log";
 import { cachedJson } from "@/utils/cache";
@@ -9,7 +9,6 @@ import { personaForKind, personaVoice, VoicePersona, type VoiceKind } from "@/se
 
 export { personaForKind };
 export type Persona = string | undefined;
-export const canSpeak = () => typeof window !== "undefined" && "speechSynthesis" in window;
 
 function rate() {
   const r = Number(localStorage.getItem("aura_voice_rate") ?? "1");
@@ -35,64 +34,11 @@ export function primeAudio(): void {
   window.addEventListener("touchend", unlock, { passive: true });
 }
 
-// ---------------------------------------------------------------- the phone's own voice (last resort)
-const FEMALE_NAMES = /alice|federica|paola|elsa|isabella|giorgia|silvia|carla|chiara|amelie|marie|anna|monica|helena|laura|sara|ioana|zira/i;
-const MALE_NAMES = /luca|diego|cosimo|jorge|thomas|daniel|reed|eddy|marco|paulo|yannick|markus|andrei/i;
-
-function voiceScore(v: SpeechSynthesisVoice, kind: VoiceKind) {
-  const n = v.name;
-  let score = 0;
-  if (/premium|enhanced|natural|neural|studio|wavenet/i.test(n)) score += 50;
-  if (/siri|google|microsoft .*online/i.test(n)) score += 30;
-  if (kind === "male" ? MALE_NAMES.test(n) : FEMALE_NAMES.test(n)) score += 25; // the right sex for the profile
-  if (kind !== "male" && MALE_NAMES.test(n)) score -= 25;
-  if (/compact|espeak|robot|fred|zarvox|trinoids|whisper|bad news|bubbles/i.test(n)) score -= 100;
-  if (!v.localService) score += 10;
-  return score;
-}
-
-export function pickDeviceVoice(tag: string, kind: VoiceKind = "female") {
-  const code = tag.slice(0, 2).toLowerCase();
-  const all = window.speechSynthesis.getVoices().filter((v) => v.lang.toLowerCase().startsWith(code));
-  const exact = all.filter((v) => v.lang.toLowerCase().replace("_", "-") === tag.toLowerCase());
-  return [...(exact.length ? exact : all)].sort((a, b) => voiceScore(b, kind) - voiceScore(a, kind))[0] ?? null;
-}
-
-export function speak(raw: string, lang: Lang, onEnd?: () => void, kind: VoiceKind = "female") {
-  const text = speechText(raw, lang);
-  if (!canSpeak()) return onEnd?.();
-  const synth = window.speechSynthesis;
-  synth.cancel();
-  const tag = LOCALE_TAG[lang];
-  const voice = pickDeviceVoice(tag, kind);
-  const parts = splitSentences(text);
-  if (parts.length === 0) return onEnd?.();
-  vlog(`telefono (ultima scelta): ${parts.length} frasi, voce ${voice?.name ?? "predefinita"}`);
-  let finished = false;
-  const done = () => {
-    if (finished) return;
-    finished = true;
-    window.clearInterval(keepAlive);
-    onEnd?.();
-  };
-  // All sentences are queued at once: chaining them from "end" events stops half-way on iPhone Safari.
-  parts.forEach((p, i) => {
-    const u = new SpeechSynthesisUtterance(p);
-    u.lang = tag;
-    u.voice = voice;
-    u.rate = Math.min(1.1, rate() * 0.95);
-    u.pitch = kind === "young" ? 1.1 : 1;
-    if (i === parts.length - 1) {
-      u.onend = done;
-      u.onerror = done;
-    }
-    synth.speak(u);
-  });
-  // Safari silently pauses long speech: nudge it every few seconds until the last sentence ends.
-  const keepAlive = window.setInterval(() => {
-    if (!synth.speaking && !synth.pending) return done();
-    if (synth.paused) synth.resume();
-  }, 4000);
+// ---------------------------------------------------------------- when the natural voice is not available
+/** There is NO robot fallback: if the natural voice cannot be made right now the app stays quiet, shows the text and tells the visitor. */
+function voiceUnavailable(onEnd?: () => void) {
+  if (typeof window !== "undefined") window.dispatchEvent(new Event("aura-voice-unavailable"));
+  onEnd?.();
 }
 
 // ---------------------------------------------------------------- the natural voice of our server (Google), all nine languages
@@ -161,11 +107,11 @@ async function speakFromServer(text: string, kind: VoiceKind, lang: Lang, onEnd?
       const played = (await clip.started) && (await clip.ended);
       URL.revokeObjectURL(url);
       if (my !== serverRun) return;
-      if (!played && i === 0) return void speak(parts.join(" "), lang, onEnd, kind);
+      if (!played && i === 0) return void voiceUnavailable(onEnd);
       if (!upcoming) break;
       const nextUrl = await upcoming;
       if (my !== serverRun) return;
-      if (!nextUrl) return void speak(parts.slice(i + 1).join(" "), lang, onEnd, kind); // carry on from where the server stopped
+      if (!nextUrl) return void voiceUnavailable(onEnd); // the server could not make the next piece: stop quietly
       url = nextUrl;
     }
     onEnd?.();
@@ -178,7 +124,7 @@ export async function speakNatural(raw: string, lang: Lang, onEnd?: () => void, 
   const text = speechText(raw, lang);
   const { kind } = personaVoice(persona, venueVoice);
   if (await speakFromServer(text, kind, lang, onEnd)) return;
-  speak(text, lang, onEnd, kind);
+  voiceUnavailable(onEnd);
 }
 
 // ---------------------------------------------------------------- recorded stories (instant, offline)
@@ -238,5 +184,4 @@ export function stopSpeaking() {
     current.onended = null;
     current = null;
   }
-  if (canSpeak()) window.speechSynthesis.cancel();
 }

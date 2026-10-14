@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { getMoonIllumination } from "suncalc";
 import type { Lang } from "./i18n";
+import type { Trivia } from "@/lib/trivia";
 import { romeDate } from "@/utils/geo";
 
 export type Today = {
@@ -175,8 +176,6 @@ export function useToday() {
   return { data, failed };
 }
 
-export type LiveQuestion = { id: string; kids: boolean; q: string; options: string[]; ok: number };
-
 const hhmm = (s: string, add: number) => {
   const [h, m] = s.split(":").map(Number) as [number, number];
   const t = (h * 60 + m + add + 1440) % 1440;
@@ -194,50 +193,28 @@ function shuffle<T>(arr: T[], rnd: () => number) {
 
 const NAMES = ["Marco", "Luca", "Giulia", "Anna", "Paolo", "Lucia", "Giovanni", "Francesco", "Maria", "Andrea", "Chiara", "Matteo", "Sara", "Elena", "Davide", "Marta", "Alberto", "Teresa"];
 
-/** Questions for grown-ups, built from today's real data and from verified facts about Bra and Piedmont. */
-export function buildLiveQuestions(d: Today, lang: Lang): LiveQuestion[] {
-  const it = lang === "it";
+/** "On this day" questions, built from today's real data (what happened, who was born). New every day, several per day, each one explains itself. */
+export function todayTrivia(d: Today): Trivia[] {
   const day = Number(romeDate(new Date()).replace(/-/g, ""));
   const rnd = seeded(day);
-  const make = (id: string, q: string, right: string, wrong: string[]): LiveQuestion => {
-    const options = shuffle([right, ...wrong], rnd);
-    return { id: `live-${day}-${id}`, kids: false, q, options, ok: options.indexOf(right) };
+  const dateWords = new Intl.DateTimeFormat("it-IT", { timeZone: "Europe/Rome", day: "numeric", month: "long" }).format(new Date());
+  const out: Trivia[] = [];
+  const add = (id: string, q: string, right: string, wrong: string[], why: string) => {
+    const options = [right, ...wrong];
+    if (new Set(options).size !== options.length) return;
+    out.push({ id: `oggi-${day}-${id}`, topic: "oggi", bands: ["teen", "adult"], q, options, ok: 0, why });
   };
-  const out: LiveQuestion[] = [];
-  const dateWords = new Intl.DateTimeFormat(it ? "it-IT" : "en-GB", { timeZone: "Europe/Rome", day: "numeric", month: "long" }).format(new Date());
-
   // Which of these really happened today?
-  if (d.events.length > 0 && d.otherEvents.length >= 2) {
-    const e = d.events[day % d.events.length]!;
+  d.events.slice(0, 4).forEach((e, i) => {
     const wrong = shuffle(d.otherEvents, rnd).slice(0, 2);
-    out.push(make("e", it ? `Quale di questi fatti è accaduto proprio oggi, ${dateWords}?` : `Which of these happened on this very day, ${dateWords}?`, e.text, wrong.map((x) => x.text)));
-  }
-  if (d.event) {
-    const y = d.event.year;
-    out.push(make("h", `${it ? "In che anno?" : "In which year?"} ${d.event.text}`, String(y), [String(y - 7), String(y + 11)]));
-  }
-  if (d.birth && d.birth.others.length >= 2) out.push(make("b", it ? `Chi è nato proprio oggi, nel ${d.birth.year}?` : `Who was born on this very day in ${d.birth.year}?`, d.birth.name, shuffle(d.birth.others, rnd).slice(0, 2)));
-  // Culture: two verified questions a day
-  const pool = CULTURE.filter((_, i) => (i + day) % 3 === 0 || (i * 7 + day) % 5 === 0).slice(0, 2);
-  (pool.length ? pool : CULTURE.slice(day % CULTURE.length, (day % CULTURE.length) + 2)).forEach((c, i) => {
-    out.push(make(`c${i}`, it ? c.q.it : c.q.en, it ? c.a.it : c.a.en, (it ? c.w.it : c.w.en)));
+    if (wrong.length === 2) add(`e${i}`, `Quale di questi fatti è accaduto proprio oggi, ${dateWords}?`, e.text, wrong.map((x) => x.text), `Accadde nel ${e.year}, il ${dateWords}.`);
   });
+  // In which year?
+  d.events.slice(0, 3).forEach((e, i) => {
+    const y = e.year;
+    const step = () => 3 + Math.floor(rnd() * 28);
+    add(`y${i}`, `In che anno? ${e.text}`, String(y), [y - step(), y + step()].map(String), `Fu nel ${y}.`);
+  });
+  if (d.birth && d.birth.others.length >= 2) add("b", `Chi è nato proprio oggi, nel ${d.birth.year}?`, d.birth.name, shuffle(d.birth.others, rnd).slice(0, 2), `${d.birth.name} nacque il ${dateWords} del ${d.birth.year}.`);
   return out;
 }
-
-type Culture = { q: { it: string; en: string }; a: { it: string; en: string }; w: { it: string[]; en: string[] } };
-// Facts taken from the app's own sourced texts or well-known public facts.
-const CULTURE: Culture[] = [
-  { q: { it: "Chi progettò la chiesa di Santa Chiara a Bra, con la sua «cupola diafana»?", en: "Who designed the church of Santa Chiara in Bra, with its “diaphanous dome”?" }, a: { it: "Bernardo Antonio Vittone", en: "Bernardo Antonio Vittone" }, w: { it: ["Filippo Juvarra", "Guarino Guarini"], en: ["Filippo Juvarra", "Guarino Guarini"] } },
-  { q: { it: "In che anno la Residenza Sabauda di Pollenzo è stata riconosciuta dall'UNESCO?", en: "In which year was the Savoy Residence of Pollenzo recognised by UNESCO?" }, a: { it: "1997", en: "1997" }, w: { it: ["1962", "2008"], en: ["1962", "2008"] } },
-  { q: { it: "Quale movimento nato a Bra nel 1986 difende il cibo buono, pulito e giusto?", en: "Which movement born in Bra in 1986 defends good, clean and fair food?" }, a: { it: "Slow Food", en: "Slow Food" }, w: { it: ["Km Zero", "Fast Good"], en: ["Zero Km", "Fast Good"] } },
-  { q: { it: "Quale formaggio DOP prende il nome dalla città di Bra?", en: "Which PDO cheese takes its name from the city of Bra?" }, a: { it: "Bra", en: "Bra" }, w: { it: ["Castelmagno", "Raschera"], en: ["Castelmagno", "Raschera"] } },
-  { q: { it: "Quale re di casa Savoia trasformò il borgo di Pollenzo in un modello di tenuta agricola tra il 1832 e il 1848?", en: "Which Savoy king turned the village of Pollenzo into a model farm between 1832 and 1848?" }, a: { it: "Carlo Alberto", en: "Charles Albert" }, w: { it: ["Vittorio Emanuele II", "Umberto I"], en: ["Victor Emmanuel II", "Umberto I"] } },
-  { q: { it: "Quale fiume attraversa Torino?", en: "Which river runs through Turin?" }, a: { it: "Il Po", en: "The Po" }, w: { it: ["Il Tanaro", "La Dora Baltea"], en: ["The Tanaro", "The Dora Baltea"] } },
-  { q: { it: "Quale fiume scorre vicino a Bra e Pollenzo, affluente del Po?", en: "Which tributary of the Po flows near Bra and Pollenzo?" }, a: { it: "Il Tanaro", en: "The Tanaro" }, w: { it: ["Il Ticino", "L'Adige"], en: ["The Ticino", "The Adige"] } },
-  { q: { it: "Per quale prodotto è famosa nel mondo la città di Alba, vicina a Bra?", en: "What is the city of Alba, near Bra, famous for worldwide?" }, a: { it: "Il tartufo bianco", en: "The white truffle" }, w: { it: ["Il pesce azzurro", "Il caffè"], en: ["Blue fish", "Coffee"] } },
-  { q: { it: "Quale vino rosso, chiamato «re dei vini», nasce nelle vicine Langhe?", en: "Which red wine, called the “king of wines”, comes from the nearby Langhe?" }, a: { it: "Il Barolo", en: "Barolo" }, w: { it: ["Il Chianti", "L'Amarone"], en: ["Chianti", "Amarone"] } },
-  { q: { it: "Quale università fondata nel 2004, legata a Slow Food, ha sede a Pollenzo?", en: "Which university founded in 2004, linked to Slow Food, is based in Pollenzo?" }, a: { it: "L'Università di Scienze Gastronomiche", en: "The University of Gastronomic Sciences" }, w: { it: ["Il Politecnico di Torino", "L'Università Bocconi"], en: ["The Polytechnic of Turin", "Bocconi University"] } },
-  { q: { it: "Come si chiama la salsa piemontese a base di acciughe, aglio e olio, in cui si intingono le verdure?", en: "What is the Piedmontese dip of anchovies, garlic and oil, used for vegetables, called?" }, a: { it: "Bagna càuda", en: "Bagna càuda" }, w: { it: ["Salsa verde", "Pesto"], en: ["Salsa verde", "Pesto"] } },
-  { q: { it: "Quale manifestazione biennale dedicata ai formaggi di qualità si tiene a Bra?", en: "Which biennial event for quality cheeses takes place in Bra?" }, a: { it: "Cheese", en: "Cheese" }, w: { it: ["Vinitaly", "Salone del Gusto"], en: ["Vinitaly", "Salone del Gusto"] } },
-];

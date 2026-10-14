@@ -3,7 +3,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 const VOICES = { female: "Kore", male: "Charon", young: "Puck" } as const;
-const MODEL = "gemini-2.5-flash-preview-tts";
+// Every model has its own free daily quota: when one is used up the next one takes over (the voices have the same names).
+const MODELS = ["gemini-2.5-flash-preview-tts", "gemini-3.1-flash-tts-preview", "gemini-3.8-flash-tts", "gemini-3.8-flash-lite-tts", "gemini-2.5-pro-preview-tts"];
+let firstModel = 0;
 const MAX_CHARS = 700;
 const LANG_NAMES: Record<string, string> = { it: "Italian", en: "English", fr: "French", de: "German", es: "Spanish", ar: "Arabic", ro: "Romanian", sq: "Albanian", hi: "Hindi" };
 const MAX_PER_DAY = 300;
@@ -39,7 +41,7 @@ export const Route = createFileRoute("/api/tts")({
 
         const dir = path.join(process.cwd(), ".voice-cache");
         fs.mkdirSync(dir, { recursive: true });
-        const file = path.join(dir, `${crypto.createHash("sha256").update(`${MODEL}|${voice}|${lang}|${text}`).digest("hex")}.wav`);
+        const file = path.join(dir, `${crypto.createHash("sha256").update(`v1|${voice}|${lang}|${text}`).digest("hex")}.wav`);
         if (fs.existsSync(file)) return new Response(new Uint8Array(fs.readFileSync(file)), { headers: { "content-type": "audio/wav" } });
 
         const today = new Date().toISOString().slice(0, 10);
@@ -55,17 +57,25 @@ export const Route = createFileRoute("/api/tts")({
             : voice === "female"
               ? `Read aloud in ${L} with an elegant, warm, narrative female voice, like a refined local guide, calm pace. ${rules}`
               : `Read aloud in ${L} with a warm, friendly welcoming male voice, like a cheerful host greeting a guest, easy pace. ${rules}`;
-        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`, {
-          method: "POST",
-          headers: { "x-goog-api-key": key, "content-type": "application/json" },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: style + text }] }],
-            generationConfig: { responseModalities: ["AUDIO"], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: VOICES[voice] } } } },
-          }),
+        const body2 = JSON.stringify({
+          contents: [{ parts: [{ text: style + text }] }],
+          generationConfig: { responseModalities: ["AUDIO"], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: VOICES[voice] } } } },
         });
-        const j = (await res.json()) as { candidates?: { content?: { parts?: { inlineData?: { data?: string } }[] } }[] };
-        const b64 = j.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
-        if (!res.ok || !b64) return Response.json({ error: "tts failed" }, { status: res.status === 429 ? 429 : 502 });
+        let b64: string | undefined;
+        let lastStatus = 502;
+        for (let i = 0; i < MODELS.length && !b64; i++) {
+          const idx = (firstModel + i) % MODELS.length;
+          try {
+            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODELS[idx]}:generateContent`, { method: "POST", headers: { "x-goog-api-key": key, "content-type": "application/json" }, body: body2 });
+            lastStatus = res.status;
+            const j = (await res.json()) as { candidates?: { content?: { parts?: { inlineData?: { data?: string } }[] } }[] };
+            b64 = res.ok ? j.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data : undefined;
+            if (b64) firstModel = idx; // start from the model that works next time
+          } catch {
+            /* next model */
+          }
+        }
+        if (!b64) return Response.json({ error: "tts failed" }, { status: lastStatus === 429 ? 429 : 502 });
         const out = wav(Buffer.from(b64, "base64"));
         fs.writeFileSync(file, out);
         return new Response(new Uint8Array(out), { headers: { "content-type": "audio/wav" } });

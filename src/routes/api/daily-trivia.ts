@@ -4,7 +4,7 @@ import { createFileRoute } from "@tanstack/react-router";
 
 const MODELS = ["gemini-3.5-flash-lite", "gemini-3.1-flash-lite"]; // fastest ones that answer for our key (checked 2026-10-13)
 const TOPICS = ["italiano", "english", "storia", "geografia", "scienze", "mate", "arte", "civica", "modi", "locale"];
-let inflight: Promise<unknown[]> | null = null;
+const inflight = new Map<string, Promise<unknown[]>>();
 
 type Raw = { band?: string; topic?: string; q?: string; options?: unknown; why?: string };
 
@@ -17,13 +17,15 @@ function clean(list: Raw[], day: string) {
     const topic = TOPICS.includes(String(r.topic)) ? String(r.topic) : "scienze";
     // kids' questions are also fine for teens; teen ones for adults too
     const bands = band === "kids" ? ["kids", "teen"] : band === "teen" ? ["teen", "adult"] : ["adult"];
-    out.push({ id: `ai-${day}-${out.length}`, topic, bands, q: r.q.trim(), options: options.slice(0, 4), ok: 0, why: r.why.trim(), ai: true });
+    out.push({ id: `ai-${day}-${Math.random().toString(36).slice(2, 7)}-${out.length}`, topic, bands, q: r.q.trim(), options: options.slice(0, 4), ok: 0, why: r.why.trim(), ai: true });
   }
   return out;
 }
 
-async function generate(key: string, day: string) {
-  const prompt = `Oggi è ${day}. Scrivi 18 domande a scelta multipla in italiano per un'app di quiz educativa e divertente: 6 per bambini (8-11 anni, "kids"), 6 per ragazzi delle scuole medie e superiori ("teen"), 6 per adulti ("adult").
+async function generate(key: string, day: string, focus?: { topic: string; band: string }) {
+  const prompt = focus
+    ? `Oggi è ${day}. Scrivi 10 NUOVE domande a scelta multipla in italiano per un'app di quiz educativa e divertente. Materia: ${focus.topic} (${focus.topic === "english" ? "come si dice in inglese, falsi amici, frasi utili" : focus.topic === "modi" ? "modi di dire italiani" : focus.topic === "locale" ? "Piemonte, Langhe, Bra, cibo e vino" : "programma scolastico italiano"}). Livello: ${focus.band === "kids" ? "bambini 8-11 anni" : focus.band === "teen" ? "ragazzi delle scuole medie e superiori" : "adulti"}. Ogni domanda su un argomento DIVERSO dentro la materia (non ripetere gli stessi temi). Regole: SOLO fatti certi e verificabili; 4 risposte diverse, la PRIMA è sempre quella giusta; spiegazione di 1-2 frasi che insegna qualcosa; tono chiaro e simpatico. Campi: band="${focus.band}", topic="${focus.topic}".`
+    : `Oggi è ${day}. Scrivi 18 domande a scelta multipla in italiano per un'app di quiz educativa e divertente: 6 per bambini (8-11 anni, "kids"), 6 per ragazzi delle scuole medie e superiori ("teen"), 6 per adulti ("adult").
 Varia le materie tra: ${TOPICS.join(", ")} (english = come si dice in inglese, falsi amici, frasi utili; modi = modi di dire italiani; locale = Piemonte, Langhe, Bra, cibo e vino).
 Regole: SOLO fatti certi e verificabili (niente dubbi, niente notizie recenti); 4 risposte diverse, la PRIMA è sempre quella giusta; spiegazione di 1-2 frasi che insegna qualcosa; tono chiaro e simpatico; nessuna domanda che dipende dalla data odierna.`;
   for (const model of MODELS) {
@@ -65,13 +67,17 @@ Regole: SOLO fatti certi e verificabili (niente dubbi, niente notizie recenti); 
 export const Route = createFileRoute("/api/daily-trivia")({
   server: {
     handlers: {
-      GET: async () => {
+      GET: async ({ request }) => {
         const fs = await import("node:fs");
         const path = await import("node:path");
         const os = await import("node:os");
         const day = new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Rome" });
         const dir = path.join(process.cwd(), ".daily-cache");
-        const file = path.join(dir, `trivia-${day}.json`);
+        const url = new URL(request.url);
+        const topic = url.searchParams.get("topic") ?? "";
+        const band = url.searchParams.get("band") ?? "";
+        const focus = TOPICS.includes(topic) && ["kids", "teen", "adult"].includes(band) ? { topic, band } : undefined;
+        const file = path.join(dir, focus ? `trivia-${day}-${band}-${topic}.json` : `trivia-${day}.json`);
         if (fs.existsSync(file)) return new Response(fs.readFileSync(file), { headers: { "content-type": "application/json", "cache-control": "public, max-age=600" } });
         let key = process.env["GEMINI_API_KEY"] ?? "";
         if (!key) {
@@ -79,8 +85,9 @@ export const Route = createFileRoute("/api/daily-trivia")({
         }
         if (!key) return Response.json([], { status: 503 });
         // Writing 18 questions takes a while: answer at once ("not ready yet") and let it finish in the background.
-        if (!inflight) {
-          inflight = generate(key, day)
+        const slot = focus ? `${band}-${topic}` : "daily";
+        if (!inflight.has(slot)) {
+          inflight.set(slot, generate(key, day, focus)
             .then((list) => {
               if (list.length) {
                 fs.mkdirSync(dir, { recursive: true });
@@ -88,7 +95,7 @@ export const Route = createFileRoute("/api/daily-trivia")({
               }
               return list;
             })
-            .finally(() => { setTimeout(() => (inflight = null), 120_000); });
+            .finally(() => { setTimeout(() => inflight.delete(slot), 120_000); }));
         }
         return Response.json([], { status: 202 });
       },

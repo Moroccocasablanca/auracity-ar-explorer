@@ -186,5 +186,6 @@
   "safety.paused": "Duket se po lëviz shpejt: AR u pezullua. Ndalo në një vend të sigurt për të vazhduar.",
   "auth.adult": "Jam të paktën 18 vjeç dhe do ta përdor telefonin me përgjegjësi: në kohën dhe vendin e duhur, duke parë ku eci dhe duke qëndruar larg rrugës.",
   "safety.cam.one": "Kujdes: shiko ku ecën dhe mos e përdor kurrë kamerën afër trafikut.",
-  "node.guide.hello": "Përshëndetje! Jam udhëzuesja jote: po të tregoj historinë e {name}."
+  "node.guide.hello": "Përshëndetje! Jam udhëzuesja jote: po të tregoj historinë e {name}.",
+  "voice.off": "Zëri natyral nuk është i disponueshëm tani: lexo tekstin, provo përsëri së shpejti."
 }

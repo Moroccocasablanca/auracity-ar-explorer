@@ -10,7 +10,7 @@ import { isRestaurant } from "@/lib/explore-rules";
 import { speakNatural, stopSpeaking } from "@/services/voice/speech";
 import { VoicePersona } from "@/services/voice/voice-persona";
 import { contentLang } from "@/services/voice/text-speech";
-import { buildLiveQuestions, moonName, useToday, weatherWord, type LiveQuestion } from "@/lib/live";
+import { moonName, useToday, weatherWord } from "@/lib/live";
 import { isOpenNow } from "@/utils/geo";
 import { HuntCard } from "@/components/hunt/HuntCard";
 import { TriviaCard } from "@/components/hunt/TriviaCard";
@@ -121,53 +121,6 @@ function TodayCard() {
   );
 }
 
-function LiveQuizCard({ q }: { q: LiveQuestion }) {
-  const { t, lang } = useI18n();
-  const [picked, setPicked] = useState<number | null>(null);
-  const [reading, setReading] = useState(false);
-  const solved = picked === q.ok;
-  useEffect(() => () => stopSpeaking(), []);
-  const read = () => {
-    if (reading) { stopSpeaking(); setReading(false); return; }
-    setReading(true);
-    void speakNatural(`${q.q} ${q.options.map((o, i) => `${i + 1}. ${o}.`).join(" ")}`, contentLang(lang), () => setReading(false), VoicePersona.HUNT_DYNAMIC);
-  };
-  return (
-    <div className="rounded-2xl border border-border bg-card/60 p-4">
-      <div className="flex items-center justify-between gap-2">
-        <span className="mono-label">{q.kids ? t("live.kids") : t("live.adults")}</span>
-        <Button type="button" size="sm" variant="outline" className="rounded-full" onClick={read}><Volume2 className="size-4" /> {reading ? t("audio.stop") : t("audio.listen")}</Button>
-      </div>
-      <p className="mt-2 font-semibold leading-snug">{q.q}</p>
-      <div className="mt-3 grid gap-2">
-        {q.options.map((o, i) => (
-          <button
-            key={o}
-            type="button"
-            onClick={() => { if (solved) return; setPicked(i); if (i === q.ok) logEvent("riddle", q.id); }}
-            className={`rounded-xl border px-3 py-2.5 text-left font-medium ${picked == null ? "border-border" : i === q.ok && solved ? "border-green-400 bg-green-400/20" : picked === i ? "border-red-400 bg-red-400/15" : "border-border"}`}
-          >{o}</button>
-        ))}
-      </div>
-      {picked != null && <p className={`mt-2 text-sm font-semibold ${solved ? "text-green-300" : "text-red-300"}`}>{solved ? t("quest.right") : t("quest.retry")}</p>}
-    </div>
-  );
-}
-
-function LiveQuiz() {
-  const { t, lang } = useI18n();
-  const { data: d } = useToday();
-  if (!d) return null;
-  const qs = buildLiveQuestions(d, lang);
-  return (
-    <section>
-      <h2 className="text-xl font-bold">{t("live.quiz")}</h2>
-      <p className="text-sm text-muted-foreground">{t("live.quiz.sub")}</p>
-      <div className="mt-3 space-y-3">{qs.map((q) => <LiveQuizCard key={q.id} q={q} />)}</div>
-    </section>
-  );
-}
-
 function Challenges() {
   const { t, lang } = useI18n();
   const list = challengesOfDay();
@@ -265,7 +218,6 @@ function Quest() {
         </header>
 
         <TodayCard />
-        <LiveQuiz />
         <TriviaCard />
         <Challenges />
         <HuntCard />

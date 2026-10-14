@@ -1,11 +1,12 @@
 // Quiz bank for everyone: kids, teenagers at school, adults. Every question has the answer and a "did you know" note,
 // so the player learns something on the spot (no "search the internet" step).
 export type Band = "kids" | "teen" | "adult";
-export type Topic = "italiano" | "english" | "storia" | "geografia" | "scienze" | "mate" | "arte" | "civica" | "modi" | "locale";
+export type Topic = "oggi" | "italiano" | "english" | "storia" | "geografia" | "scienze" | "mate" | "arte" | "civica" | "modi" | "locale";
 
 export type Trivia = { id: string; topic: Topic; bands: Band[]; q: string; options: string[]; ok: number; why: string; ai?: boolean };
 
 export const TOPICS: { id: Topic; label: string; icon: string }[] = [
+  { id: "oggi", label: "Accade oggi", icon: "oggi" },
   { id: "italiano", label: "Italiano", icon: "italiano" },
   { id: "english", label: "Inglese", icon: "english" },
   { id: "storia", label: "Storia", icon: "storia" },
@@ -132,6 +133,14 @@ export const BANK: Trivia[] = [
   q("locale", ALL, "Quale frutto secco è famoso in Piemonte, la «Tonda gentile»?", ["La nocciola", "La noce", "La mandorla", "Il pistacchio"], "La nocciola Piemonte IGP: è tra gli ingredienti tipici della gianduia e dei dolci piemontesi."),
   q("locale", ALL, "Quale movimento nacque a Bra nel 1986?", ["Slow Food", "Fast Food", "Km Zero", "Bio Day"], "Slow Food, fondato da Carlo Petrini: difende il cibo buono, pulito e giusto."),
   q("locale", ALL, "Che cosa si studia all'Università di Scienze Gastronomiche di Pollenzo?", ["Il cibo e la sua cultura", "Solo la cucina", "Ingegneria", "Medicina"], "A Pollenzo, frazione di Bra, si studia il cibo da molti punti di vista: scienza, storia, economia."),
+  q("locale", TA, "Chi progettò la chiesa di Santa Chiara a Bra, con la sua «cupola diafana»?", ["Bernardo Antonio Vittone", "Filippo Juvarra", "Guarino Guarini", "Francesco Gallo"], "L'architetto Vittone la costruì nel Settecento: la luce filtra dalla doppia cupola."),
+  q("locale", TA, "In che anno la Residenza Sabauda di Pollenzo è stata riconosciuta dall'UNESCO?", ["1997", "1962", "2008", "1985"], "Pollenzo fa parte delle Residenze Sabaude, patrimonio UNESCO dal 1997."),
+  q("locale", TA, "Quale re di casa Savoia trasformò Pollenzo in una tenuta agricola modello tra il 1832 e il 1848?", ["Carlo Alberto", "Vittorio Emanuele II", "Umberto I", "Carlo Felice"], "Carlo Alberto vi creò una grande azienda agricola con castello, chiesa e cantine."),
+  q("locale", ALL, "Quale fiume scorre vicino a Bra e Pollenzo, affluente del Po?", ["Il Tanaro", "Il Ticino", "L'Adige", "La Dora Baltea"], "Il Tanaro passa vicino a Pollenzo e poi si getta nel Po."),
+  q("locale", ALL, "Per quale prodotto è famosa nel mondo la città di Alba, vicina a Bra?", ["Il tartufo bianco", "Il pesce azzurro", "Il caffè", "Il riso"], "Il tartufo bianco d'Alba è uno dei più pregiati al mondo."),
+  q("locale", TA, "Quale università fondata nel 2004, legata a Slow Food, ha sede a Pollenzo?", ["L'Università di Scienze Gastronomiche", "Il Politecnico", "L'Accademia delle Belle Arti", "L'Università Bocconi"], "Studia il cibo come cultura, scienza ed economia."),
+  q("locale", ALL, "Come si chiama la salsa piemontese di acciughe, aglio e olio in cui si intingono le verdure?", ["Bagna càuda", "Pesto", "Salsa verde", "Bagnetto rosso"], "«Bagna càuda» significa «salsa calda» in piemontese."),
+  q("locale", ALL, "Quale manifestazione biennale dedicata ai formaggi di qualità si tiene a Bra?", ["Cheese", "Vinitaly", "Salone del Gusto", "Slow Fish"], "«Cheese» ha luogo a Bra ogni due anni, organizzata da Slow Food."),
   q("locale", KT, "Come si chiama la città con la grande torre «Mole Antonelliana»?", ["Torino", "Bra", "Cuneo", "Asti"], "La Mole Antonelliana è il simbolo di Torino e oggi ospita il Museo del Cinema."),
 ];
 
@@ -161,6 +170,9 @@ const markSeen = (id: string) => {
 /** Picks a question for the player's age group and chosen subject, avoiding the ones seen most recently. */
 /** Questions written by the AI today (fetched from the server); they join the built-in bank. */
 let daily: Trivia[] = [];
+let todayList: Trivia[] = [];
+/** The "On this day" questions of today (built from live data). */
+export const setTodayTrivia = (list: Trivia[]) => { todayList = list; };
 export const setDailyTrivia = (list: Trivia[]) => { daily = list; };
 export async function loadDailyTrivia(): Promise<number> {
   try {
@@ -178,14 +190,43 @@ export async function loadDailyTrivia(): Promise<number> {
   return daily.length;
 }
 
-export function nextTrivia(band: Band, topic: Topic | "mix"): Trivia {
-  const pool = [...BANK, ...daily].filter((t) => t.bands.includes(band) && (topic === "mix" || t.topic === topic));
+const poolFor = (band: Band, topic: Topic | "mix"): Trivia[] =>
+  topic === "oggi" ? todayList : [...BANK, ...daily].filter((t) => t.bands.includes(band) && (topic === "mix" || t.topic === topic));
+
+/** How many questions of this age and subject have not been asked recently. */
+export const unseenCount = (band: Band, topic: Topic | "mix"): number => {
+  const seen = new Set(seenIds());
+  return poolFor(band, topic).filter((t) => !seen.has(t.id)).length;
+};
+
+/** Picks a question for the player's age group and chosen subject, avoiding the ones seen most recently (null if there are none). */
+export function nextTrivia(band: Band, topic: Topic | "mix"): Trivia | null {
+  const pool = poolFor(band, topic);
+  if (!pool.length) return null;
   const seen = new Set(seenIds());
   const fresh = pool.filter((t) => !seen.has(t.id));
   const from = fresh.length ? fresh : pool;
   const pick = from[Math.floor(Math.random() * from.length)]!;
   markSeen(pick.id);
   return pick;
+}
+
+/** Asks the AI (on our server) for more questions of this subject when the player is running out; they are kept for the day. */
+export async function loadMoreTrivia(band: Band, topic: Topic | "mix"): Promise<void> {
+  if (topic === "oggi") return;
+  try {
+    for (let attempt = 0; attempt < 4; attempt++) {
+      const r = await fetch(`/api/daily-trivia?topic=${topic}&band=${band}`);
+      if (r.status === 200) {
+        const list = (await r.json()) as Trivia[];
+        const have = new Set(daily.map((t) => t.id));
+        daily = [...daily, ...list.filter((t) => Array.isArray(t.options) && t.options.length >= 3 && !have.has(t.id))];
+        return;
+      }
+      if (r.status !== 202) return;
+      await new Promise((res) => setTimeout(res, 15_000));
+    }
+  } catch { /* offline or no key: the built-in bank is enough */ }
 }
 
 /** Shows the options in a different order every time (the right one is always written first in the bank). */
