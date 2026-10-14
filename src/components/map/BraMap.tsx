@@ -149,13 +149,16 @@ function declutter(shown: Map<string, maplibregl.Marker>, services?: Map<string,
   }
 }
 
+/** The 3D icon that says what a place is; the flat symbol shows instead if the picture cannot load. */
+const icon3d = (name: string) => `<img class="aura-ico3d" src="/icons3d/${name}.png" alt="" decoding="async" draggable="false" />`;
+
 /** Small round badge in the category colour with a white symbol: easy to read at small size. Monuments get a double ring. */
-function stopPin(color: string, symbol: string, big: boolean, mon = false): Pin {
+function stopPin(color: string, symbol: string, big: boolean, mon = false, icon?: string): Pin {
   const sz = mon ? 38 : big ? 32 : 26;
   return {
     w: sz,
     h: sz,
-    html: `<span class="aura-badge${mon ? " aura-badge-mon" : ""}${big && !mon ? " aura-stop-big" : ""}" style="--pin:${color};--sz:${sz}px"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${symbol}</svg></span>`,
+    html: `<span class="aura-badge${mon ? " aura-badge-mon" : ""}${big && !mon ? " aura-stop-big" : ""}" style="--pin:${color};--sz:${sz}px">${icon ? icon3d(icon) : `<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${symbol}</svg>`}</span>`,
   };
 }
 
@@ -291,7 +294,7 @@ export default function BraMap({ nodes, pos, kindLabel, placeLabel, appearance, 
       ? charPin(color, n.kind)
       : n.image_url && (monument || featured) && (map.current?.getZoom() ?? 17) >= PHOTO_ZOOM
         ? photoPin(color, n.image_url, true, st.symbol)
-        : stopPin(color, st.symbol, featured, monument);
+        : stopPin(color, st.symbol, featured, monument, st.icon);
     const { placeLabel: pl, talkLabel: tl } = propsRef.current;
     const e = document.createElement("div");
     e.className = "aura-mk";
@@ -328,7 +331,7 @@ export default function BraMap({ nodes, pos, kindLabel, placeLabel, appearance, 
       e.className = "aura-mk aura-svc";
       e.style.width = e.style.height = "30px";
       e.style.zIndex = "5";
-      e.innerHTML = `<span class="aura-svc-badge" style="--pin:${s.bg};--edge:${s.color};color:${s.fg}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${s.symbol}</svg></span><span class="aura-label aura-label-svc">${s.title ? `<small style="color:color-mix(in oklab, ${s.color} 40%, #fff)">${esc(s.tag)}</small><b>${esc(s.title)}</b>` : `<b>${esc(s.tag)}</b>`}</span>`;
+      e.innerHTML = `<span class="aura-svc-badge" style="--pin:${s.bg};--edge:${s.color};color:${s.fg}">${s.icon ? icon3d(s.icon) : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${s.symbol}</svg>`}</span><span class="aura-label aura-label-svc">${s.title ? `<small style="color:color-mix(in oklab, ${s.color} 40%, #fff)">${esc(s.tag)}</small><b>${esc(s.title)}</b>` : `<b>${esc(s.tag)}</b>`}</span>`;
       const pop = document.createElement("div");
       pop.className = "aura-pop";
       const k = document.createElement("p");

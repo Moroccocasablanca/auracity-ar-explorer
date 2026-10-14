@@ -9,6 +9,8 @@ export type Poi = {
   bg: string;
   fg: string;
   symbol: string;
+  /** name of a 3D icon in /icons3d (falls back to the flat symbol) */
+  icon?: string | undefined;
   minZoom: number;
   phone?: string | undefined;
   address?: string | undefined;

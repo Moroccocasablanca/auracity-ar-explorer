@@ -86,11 +86,11 @@ function Explore() {
     () => [
       ...mapServices.map((s) => {
         const m = SERVICE_META[s.type];
-        return { id: s.id, lat: s.lat, lng: s.lng, title: s.name ?? null, tag: t(m.label), color: m.color, bg: m.bg, fg: m.fg, symbol: m.symbol, minZoom: kind === "services" ? 14 : 14.5, phone: s.phone, address: s.address, hours: s.hours };
+        return { id: s.id, lat: s.lat, lng: s.lng, title: s.name ?? null, tag: t(m.label), color: m.color, bg: m.bg, fg: m.fg, symbol: m.symbol, icon: m.icon, minZoom: kind === "services" ? 14 : 14.5, phone: s.phone, address: s.address, hours: s.hours };
       }),
       ...mapActivities.map((a) => {
         const m = ACTIVITY_META[a.type];
-        return { id: a.id, lat: a.lat, lng: a.lng, title: a.name ?? t(m.label), tag: t(m.label), color: m.color, bg: m.color, fg: "#ffffff", symbol: m.symbol, minZoom: kind === "activities" ? 14 : m.minZoom, phone: a.phone, address: a.address, hours: a.hours, open: `/attivita/${a.id}` };
+        return { id: a.id, lat: a.lat, lng: a.lng, title: a.name ?? t(m.label), tag: t(m.label), color: m.color, bg: m.color, fg: "#ffffff", symbol: m.symbol, icon: m.icon, minZoom: kind === "activities" ? 14 : m.minZoom, phone: a.phone, address: a.address, hours: a.hours, open: `/attivita/${a.id}` };
       }),
     ],
     [mapServices, mapActivities, kind, t],

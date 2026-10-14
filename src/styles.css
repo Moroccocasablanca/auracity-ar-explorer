@@ -524,3 +524,9 @@ button:not(:disabled):active { transform: scale(.96); }
 .mascot-waves i:nth-child(4) { animation-delay: .45s; }
 @keyframes mascot-wave { 0%, 100% { transform: scaleY(.3); } 50% { transform: scaleY(1); } }
 @media (prefers-reduced-motion: reduce) { .mascot-idle, .mascot-waves i { animation: none; } }
+
+/* 3D icons inside the colour-coded markers: the colour says the category, the little 3D object says what it is. */
+.aura-ico3d { width: 128%; height: 128%; max-width: none; margin: -14% 0 0; object-fit: contain; pointer-events: none; filter: drop-shadow(0 2px 2px rgb(0 0 0 / .35)); }
+.aura-badge, .aura-svc-badge { overflow: visible; }
+.aura-badge:has(.aura-ico3d) { background: radial-gradient(circle at 30% 25%, color-mix(in oklab, var(--pin) 55%, #fff), var(--pin) 70%); }
+.aura-svc-badge:has(.aura-ico3d) { background: radial-gradient(circle at 30% 25%, #fff, color-mix(in oklab, var(--edge, #fff) 35%, #fff) 80%); }
