@@ -10,7 +10,6 @@ const clean = (s: string) => s.toLowerCase().replace(/\(.*?\)/g, " ").replace(/\
 
 /** The pharmacy on our map that has this name (OpenStreetMap names differ a little from the calendar's), or nothing if it is outside Bra. */
 export function matchPharmacy(name: string, town?: string | null): ServicePlace | undefined {
-  if (town && !/^bra$/i.test(town.trim())) return undefined;
   const n = clean(name);
   if (!n) return undefined;
   return SERVICES.filter((s) => s.type === "pharmacy" && s.name).find((s) => {

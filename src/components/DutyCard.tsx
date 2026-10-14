@@ -23,11 +23,11 @@ export function DutyCard({ duty, list, full }: { duty: DutyData | null; list: Du
             <li key={`${d.kind}-${d.name}`} className="flex items-center gap-3 rounded-xl bg-card/70 p-2.5">
               <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-green-600 text-white"><Icon className="size-5" /></span>
               <span className="min-w-0 flex-1">
-                <span className="block text-[0.65rem] font-semibold uppercase tracking-wider text-green-400">{t(d.kind === "night" ? "duty.night" : "duty.day")} · {range(t, d.hours)}{d.active ? ` · ${t("duty.now")}` : ""}</span>
+                <span className="block text-[0.65rem] font-semibold uppercase tracking-wider text-green-400">{t(d.kind === "night" ? "duty.night" : "duty.day")} · {d.hours.replace("-", "–")}{d.active ? ` · ${t("duty.now")}` : ""}</span>
                 <span className="block font-semibold leading-snug">{d.name}{d.town && !/^bra$/i.test(d.town) ? ` (${d.town})` : ""}</span>
                 {d.place?.address && <span className="block text-sm text-muted-foreground">{d.place.address}</span>}
               </span>
-              {d.place?.phone && <a href={telHref(d.place.phone)} aria-label="call" className="flex size-9 items-center justify-center rounded-full bg-primary text-primary-foreground"><Phone className="size-4" /></a>}
+              {d.place?.phone && <a href={telHref(d.place.phone)} aria-label="call" className="flex shrink-0 items-center gap-1.5 rounded-full bg-primary px-3 py-2 text-xs font-bold text-primary-foreground"><Phone className="size-4" />{d.place.phone.replace("+39 ", "")}</a>}
               <a href={d.place ? directionsUrl(d.place) : `https://www.google.com/maps/search/?api=1&query=${q}`} target="_blank" rel="noopener" aria-label="directions" className="flex size-9 items-center justify-center rounded-full border border-border"><Navigation className="size-4" /></a>
             </li>
           );
@@ -38,9 +38,6 @@ export function DutyCard({ duty, list, full }: { duty: DutyData | null; list: Du
     </section>
   );
 }
-
-/** "12:30-15:30" -> "dalle 12:30 alle 15:30" (in the app language). */
-const range = (t: ReturnType<typeof useI18n>["t"], h: string) => { const [a = "", b = ""] = h.split("-"); return t("duty.range", { a, b }); };
 
 /** The time of day, kept right by itself. */
 export function useClock(): string {
@@ -66,7 +63,8 @@ export function DutyLine({ className = "" }: { className?: string }) {
       <ul className="mt-1 space-y-1">
         {shown.map((d) => (
           <li key={`${d.kind}-${d.name}`} className="flex items-center gap-2">
-            <span className="min-w-0 flex-1 font-semibold">{d.name}{d.town && !/^bra$/i.test(d.town) ? ` (${d.town})` : ""} <span className="font-normal text-muted-foreground">· {d.kind === "night" ? t("duty.night") : t("duty.day")} {range(t, d.hours)}</span></span>
+            <span className="min-w-0 flex-1 font-semibold">{d.name}{d.town && !/^bra$/i.test(d.town) ? ` (${d.town})` : ""} <span className="font-normal text-muted-foreground">· {d.kind === "night" ? t("duty.night") : t("duty.day")} {d.hours.replace("-", "–")}</span></span>
+            {d.place?.phone && <a href={telHref(d.place.phone)} aria-label="call" className="flex shrink-0 items-center gap-1 rounded-full bg-primary px-2.5 py-1.5 text-xs font-bold text-primary-foreground"><Phone className="size-3.5" />{d.place.phone.replace("+39 ", "")}</a>}
             <a href={d.place ? directionsUrl(d.place) : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`Farmacia ${d.name} ${d.town ?? "Bra"}`)}`} target="_blank" rel="noopener" aria-label="directions" className="flex size-8 shrink-0 items-center justify-center rounded-full border border-border"><Navigation className="size-4" /></a>
           </li>
         ))}
