@@ -154,7 +154,7 @@ const icon3d = (name: string) => `<img class="aura-ico3d" src="/icons3d/${name}.
 
 /** Small round badge in the category colour with a white symbol: easy to read at small size. Monuments get a double ring. */
 function stopPin(color: string, symbol: string, big: boolean, mon = false, icon?: string): Pin {
-  const sz = mon ? 38 : big ? 32 : 26;
+  const sz = mon ? 38 : big ? 34 : 30;
   return {
     w: sz,
     h: sz,
@@ -529,7 +529,7 @@ export default function BraMap({ nodes, pos, kindLabel, placeLabel, appearance, 
     byId.current = new Map(items.map((n) => [n.id, n]));
     gardens.current = items.filter(isGardenObject);
     const clusterable = items.filter((n) => !isGardenObject(n));
-    const idx = new Supercluster({ radius: 70, maxZoom: 17 });
+    const idx = new Supercluster({ radius: 44, maxZoom: 15 }) /* shops and places are never hidden in a number bubble once you are in town */;
     idx.load(
       clusterable.map((n) => ({
         type: "Feature" as const,

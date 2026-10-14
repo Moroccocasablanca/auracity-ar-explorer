@@ -86,7 +86,7 @@ function Explore() {
     () => [
       ...mapServices.map((s) => {
         const m = SERVICE_META[s.type];
-        return { id: s.id, lat: s.lat, lng: s.lng, title: s.name ?? null, tag: t(m.label), color: m.color, bg: m.bg, fg: m.fg, symbol: m.symbol, icon: m.icon, minZoom: Math.max(m.minZoom ?? 0, kind === "services" ? 14 : 14.5), phone: s.phone, address: s.address, hours: s.hours };
+        return { id: s.id, lat: s.lat, lng: s.lng, title: s.name ?? null, tag: t(m.label), color: m.color, bg: m.bg, fg: m.fg, symbol: m.symbol, icon: m.icon, minZoom: Math.max(m.minZoom ?? 0, kind === "services" ? 14 : 16.5), phone: s.phone, address: s.address, hours: s.hours };
       }),
       ...mapActivities.map((a) => {
         const m = ACTIVITY_META[a.type];
