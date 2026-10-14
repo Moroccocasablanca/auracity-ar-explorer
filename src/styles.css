@@ -543,3 +543,10 @@ button:not(:disabled):active { transform: scale(.96); }
 .aura-badge:has(.aura-ico3d) { padding: 12%; box-sizing: border-box; }
 .aura-svc-badge:has(.aura-ico3d) { padding: 12%; box-sizing: border-box; }
 .aura-legend-ico { padding: 2px; box-sizing: border-box; }
+
+/* Pharmacy on duty: bigger, green and softly pulsing, so people find it at night. */
+.aura-svc-duty { z-index: 8 !important; }
+.aura-svc-duty .aura-svc-badge { width: 40px; height: 40px; border-color: #16a34a; box-shadow: 0 0 0 4px rgb(22 163 74 / .35), 0 6px 14px rgb(0 0 0 / .35); animation: aura-duty 1.8s ease-in-out infinite; }
+.aura-svc-duty .aura-label { display: flex !important; }
+@keyframes aura-duty { 50% { box-shadow: 0 0 0 9px rgb(22 163 74 / 0), 0 6px 14px rgb(0 0 0 / .35); } }
+@media (prefers-reduced-motion: reduce) { .aura-svc-duty .aura-svc-badge { animation: none; } }

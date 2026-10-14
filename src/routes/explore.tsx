@@ -1,7 +1,7 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ClientOnly, createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Bell, ChevronRight, Crosshair, Dumbbell, Info, Landmark, LayoutGrid, Moon, ShieldPlus, Store, Sun, SunMoon, TreePine, Utensils } from "lucide-react";
+import { Bell, ChevronRight, Pill, Crosshair, Dumbbell, Info, Landmark, LayoutGrid, Moon, ShieldPlus, Store, Sun, SunMoon, TreePine, Utensils } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useMapAppearance } from "@/components/map/MapAppearanceControl";
 import type { MapMode } from "@/lib/map-appearance";
@@ -23,6 +23,8 @@ import { discovered, markDiscovered } from "@/lib/discovered";
 import { directionsUrl, isEssential, SERVICES, SERVICE_META, telHref, type ServicePlace } from "@/lib/services";
 import { ACTIVITIES, ACTIVITY_META } from "@/lib/activities";
 import type { Poi } from "@/lib/poi";
+import { dutyNow, useDuty } from "@/lib/duty";
+import { DutyCard } from "@/components/DutyCard";
 import { logEvent } from "@/lib/quest";
 
 const BraMap = lazy(() => import("@/components/map/BraMap"));
@@ -76,7 +78,13 @@ function Explore() {
   }, [nodes, kind, pos]);
   const filtered = useMemo(() => list.map((x) => x.n), [list]);
   // Services: essentials are always on the map; defibrillators only in the Services filter.
-  const mapServices = useMemo(() => (kind === "services" ? SERVICES : kind === "all" ? SERVICES.filter(isEssential) : []), [kind]);
+  const duty = useDuty();
+  const dutyList = useMemo(() => (duty?.status === "ok" ? dutyNow(duty) : []), [duty]);
+  const dutyIds = useMemo(() => new Set(dutyList.flatMap((d) => (d.place ? [d.place.id] : []))), [dutyList]);
+  const mapServices = useMemo(
+    () => (kind === "services" ? SERVICES : kind === "all" ? SERVICES.filter((s) => isEssential(s) || dutyIds.has(s.id)) : kind === "duty" ? SERVICES.filter((s) => dutyIds.has(s.id)) : []),
+    [kind, dutyIds],
+  );
   // Activities: gyms, sports centres, playgrounds... (all in "Sport & leisure", playgrounds also under the kids' gardens)
   const mapActivities = useMemo(
     () => (kind === "activities" ? ACTIVITIES : kind === "gardens" ? ACTIVITIES.filter((a) => a.type === "playground") : kind === "all" ? ACTIVITIES.filter((a) => a.type === "gym" || a.type === "pool") : []),
@@ -86,14 +94,15 @@ function Explore() {
     () => [
       ...mapServices.map((s) => {
         const m = SERVICE_META[s.type];
-        return { id: s.id, lat: s.lat, lng: s.lng, title: s.name ?? null, tag: t(m.label), color: m.color, bg: m.bg, fg: m.fg, symbol: m.symbol, icon: m.icon, minZoom: Math.max(m.minZoom ?? 0, kind === "services" ? 14 : 16.5), phone: s.phone, address: s.address, hours: s.hours };
+        if (dutyIds.has(s.id)) return { id: s.id, lat: s.lat, lng: s.lng, title: s.name ?? null, tag: t("svc.duty"), color: "#15803d", bg: "#16a34a", fg: "#ffffff", symbol: m.symbol, icon: m.icon, duty: true, minZoom: 13.5, phone: s.phone, address: s.address, hours: s.hours };
+        return { id: s.id, lat: s.lat, lng: s.lng, title: s.name ?? null, tag: t(m.label), color: m.color, bg: m.bg, fg: m.fg, symbol: m.symbol, icon: m.icon, minZoom: Math.max(m.minZoom ?? 0, kind === "services" || kind === "duty" ? 14 : 16.5), phone: s.phone, address: s.address, hours: s.hours };
       }),
       ...mapActivities.map((a) => {
         const m = ACTIVITY_META[a.type];
         return { id: a.id, lat: a.lat, lng: a.lng, title: a.name ?? t(m.label), tag: t(m.label), color: m.color, bg: m.color, fg: "#ffffff", symbol: m.symbol, icon: m.icon, minZoom: kind === "activities" ? 14 : m.minZoom, phone: a.phone, address: a.address, hours: a.hours, open: `/attivita/${a.id}` };
       }),
     ],
-    [mapServices, mapActivities, kind, t],
+    [mapServices, mapActivities, kind, t, dutyIds],
   );
   const serviceLabel = useCallback((s: ServicePlace) => (s.name ? s.name : t(SERVICE_META[s.type].label)), [t]);
   const serviceList = useMemo(
@@ -139,9 +148,9 @@ function Explore() {
   const modes: MapMode[] = ["auto", "day", "night"];
   const nextMode = modes[(modes.indexOf(mode) + 1) % 3]!;
   const ModeIcon = mode === "auto" ? SunMoon : mode === "day" ? Sun : Moon;
-  const chips = ["all", "restaurants", "monument", "gardens", "business", "activities", "services"] as const;
-  const chipIcon = { all: LayoutGrid, restaurants: Utensils, monument: Landmark, gardens: TreePine, business: Store, activities: Dumbbell, services: ShieldPlus } as const;
-  const chipLabel = (k: (typeof chips)[number]) => (k === "all" ? t("all") : k === "restaurants" ? t("explore.restaurants") : k === "gardens" ? t("explore.gardens") : k === "services" ? t("explore.services") : k === "activities" ? t("explore.activities") : t(kindKey(k)));
+  const chips = ["all", "duty", "restaurants", "monument", "gardens", "business", "activities", "services"] as const;
+  const chipIcon = { all: LayoutGrid, restaurants: Utensils, monument: Landmark, gardens: TreePine, business: Store, activities: Dumbbell, services: ShieldPlus, duty: Pill } as const;
+  const chipLabel = (k: (typeof chips)[number]) => (k === "all" ? t("all") : k === "restaurants" ? t("explore.restaurants") : k === "gardens" ? t("explore.gardens") : k === "services" ? t("explore.services") : k === "duty" ? t("explore.duty") : k === "activities" ? t("explore.activities") : t(kindKey(k)));
 
   return (
     <div className="min-h-screen pb-28">
@@ -170,7 +179,7 @@ function Explore() {
         <div className="relative min-h-0 flex-1 overflow-hidden">
         <ClientOnly fallback={<div className="h-full w-full animate-pulse bg-card/60" />}>
           <Suspense fallback={<div className="h-full w-full animate-pulse bg-card/60" />}>
-            <BraMap nodes={filtered} pos={pos} kindLabel={kindLabel} placeLabel={(n) => t(placeStyle(n).label)} appearance={appearance} recenter={recenter} onTalk={onTalk} talkLabel={talkLabel} pois={pois} poiText={{ call: t("svc.call"), directions: t("svc.directions"), open: t("act.open") }} readLabel={t("venue.read")} openLabel={(o) => t(o ? "node.open" : "node.closed")} speakingId={playing} me={{ label: t("map.me"), accuracy: loc.accuracy, heading: loc.heading, avatar: myAvatar, name: myName, ring: myRing }} />
+            <BraMap nodes={filtered} pos={pos} kindLabel={kindLabel} placeLabel={(n) => t(placeStyle(n).label)} appearance={appearance} recenter={recenter} focus={kind === "duty" ? dutyList.find((d) => d.active)?.place ?? dutyList.find((d) => d.place)?.place ?? null : null} onTalk={onTalk} talkLabel={talkLabel} pois={pois} poiText={{ call: t("svc.call"), directions: t("svc.directions"), open: t("act.open") }} readLabel={t("venue.read")} openLabel={(o) => t(o ? "node.open" : "node.closed")} speakingId={playing} me={{ label: t("map.me"), accuracy: loc.accuracy, heading: loc.heading, avatar: myAvatar, name: myName, ring: myRing }} />
           </Suspense>
         </ClientOnly>
         {legend && (
@@ -210,6 +219,8 @@ function Explore() {
             <span className="flex-1">{t("prox.enable")}</span>
           </button>
         )}
+
+        {(kind === "duty" || kind === "all" || kind === "services") && <DutyCard duty={duty} list={dutyList} full={kind === "duty"} />}
 
         {kind === "services" && (
           <section className="mt-6">

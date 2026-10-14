@@ -207,6 +207,8 @@ type Props = {
   placeLabel: (n: NodeRow) => string;
   appearance: MapAppearance;
   recenter: number;
+  /** when set, the map glides to this place (e.g. the pharmacy on duty) */
+  focus?: { lat: number; lng: number } | null;
   onTalk: (n: NodeRow) => void;
   talkLabel: string;
   readLabel: string;
@@ -218,7 +220,7 @@ type Props = {
   me: { label: string; accuracy: number; heading: number; avatar: MyAvatar; name: string; ring: string };
 };
 
-export default function BraMap({ nodes, pos, kindLabel, placeLabel, appearance, recenter, onTalk, talkLabel, readLabel, openLabel, pois, poiText, speakingId, me: meInfo }: Props) {
+export default function BraMap({ nodes, pos, kindLabel, placeLabel, appearance, recenter, focus, onTalk, talkLabel, readLabel, openLabel, pois, poiText, speakingId, me: meInfo }: Props) {
   const el = useRef<HTMLDivElement>(null);
   const map = useRef<maplibregl.Map | null>(null);
   const shown = useRef(new Map<string, maplibregl.Marker>());
@@ -339,7 +341,7 @@ export default function BraMap({ nodes, pos, kindLabel, placeLabel, appearance, 
       if (svcShown.current.has(id)) continue;
       const { poiText: tx } = propsRef.current;
       const e = document.createElement("div");
-      e.className = "aura-mk aura-svc";
+      e.className = `aura-mk aura-svc${s.duty ? " aura-svc-duty" : ""}`;
       e.style.width = e.style.height = "30px";
       e.style.zIndex = "5";
       e.innerHTML = `<span class="aura-svc-badge" style="--pin:${s.bg};--edge:${s.color};color:${s.fg}">${s.icon ? icon3d(s.icon) : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${s.symbol}</svg>`}</span><span class="aura-label aura-label-svc">${s.title ? `<small style="color:color-mix(in oklab, ${s.color} 40%, #fff)">${esc(s.tag)}</small><b>${esc(s.title)}</b>` : `<b>${esc(s.tag)}</b>`}</span>`;
@@ -637,6 +639,9 @@ export default function BraMap({ nodes, pos, kindLabel, placeLabel, appearance, 
   useEffect(() => {
     if (recenter > 0 && pos) map.current?.flyTo({ center: [pos.lng, pos.lat], zoom: 17.5, pitch: 62, duration: 1400 });
   }, [recenter, pos, mapReady]);
+  useEffect(() => {
+    if (focus && mapReady) map.current?.flyTo({ center: [focus.lng, focus.lat], zoom: 16.8, pitch: 0, bearing: 0, duration: 1200 });
+  }, [focus?.lat, focus?.lng, mapReady]);
 
   const [flat, setFlat] = useState(savedView() === "2d");
   useEffect(() => {

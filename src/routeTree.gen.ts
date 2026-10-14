@@ -19,6 +19,7 @@ import { Route as QuestRouteImport } from './routes/quest'
 import { Route as ApiDailyTriviaRouteImport } from './routes/api/daily-trivia'
 import { Route as ApiGuideRouteImport } from './routes/api/guide'
 import { Route as ApiHuntRiddlesRouteImport } from './routes/api/hunt-riddles'
+import { Route as ApiPharmacyDutyRouteImport } from './routes/api/pharmacy-duty'
 import { Route as ApiPromoRouteImport } from './routes/api/promo'
 import { Route as ApiTtsRouteImport } from './routes/api/tts'
 import { Route as AttivitaIdRouteImport } from './routes/attivita.$id'
@@ -74,6 +75,11 @@ const ApiHuntRiddlesRoute = ApiHuntRiddlesRouteImport.update({
   path: '/api/hunt-riddles',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPharmacyDutyRoute = ApiPharmacyDutyRouteImport.update({
+  id: '/api/pharmacy-duty',
+  path: '/api/pharmacy-duty',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPromoRoute = ApiPromoRouteImport.update({
   id: '/api/promo',
   path: '/api/promo',
@@ -106,6 +112,7 @@ export interface FileRoutesByFullPath {
   '/api/daily-trivia': typeof ApiDailyTriviaRoute
   '/api/guide': typeof ApiGuideRoute
   '/api/hunt-riddles': typeof ApiHuntRiddlesRoute
+  '/api/pharmacy-duty': typeof ApiPharmacyDutyRoute
   '/api/promo': typeof ApiPromoRoute
   '/api/tts': typeof ApiTtsRoute
   '/attivita/$id': typeof AttivitaIdRoute
@@ -122,6 +129,7 @@ export interface FileRoutesByTo {
   '/api/daily-trivia': typeof ApiDailyTriviaRoute
   '/api/guide': typeof ApiGuideRoute
   '/api/hunt-riddles': typeof ApiHuntRiddlesRoute
+  '/api/pharmacy-duty': typeof ApiPharmacyDutyRoute
   '/api/promo': typeof ApiPromoRoute
   '/api/tts': typeof ApiTtsRoute
   '/attivita/$id': typeof AttivitaIdRoute
@@ -139,6 +147,7 @@ export interface FileRoutesById {
   '/api/daily-trivia': typeof ApiDailyTriviaRoute
   '/api/guide': typeof ApiGuideRoute
   '/api/hunt-riddles': typeof ApiHuntRiddlesRoute
+  '/api/pharmacy-duty': typeof ApiPharmacyDutyRoute
   '/api/promo': typeof ApiPromoRoute
   '/api/tts': typeof ApiTtsRoute
   '/attivita/$id': typeof AttivitaIdRoute
@@ -157,6 +166,7 @@ export interface FileRouteTypes {
     | '/api/daily-trivia'
     | '/api/guide'
     | '/api/hunt-riddles'
+    | '/api/pharmacy-duty'
     | '/api/promo'
     | '/api/tts'
     | '/attivita/$id'
@@ -173,6 +183,7 @@ export interface FileRouteTypes {
     | '/api/daily-trivia'
     | '/api/guide'
     | '/api/hunt-riddles'
+    | '/api/pharmacy-duty'
     | '/api/promo'
     | '/api/tts'
     | '/attivita/$id'
@@ -189,6 +200,7 @@ export interface FileRouteTypes {
     | '/api/daily-trivia'
     | '/api/guide'
     | '/api/hunt-riddles'
+    | '/api/pharmacy-duty'
     | '/api/promo'
     | '/api/tts'
     | '/attivita/$id'
@@ -206,6 +218,7 @@ export interface RootRouteChildren {
   ApiDailyTriviaRoute: typeof ApiDailyTriviaRoute
   ApiGuideRoute: typeof ApiGuideRoute
   ApiHuntRiddlesRoute: typeof ApiHuntRiddlesRoute
+  ApiPharmacyDutyRoute: typeof ApiPharmacyDutyRoute
   ApiPromoRoute: typeof ApiPromoRoute
   ApiTtsRoute: typeof ApiTtsRoute
   AttivitaIdRoute: typeof AttivitaIdRoute
@@ -284,6 +297,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiHuntRiddlesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/pharmacy-duty': {
+      id: '/api/pharmacy-duty'
+      path: '/api/pharmacy-duty'
+      fullPath: '/api/pharmacy-duty'
+      preLoaderRoute: typeof ApiPharmacyDutyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/promo': {
       id: '/api/promo'
       path: '/api/promo'
@@ -326,6 +346,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiDailyTriviaRoute: ApiDailyTriviaRoute,
   ApiGuideRoute: ApiGuideRoute,
   ApiHuntRiddlesRoute: ApiHuntRiddlesRoute,
+  ApiPharmacyDutyRoute: ApiPharmacyDutyRoute,
   ApiPromoRoute: ApiPromoRoute,
   ApiTtsRoute: ApiTtsRoute,
   AttivitaIdRoute: AttivitaIdRoute,

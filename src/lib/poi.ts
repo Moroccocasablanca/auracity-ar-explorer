@@ -11,6 +11,8 @@ export type Poi = {
   symbol: string;
   /** name of a 3D icon in /icons3d (falls back to the flat symbol) */
   icon?: string | undefined;
+  /** pharmacy on duty today: drawn bigger, green, always visible in town */
+  duty?: boolean | undefined;
   minZoom: number;
   phone?: string | undefined;
   address?: string | undefined;
