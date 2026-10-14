@@ -41,24 +41,17 @@ export const Route = createFileRoute("/api/tts")({
 
         const dir = path.join(process.cwd(), ".voice-cache");
         fs.mkdirSync(dir, { recursive: true });
-        const file = path.join(dir, `${crypto.createHash("sha256").update(`v1|${voice}|${lang}|${text}`).digest("hex")}.wav`);
+        const file = path.join(dir, `${crypto.createHash("sha256").update(`v2|${voice}|${lang}|${text}`).digest("hex")}.wav`);
         if (fs.existsSync(file)) return new Response(new Uint8Array(fs.readFileSync(file)), { headers: { "content-type": "audio/wav" } });
 
         const today = new Date().toISOString().slice(0, 10);
         if (day !== today) { day = today; count = 0; }
         if (++count > MAX_PER_DAY) return Response.json({ error: "daily limit" }, { status: 429 });
 
-        const L = LANG_NAMES[lang]!;
-        // Place and brand names keep their own pronunciation: Italian names stay Italian, foreign ones keep their native accent.
-        const rules = `Pronounce every word exactly as a native ${L} speaker would; if a proper name is Italian (Palazzo Traversa, Chiesa di San Pietro) say it with perfect Italian phonetics, and if it is clearly foreign (Harry's Bar, Bistrot) keep its native accent. Pronounce Italian double consonants fully (birra, caffè, panna, mamma) and never cut the last syllable of a word. `;
-        const style =
-          voice === "young"
-            ? `Read aloud in ${L} with a playful, proud, curious youthful voice, lively but natural, never like a cartoon. ${rules}`
-            : voice === "female"
-              ? `Read aloud in ${L} with an elegant, warm, narrative female voice, like a refined local guide, calm pace. ${rules}`
-              : `Read aloud in ${L} with a warm, friendly welcoming male voice, like a cheerful host greeting a guest, easy pace. ${rules}`;
+        // Only the written text goes to the voice: the voice itself (woman, man, young) is chosen by its name, so nothing
+        // like "narrate with an elegant female voice" can ever be read aloud.
         const body2 = JSON.stringify({
-          contents: [{ parts: [{ text: style + text }] }],
+          contents: [{ parts: [{ text }] }],
           generationConfig: { responseModalities: ["AUDIO"], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: VOICES[voice] } } } },
         });
         let b64: string | undefined;

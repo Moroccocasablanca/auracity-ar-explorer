@@ -176,13 +176,12 @@ function Explore() {
         {legend && (
           <div className="absolute inset-x-3 bottom-16 z-[6] rounded-2xl border border-border bg-card/95 p-3 text-xs shadow-xl backdrop-blur" onClick={() => setLegend(false)}>
             <div className="grid grid-cols-2 gap-x-3 gap-y-1.5">
-              {(["restaurant", "streetfood", "cafe", "icecream", "bar", "church", "palace", "museum"] as const).map((k) => (
-                <span key={k} className="flex items-center gap-2"><i className="size-3 shrink-0 rounded-full border-2 border-white" style={{ background: PLACE_STYLE[k].color }} />{t(PLACE_STYLE[k].label)}</span>
+              {(["church", "palace", "townhall", "museum", "castle", "memorial", "park", "restaurant", "streetfood", "cafe", "icecream", "bar", "shop"] as const).map((k) => (
+                <span key={k} className="flex items-center gap-2"><i className="aura-legend-ico" style={{ background: PLACE_STYLE[k].color }}><img src={`/icons3d/${PLACE_STYLE[k].icon}.png`} alt="" /></i>{t(PLACE_STYLE[k].label)}</span>
               ))}
-              <span className="flex items-center gap-2"><i className="size-3 shrink-0 rounded-full border-2 border-white bg-kind-bench" />{t("kind.bench")}</span>
-              <span className="flex items-center gap-2"><i className="size-3 shrink-0 rounded-full border-2 border-green-600 bg-white" />{t("svc.pharmacy")}</span>
-              <span className="flex items-center gap-2"><i className="size-3 shrink-0 rounded-full border-2 border-white bg-blue-700" />{t("svc.hospital")}</span>
-              <span className="flex items-center gap-2"><i className="size-3 shrink-0 rounded-full border-2 border-white bg-blue-900" />{t("svc.police")} / {t("svc.carabinieri")}</span>
+              {(["pharmacy", "hospital", "police", "carabinieri", "fire", "aed"] as const).map((k) => (
+                <span key={k} className="flex items-center gap-2"><i className="aura-legend-ico" style={{ background: SERVICE_META[k].color }}><img src={`/icons3d/${SERVICE_META[k].icon}.png`} alt="" /></i>{t(SERVICE_META[k].label)}</span>
+              ))}
             </div>
           </div>
         )}

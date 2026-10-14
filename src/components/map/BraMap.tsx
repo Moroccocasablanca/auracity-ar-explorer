@@ -163,12 +163,12 @@ function stopPin(color: string, symbol: string, big: boolean, mon = false, icon?
 }
 
 /** Round photo badge: the real photo of the place inside a coloured ring. */
-function photoPin(color: string, url: string, big: boolean, symbol: string): Pin {
+function photoPin(color: string, url: string, big: boolean, symbol: string, icon?: string): Pin {
   const d = big ? 42 : 34;
   return {
     w: d,
     h: d,
-    html: `<span class="aura-photo-stop${big ? " aura-stop-big" : ""}" style="--pin:${color};width:${d}px;height:${d}px"><svg class="aura-photo-fallback" viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${symbol}</g></svg><img src="${encodeURI(url)}" alt="" loading="lazy" decoding="async" onerror="this.style.display='none'" /></span>`,
+    html: `<span class="aura-photo-stop${big ? " aura-stop-big" : ""}" style="--pin:${color};width:${d}px;height:${d}px"><svg class="aura-photo-fallback" viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${symbol}</g></svg><img src="${encodeURI(url)}" alt="" loading="lazy" decoding="async" onerror="this.style.display='none'" />${icon ? `<span class="aura-photo-chip" style="--pin:${color}">${icon3d(icon)}</span>` : ""}</span>`,
   };
 }
 
@@ -293,7 +293,7 @@ export default function BraMap({ nodes, pos, kindLabel, placeLabel, appearance, 
     const pin = garden
       ? charPin(color, n.kind)
       : n.image_url && (monument || featured) && (map.current?.getZoom() ?? 17) >= PHOTO_ZOOM
-        ? photoPin(color, n.image_url, true, st.symbol)
+        ? photoPin(color, n.image_url, true, st.symbol, st.icon)
         : stopPin(color, st.symbol, featured, monument, st.icon);
     const { placeLabel: pl, talkLabel: tl } = propsRef.current;
     const e = document.createElement("div");

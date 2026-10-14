@@ -530,3 +530,8 @@ button:not(:disabled):active { transform: scale(.96); }
 .aura-badge, .aura-svc-badge { overflow: visible; }
 .aura-badge:has(.aura-ico3d) { background: radial-gradient(circle at 30% 25%, color-mix(in oklab, var(--pin) 55%, #fff), var(--pin) 70%); }
 .aura-svc-badge:has(.aura-ico3d) { background: radial-gradient(circle at 30% 25%, #fff, color-mix(in oklab, var(--edge, #fff) 35%, #fff) 80%); }
+.aura-photo-chip { position: absolute; z-index: 2; right: -9px; bottom: -7px; width: 22px; height: 22px; border-radius: 9999px; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at 30% 25%, color-mix(in oklab, var(--pin) 50%, #fff), var(--pin) 75%); border: 2px solid #fff; box-shadow: 0 2px 5px rgb(0 0 0 / .4); }
+.aura-photo-chip .aura-ico3d { width: 124%; height: 124%; margin: -12% 0 0; }
+.aura-photo-stop img.aura-ico3d { position: static; border-radius: 0; }
+.aura-legend-ico { width: 22px; height: 22px; flex: none; border-radius: 9999px; display: inline-flex; align-items: center; justify-content: center; border: 2px solid #fff; box-shadow: 0 1px 3px rgb(0 0 0 / .35); }
+.aura-legend-ico img { width: 124%; height: 124%; max-width: none; margin-top: -12%; }

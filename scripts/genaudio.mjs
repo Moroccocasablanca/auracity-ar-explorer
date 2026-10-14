@@ -14,11 +14,8 @@ const KEY = fs.readFileSync(process.env.HOME + "/.auracity-gemini-key", "utf8").
 const VOICE = { female: "Kore", young: "Puck" };
 // Each model has its own free daily quota: when one is used up the next one carries on.
 const MODELS = ["gemini-2.5-flash-preview-tts", "gemini-3.1-flash-tts-preview", "gemini-3.8-flash-tts", "gemini-3.8-flash-lite-tts", "gemini-2.5-pro-preview-tts"];
-const RULES = " Pronuncia perfettamente le doppie consonanti (birra, caffè, panna) e non tagliare mai l'ultima sillaba di una parola.";
-const STYLE = {
-  female: "Narra in italiano con voce di donna calda, elegante e naturale, come una guida locale esperta, ritmo calmo e continuo, senza pause lunghe:" + RULES + " ",
-  young: "Racconta in italiano con la voce di un ragazzo giovane, curioso e un po' orgoglioso, allegro ma naturale, non da cartone animato, ritmo continuo:" + RULES + " ",
-};
+// Only the written text is sent: the voice is chosen by its name, so no instruction can ever be read aloud.
+const STYLE = { female: "", young: "" };
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const manifest = () => fs.writeFileSync("public/audio/manifest.json", JSON.stringify(fs.readdirSync("public/audio").filter((f) => f.endsWith(".m4a")).sort()));
 

@@ -7,10 +7,6 @@
   "bytes": 56572,
   "sha256": "b7a028392707d3c116d8209a1483b9effa6e2ef8f93811a45a63b8c48d402c24"
  },
- "public/audio/279ccf28-0df6-46ca-b024-38de31d7a1cc.m4a": {
-  "bytes": 125237,
-  "sha256": "4377da99d307e8b347fca233bcf50f06a4f55fb07f67170d3942299548ee423c"
- },
  "public/audio/303d32a5-8690-4bcc-92ad-ef1267fe314c-full.m4a": {
   "bytes": 269542,
   "sha256": "f6728160b59d78366ecaccd319313ea34a9f51a360d653fbe2b9ba9cad1e81b0"
@@ -39,10 +35,6 @@
   "bytes": 57948,
   "sha256": "23b27bee7f9c19ac3cb0cc8452256d032df6b3662dcad6bdf1bbce53bc60a309"
  },
- "public/audio/51d48206-0852-475d-beb5-3b261fdd214a.m4a": {
-  "bytes": 146468,
-  "sha256": "ee809a72e9c8f7743fbe53de0d227497f11e63f0a69c29150bc38ad7c33455ce"
- },
  "public/audio/59bbf316-4860-4a3c-970c-3d1761cf5650-full.m4a": {
   "bytes": 173850,
   "sha256": "d1505537156ced1b1d6ecb2aade59db842092bb72d7969b0531d014e2defb3de"
@@ -58,18 +50,6 @@
  "public/audio/6bd85369-53c0-4f5f-8816-7c4b4f901064.m4a": {
   "bytes": 230117,
   "sha256": "40ae99abed70e7d18a64d81b3aae3aa8e458dd2f56e44c13baf582c5c18715a1"
- },
- "public/audio/6f1ab813-db99-472c-a0de-e162bf257619.m4a": {
-  "bytes": 148778,
-  "sha256": "65339415ad30acdf73537a857216bcd623b780ddae49041564f1c229821afc34"
- },
- "public/audio/70b86568-b8d8-4073-9268-a0a0a39d0e74.m4a": {
-  "bytes": 224685,
-  "sha256": "fce6a5fbe1a171c37a93a53548c3517c3deeb352500c9ccfeed2b70f78f96c01"
- },
- "public/audio/79d81ff2-e225-48e4-b164-830cf5e9dc1b.m4a": {
-  "bytes": 201568,
-  "sha256": "23756dc48defe3dae182cba7129a4ea857e1e2a21f96c214968315f1f5ff63f2"
  },
  "public/audio/85b52b2a-8b2d-419d-8034-79af2203e7ac.m4a": {
   "bytes": 111412,
@@ -87,29 +67,9 @@
   "bytes": 152394,
   "sha256": "adbcf1483e1fb065e82fc725fd5ee62717123ace73545c46ce3ce1ffde03ee26"
  },
- "public/audio/98b2fa67-4648-47be-b1a6-7a0d096419cb.m4a": {
-  "bytes": 166859,
-  "sha256": "b5f18aa8234d504793113b71353c1ccf2e5ab8159889167301e16c88cb476ecd"
- },
- "public/audio/9eb37ecb-5e40-4ac7-ae68-acfb080f93f0.m4a": {
-  "bytes": 184000,
-  "sha256": "ed595bafd7a5292b432f748b3a40cce62875040b218caa6d38f8a4ecd7161e3d"
- },
- "public/audio/9fcf30fb-14da-48f6-bc79-fba79e529b49.m4a": {
-  "bytes": 168638,
-  "sha256": "41435416b84eb1db7ad0af7d89e8655c518b0807a861cb32592d7fe7038196e9"
- },
  "public/audio/b1996040-6915-4971-8d4f-0abe3d6acb04.m4a": {
   "bytes": 55168,
   "sha256": "0df2b8a0b2f5146cd04255bc8ae996117e01d44672097b707df81ba758d4be77"
- },
- "public/audio/b4ebce39-0f30-4241-9837-ca41245bac45.m4a": {
-  "bytes": 150380,
-  "sha256": "769ed464df0c41fd1d50c001d604f1e7a843360bdf944076b1351fb56a85fa32"
- },
- "public/audio/b50f6239-5718-4ac1-a32c-6604dea07c08.m4a": {
-  "bytes": 220205,
-  "sha256": "1b0277d2849b5d08e2d4bdde18e0635b3e04512ff1a178df285678e64f0adaf2"
  },
  "public/audio/b8fc5545-3b4c-4386-a70f-edf37a342c36.m4a": {
   "bytes": 74677,
@@ -127,18 +87,6 @@
   "bytes": 38948,
   "sha256": "436f3e01f7fb5935d1e3480d2029dfadc41c2ae62158539c032e0517a088224b"
  },
- "public/audio/d0e7c096-5bd7-43ce-8a96-804ffffe3b65.m4a": {
-  "bytes": 174076,
-  "sha256": "deef3e0505f9c325acb0eef9d09aa5fde68dc02fafc1218b439b7a16773dd025"
- },
- "public/audio/dd2bbe3e-faa2-4cd4-b22f-e697865df6de.m4a": {
-  "bytes": 191826,
-  "sha256": "18c72b043b77e88fad1fb38298772b72ff8bb5173aac2c31a547ae74671e3af1"
- },
- "public/audio/deaa7cf2-57bc-49a0-84e5-115d30cd8b42-full.m4a": {
-  "bytes": 175967,
-  "sha256": "106a5a27f47f569bc983a0bc09625c83e985224e4d6fca464e230ed54bfe1d9f"
- },
  "public/audio/deaa7cf2-57bc-49a0-84e5-115d30cd8b42.m4a": {
   "bytes": 65967,
   "sha256": "b8d8fd969eac85ff2528d56374e8ecabba02e405c8bf48f62f35a580d97fc359"
@@ -151,37 +99,13 @@
   "bytes": 62307,
   "sha256": "6cca51e6519590d013bf2b6ebcd865da3e427fd37e843c6d0b4c71ed85d0bad2"
  },
- "public/audio/e686757f-5951-4e43-9d9e-f602771653d9.m4a": {
-  "bytes": 190444,
-  "sha256": "3d534ea9444c1b7795c03c6f903806483d7387e78ae42c67bc3adb74509e63ac"
- },
- "public/audio/e6a54bc2-51c6-4291-bc92-1a83b00c830d.m4a": {
-  "bytes": 151252,
-  "sha256": "1ca402f4bac4c8d4a3be314e40e52af0ec31c81598a9ae1c3eb578035ad40405"
- },
- "public/audio/e9208cf8-fbe5-4789-a5ae-efa2d142bcae.m4a": {
-  "bytes": 162309,
-  "sha256": "a6a0dc14d0afe27a6024830584459f10d0020878573dfe870f6f36c15b5e372c"
- },
- "public/audio/ecce13da-4dce-4f1e-b180-73ed57501e44-full.m4a": {
-  "bytes": 194283,
-  "sha256": "c69519a68fbd83a3d5b7d1ba8009ec197221307fc28e732ee18bc9142381d823"
- },
  "public/audio/ecce13da-4dce-4f1e-b180-73ed57501e44.m4a": {
   "bytes": 77321,
   "sha256": "05f0fd6e16158d711eb438a91caf16daf42c403ffe476c14fca48cb4288ac78f"
  },
- "public/audio/ef6452c4-44e3-4588-a44f-1d42efac89b0-full.m4a": {
-  "bytes": 204280,
-  "sha256": "f52bda4c2ad10ae303e743d0e5c8dd04ccc8e759d973bc0ef3653fe191a88053"
- },
  "public/audio/ef6452c4-44e3-4588-a44f-1d42efac89b0.m4a": {
   "bytes": 71949,
   "sha256": "b8a31c86db169fd2dc5696c1d3100f51ff60a9d75e07bd0a211644f1fddf53b0"
- },
- "public/audio/fef5a5e0-0c71-4286-80f0-4a7c5e128996-full.m4a": {
-  "bytes": 222119,
-  "sha256": "d89064d925ce948cedf09772160b9bbb172cc28910a83fd068c500c0ae824c45"
  },
  "public/audio/fef5a5e0-0c71-4286-80f0-4a7c5e128996.m4a": {
   "bytes": 99511,
@@ -266,6 +190,110 @@
  "public/dishes/wine.png": {
   "bytes": 24720,
   "sha256": "beb681aa5471ef038b13f009931a61b6174488a474426100d35f097fb4f11bf9"
+ },
+ "public/icons3d/aed.png": {
+  "bytes": 34339,
+  "sha256": "e5f536d18ce2303368a2aceed3c3cadde00576e21f49b2aeebe1605c3727fefa"
+ },
+ "public/icons3d/bar.png": {
+  "bytes": 22343,
+  "sha256": "322dbcb00c556ed349adeb5b791607f57336718a45e51c14258dad0185fd0e46"
+ },
+ "public/icons3d/cafe.png": {
+  "bytes": 35938,
+  "sha256": "c91d505d8a4f8ab70485f699a42bc00ae591ec90444f5c14cfae128202ab1de4"
+ },
+ "public/icons3d/carabinieri.png": {
+  "bytes": 34111,
+  "sha256": "04c387a678057b4e51e30720ddf9020cfb0db593ca8eb202ff128f0b6dd5b820"
+ },
+ "public/icons3d/castle.png": {
+  "bytes": 43855,
+  "sha256": "6650e842288469b4cc04d841ddc6ada092856d7e205923c69b54677c8d85a007"
+ },
+ "public/icons3d/church.png": {
+  "bytes": 41877,
+  "sha256": "e9e0e14928ccd0d08c66ad200f4aa0d94a03d6076fd384e3c889d8466084320c"
+ },
+ "public/icons3d/cinema.png": {
+  "bytes": 35623,
+  "sha256": "812efcba2d7b418c20c18277383f41b1bf65076114a181e99814c23911dc0874"
+ },
+ "public/icons3d/clinic.png": {
+  "bytes": 34743,
+  "sha256": "9f6770212a0a5c2ce9262657e5aca9ae0962a4e926acf191358fb5e5090c511f"
+ },
+ "public/icons3d/fire.png": {
+  "bytes": 51818,
+  "sha256": "a0c630c9229a9c310f9c6daf869ec2402511321a7317401a712dfba4e79eccb9"
+ },
+ "public/icons3d/gym.png": {
+  "bytes": 36317,
+  "sha256": "b4d9399f841f594ed349cc1f1a4ac7ad020e7eeac0656d4505403241bf7fc1e6"
+ },
+ "public/icons3d/hospital.png": {
+  "bytes": 34091,
+  "sha256": "55cca083dc6bbe003192fa4b26e372b8eed10be29e151c01f88516ee0970ac1f"
+ },
+ "public/icons3d/icecream.png": {
+  "bytes": 24421,
+  "sha256": "a405e2b91b1634ebacebcbaaf609dc82877d0261fb9956768d8c7830c50829b9"
+ },
+ "public/icons3d/memorial.png": {
+  "bytes": 22052,
+  "sha256": "ed9bc53b9b8083988e7e7d6b707e279a16ff5ca9e10b2ba962fcdf4531da5450"
+ },
+ "public/icons3d/museum.png": {
+  "bytes": 31755,
+  "sha256": "6e1221704c53a77259a935399e5acf809a8443c1f19f5a1d0144d1d92bd76b11"
+ },
+ "public/icons3d/palace.png": {
+  "bytes": 51291,
+  "sha256": "8eb3d6a16f0299deb7f6844d9f8b51f5d9975139cd9958a458be89f998385cc5"
+ },
+ "public/icons3d/park.png": {
+  "bytes": 31177,
+  "sha256": "58050ad616df46f0e0f90065598580b1fb411a9145cd50b06412450848b79e5c"
+ },
+ "public/icons3d/pharmacy.png": {
+  "bytes": 28152,
+  "sha256": "55944cf427ebd982303895a58c32fc97f5874c3ec8c5044c8f62e9489ed0aac5"
+ },
+ "public/icons3d/playground.png": {
+  "bytes": 35489,
+  "sha256": "1c86024f4acce0cec065157dc98cb882369dd4259c4e164014f12a1487bfb1d2"
+ },
+ "public/icons3d/police.png": {
+  "bytes": 40533,
+  "sha256": "5bcf1e7e991922f707db15871de1cf0ef727b6f2fa2fd5424c19e08020bfaec9"
+ },
+ "public/icons3d/pool.png": {
+  "bytes": 36957,
+  "sha256": "016f56f77eac3a0582244422e73264ba682d46a5017524fc26d294326fa0aa8c"
+ },
+ "public/icons3d/restaurant.png": {
+  "bytes": 28836,
+  "sha256": "f6cfcf1594a5b625f97741d65b0d8fc2fbfb9f6e81869d9b77575e1e537f9806"
+ },
+ "public/icons3d/shop.png": {
+  "bytes": 33986,
+  "sha256": "861bf7ba1d313ea763889aea4d47760a5623cd8a03f79d5814fc265c721a24e5"
+ },
+ "public/icons3d/sports.png": {
+  "bytes": 25750,
+  "sha256": "e035c0cd353c47c8ec2c02845a9df8ce2caee8f772a5495735e32f65883278de"
+ },
+ "public/icons3d/streetfood.png": {
+  "bytes": 48414,
+  "sha256": "78107f69573482e8cea3d04e0fc00f70bf79cf6e40db7153a99eab97347f7e8e"
+ },
+ "public/icons3d/theatre.png": {
+  "bytes": 34428,
+  "sha256": "745330fef2d2cee48a15be35964be6258ae5fe91b09f9b0e85f0d27c92275e3a"
+ },
+ "public/icons3d/townhall.png": {
+  "bytes": 42715,
+  "sha256": "3ae124009be16bb0cb6a0db9e83207cf1a535efd67b891249ff6cf393cf6ae33"
  },
  "public/mascots/barista.png": {
   "bytes": 291120,
