@@ -49,3 +49,20 @@ describe("Italian double consonants are never cut", () => {
     for (const w of ["birra", "caffè", "panna", "mamma"]) expect(t).toContain(w);
   });
 });
+
+import { chunkForServer } from "@/services/voice/speech";
+describe("long stories are cut at sentence ends for a continuous voice", () => {
+  it("never cuts a sentence in the middle and keeps every word", () => {
+    const text = Array.from({ length: 30 }, (_, i) => `Questa è la frase numero ${i + 1} della storia di Bra.`).join(" ");
+    const parts = chunkForServer(text, 200);
+    expect(parts.length).toBeGreaterThan(3);
+    for (const p of parts) {
+      expect(p.length).toBeLessThanOrEqual(280);
+      expect(p.endsWith(".")).toBe(true);
+    }
+    expect(parts.join(" ")).toBe(text);
+  });
+  it("a short text stays in one piece", () => {
+    expect(chunkForServer("Ciao a tutti. Benvenuti a Bra.")).toEqual(["Ciao a tutti. Benvenuti a Bra."]);
+  });
+});
