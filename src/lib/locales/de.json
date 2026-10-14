@@ -185,5 +185,6 @@
   "safety.banner": "Achte auf deinen Weg · halte Abstand zur Straße",
   "safety.paused": "Du scheinst dich schnell zu bewegen: AR pausiert. Bleib an einem sicheren Ort stehen, um fortzufahren.",
   "auth.adult": "Ich bin mindestens 18 Jahre alt und nutze mein Handy verantwortungsvoll: zur richtigen Zeit und am richtigen Ort, mit Blick auf meinen Weg und Abstand zur Straße.",
-  "safety.cam.one": "Achtung: Schau, wohin du gehst, und nutze die Kamera nie in der Nähe von Verkehr."
+  "safety.cam.one": "Achtung: Schau, wohin du gehst, und nutze die Kamera nie in der Nähe von Verkehr.",
+  "node.guide.hello": "Hallo! Ich bin deine Führerin: Ich erzähle dir die Geschichte von {name}."
 }

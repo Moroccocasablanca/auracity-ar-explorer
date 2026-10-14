@@ -185,5 +185,6 @@
   "safety.banner": "Regardez où vous marchez · restez loin de la route",
   "safety.paused": "Vous semblez vous déplacer vite : RA en pause. Arrêtez-vous dans un endroit sûr pour continuer.",
   "auth.adult": "J’ai au moins 18 ans et j’utiliserai mon téléphone de façon responsable : au bon moment, au bon endroit, en regardant où je marche et loin de la route.",
-  "safety.cam.one": "Attention : regardez où vous marchez et n’utilisez jamais la caméra près de la circulation."
+  "safety.cam.one": "Attention : regardez où vous marchez et n’utilisez jamais la caméra près de la circulation.",
+  "node.guide.hello": "Bonjour ! Je suis votre guide : je vous raconte l’histoire de {name}."
 }

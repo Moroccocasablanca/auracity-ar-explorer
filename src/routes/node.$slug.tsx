@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { ListenButton } from "@/components/ListenButton";
 import { refreshMenu } from "@/lib/auracity.functions";
-import { ArrowLeft, Clock, Landmark, MapPin, Sparkles, Tag, Zap } from "lucide-react";
+import { ArrowLeft, Clock, Landmark, MapPin, Sparkles, Tag, Zap, Box } from "lucide-react";
 import { MessageBoard, PresenceBanner, ReviewBoard, usePresence } from "@/components/NodeInteractions";
 import { isOpenNow, formatDistance } from "@/utils/geo";
 import { kindKey, LOCALE_TAG, useI18n } from "@/lib/i18n";
@@ -13,7 +13,7 @@ import { logEvent } from "@/lib/quest";
 import { nameLanguage, nameThenText } from "@/services/voice/text-speech";
 import { VenueAvatar } from "@/components/ar/VenueAvatar";
 import { personaForKind, VoicePersona } from "@/services/voice/voice-persona";
-import { MonumentModel } from "@/components/ar/MonumentOverlay";
+import { TalkingMascot } from "@/components/ar/TalkingMascot";
 import { STORY_SOURCES } from "@/data/story-sources";
 import { placeStyleKey } from "@/lib/place-style";
 import { useVenueContent } from "@/lib/venue-content";
@@ -86,6 +86,7 @@ function NodeDetail({
   const vc = useVenueContent(node);
   const menu = vc.menu?.length ? vc.menu : nodeMenu(node);
   const [talking, setTalking] = useState(false);
+  const [guideTalking, setGuideTalking] = useState(false);
   const follow = useFollowing(node.id);
   const flash = useFlash(node.id);
   const [redeemed, setRedeemed] = useState(false);
@@ -164,15 +165,17 @@ function NodeDetail({
 
       {node.kind === "monument" && (
         <section className="mt-6 border-y border-border py-5">
-          <div className="flex items-center justify-between gap-3">
-            <h2 className="mono-label inline-flex items-center gap-2" style={{ color: "var(--kind)" }}>
-              <Landmark className="size-4" /> {t("node.history")}
-            </h2>
-            <div className="flex flex-wrap items-center justify-end gap-2">
-              <ListenButton text={nameThenText(node.name, node.kind === "monument" ? story || tx.description : shortStory(story || tx.description), tx.speakLang)} voice={{ nodeId: node.id, source: "history", lang: tx.speakLang, persona: personaForKind(node.kind), full: node.kind === "monument" }} />
-              {story && story.length > 260 && node.kind !== "monument" && (
-                <ListenButton text={nameThenText(node.name, story, tx.speakLang)} voice={{ nodeId: node.id, source: "history", full: true, lang: tx.speakLang, persona: personaForKind(node.kind) }} label={t("audio.more")} />
-              )}
+          <h2 className="mono-label inline-flex items-center gap-2" style={{ color: "var(--kind)" }}>
+            <Landmark className="size-4" /> {t("node.history")}
+          </h2>
+          {/* A guide stands next to the story and tells it: she stays still while she speaks (glow + sound waves). */}
+          <div className="mt-3 flex items-end gap-2">
+            <TalkingMascot src="/mascots/guide.png" speaking={guideTalking} className="h-48 w-auto" />
+            <div className="mb-3 min-w-0 flex-1 rounded-3xl rounded-bl-md border border-border bg-card/80 p-4 shadow-lg">
+              <p className="text-sm font-medium leading-snug">{t("node.guide.hello", { name: node.name.split(" · ")[0] ?? node.name })}</p>
+              <div className="mt-3">
+                <ListenButton text={nameThenText(node.name, node.kind === "monument" ? story || tx.description : shortStory(story || tx.description), tx.speakLang)} voice={{ nodeId: node.id, source: "history", lang: tx.speakLang, persona: personaForKind(node.kind), full: node.kind === "monument" }}  onPlayingChange={setGuideTalking} />
+              </div>
             </div>
           </div>
           {story ? (
@@ -292,7 +295,7 @@ function NodeDetail({
                   <span className="text-yellow-300">{"★".repeat(r.stars)}<span className="text-muted-foreground">{"★".repeat(5 - r.stars)}</span></span>
                 </div>
                 <p className="mt-1">{r.body}</p>
-                <button type="button" className="mt-1 text-xs font-semibold text-primary" onClick={() => { bump(node.id, "voiceReviewsListened"); void speakAny(`${r.author}: ${r.body}`, contentLang(lang)); }}>🔊 {t("audio.listen")}</button>
+                <button type="button" className="mt-1 text-xs font-semibold text-primary" onClick={() => { bump(node.id, "voiceReviewsListened"); void speakAny(`${r.author}: ${r.body}`, contentLang(lang), undefined, VoicePersona.HUNT_DYNAMIC); }}>🔊 {t("audio.listen")}</button>
                 <p className="mt-1 flex items-center gap-1 text-xs text-green-300">✓ {t("venue.verified")} · <span className="text-muted-foreground">{r.when}</span></p>
               </li>
             ))}

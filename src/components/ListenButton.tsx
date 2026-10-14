@@ -39,13 +39,14 @@ export function VoiceSettings() {
   );
 }
 
-export function ListenButton({ text, voice, compact = false, label }: { text: Speakable; voice: VoiceRequest; compact?: boolean; label?: string }) {
+export function ListenButton({ text, voice, compact = false, label, onPlayingChange }: { text: Speakable; voice: VoiceRequest; compact?: boolean; label?: string; /** tells the page when this narration starts and ends (e.g. to animate the guide) */ onPlayingChange?: (on: boolean) => void }) {
   const { t } = useI18n();
   const { playing, play, stop } = useNarrator();
   const [settings, setSettings] = useState(false);
-  if (speakableIsEmpty(text)) return null;
   const id = `${voice.nodeId}:${voice.messageId ?? voice.source}${voice.full ? ":full" : ""}`;
   const on = playing === id;
+  useEffect(() => onPlayingChange?.(on), [on, onPlayingChange]);
+  if (speakableIsEmpty(text)) return null;
   const Icon = on ? Square : Volume2;
   return (
     <div className="relative flex shrink-0 items-center gap-1">

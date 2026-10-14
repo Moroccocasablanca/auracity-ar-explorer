@@ -5,7 +5,7 @@ import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
 
-const ROOTS = ["public/mascots", "public/avatars", "public/dishes", "public/audio", "src/assets"];
+const ROOTS = ["public/models", "public/mascots", "public/avatars", "public/dishes", "public/audio", "src/assets"];
 const LOCK = "assets.lock.json";
 const lock = fs.existsSync(LOCK) ? JSON.parse(fs.readFileSync(LOCK, "utf8")) : {};
 let added = 0;

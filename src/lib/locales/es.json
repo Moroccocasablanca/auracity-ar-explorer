@@ -185,5 +185,6 @@
   "safety.banner": "Mira por dónde caminas · aléjate de la calzada",
   "safety.paused": "Parece que te mueves rápido: RA en pausa. Detente en un lugar seguro para continuar.",
   "auth.adult": "Tengo al menos 18 años y usaré el móvil de forma responsable: en el momento y lugar adecuados, mirando por dónde camino y lejos de la calzada.",
-  "safety.cam.one": "Atención: mira por dónde caminas y no uses nunca la cámara cerca del tráfico."
+  "safety.cam.one": "Atención: mira por dónde caminas y no uses nunca la cámara cerca del tráfico.",
+  "node.guide.hello": "¡Hola! Soy tu guía: te cuento la historia de {name}."
 }

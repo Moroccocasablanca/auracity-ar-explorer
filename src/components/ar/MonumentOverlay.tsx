@@ -25,17 +25,32 @@ export function MonumentSubtitles({ node, bottomClass }: { node: NodeRow; bottom
   );
 }
 
-/** The 3D model of a monument, if there is one. The viewer is loaded only when needed. */
-export function MonumentModel({ slug }: { slug: string }) {
+/** The 3D model of a monument, if there is one: it loads only when it comes into view, shows the photo while it loads, and can be turned with a finger. */
+export function MonumentModel({ slug, poster, height = 180 }: { slug: string; poster?: string | null; height?: number }) {
   const url = MONUMENT_MODELS[slug];
   const [ready, setReady] = useState(false);
   useEffect(() => {
     if (!url) return;
     void import("@google/model-viewer").then(() => setReady(true));
   }, [url]);
-  if (!url || !ready) return null;
+  if (!url) return null;
+  if (!ready) return poster ? <img src={poster} alt="" className="w-full rounded-2xl object-cover" style={{ height }} /> : null;
   return (
     // @ts-expect-error model-viewer is a web component
-    <model-viewer src={url} auto-rotate camera-controls style={{ width: "100%", height: "180px", background: "transparent" }} />
+    <model-viewer
+      src={url}
+      poster={poster ?? undefined}
+      loading="lazy"
+      reveal="auto"
+      auto-rotate
+      auto-rotate-delay="800"
+      rotation-per-second="18deg"
+      camera-controls
+      interaction-prompt="auto"
+      shadow-intensity="1"
+      environment-image="neutral"
+      touch-action="pan-y"
+      style={{ width: "100%", height: `${height}px`, background: "transparent", borderRadius: "1rem" }}
+    />
   );
 }

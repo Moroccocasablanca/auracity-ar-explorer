@@ -79,6 +79,10 @@
   "bytes": 43464,
   "sha256": "1b9c34a8d29378f1432ddbdb0ff180ebe2f0ca8f29972c3e2dbb4c1d0593e94f"
  },
+ "public/audio/8cd7d893-a04f-4192-aae5-76893f51319d-full.m4a": {
+  "bytes": 135774,
+  "sha256": "f1031bb620135922eeb3f23069d3adb375010834831ca664cce3d076fc1c7727"
+ },
  "public/audio/8cd7d893-a04f-4192-aae5-76893f51319d.m4a": {
   "bytes": 152394,
   "sha256": "adbcf1483e1fb065e82fc725fd5ee62717123ace73545c46ce3ce1ffde03ee26"
@@ -159,6 +163,10 @@
   "bytes": 162309,
   "sha256": "a6a0dc14d0afe27a6024830584459f10d0020878573dfe870f6f36c15b5e372c"
  },
+ "public/audio/ecce13da-4dce-4f1e-b180-73ed57501e44-full.m4a": {
+  "bytes": 194283,
+  "sha256": "c69519a68fbd83a3d5b7d1ba8009ec197221307fc28e732ee18bc9142381d823"
+ },
  "public/audio/ecce13da-4dce-4f1e-b180-73ed57501e44.m4a": {
   "bytes": 77321,
   "sha256": "05f0fd6e16158d711eb438a91caf16daf42c403ffe476c14fca48cb4288ac78f"
@@ -170,6 +178,10 @@
  "public/audio/ef6452c4-44e3-4588-a44f-1d42efac89b0.m4a": {
   "bytes": 71949,
   "sha256": "b8a31c86db169fd2dc5696c1d3100f51ff60a9d75e07bd0a211644f1fddf53b0"
+ },
+ "public/audio/fef5a5e0-0c71-4286-80f0-4a7c5e128996-full.m4a": {
+  "bytes": 222119,
+  "sha256": "d89064d925ce948cedf09772160b9bbb172cc28910a83fd068c500c0ae824c45"
  },
  "public/audio/fef5a5e0-0c71-4286-80f0-4a7c5e128996.m4a": {
   "bytes": 99511,
@@ -266,6 +278,10 @@
  "public/mascots/chef.png": {
   "bytes": 247117,
   "sha256": "2cdc92850ebc03b25c608186c71be2e84b0e7e22c59c3e660cb417a4c07044e6"
+ },
+ "public/mascots/guide.png": {
+  "bytes": 188847,
+  "sha256": "7e54bc29180143f8bd86feba1d1ce193adf1f6ab82d216259a0b45f88c33f037"
  },
  "public/mascots/hunt-cube.png": {
   "bytes": 43942,
