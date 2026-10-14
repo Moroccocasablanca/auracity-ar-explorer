@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
-import { ArrowLeft, BookOpen, Brain, Calculator, CalendarDays, CheckCircle2, Dices, FlaskConical, Flame, Globe2, Landmark, Languages, MapPin, MessagesSquare, Palette, Scale, Sparkles, XCircle, type LucideIcon } from "lucide-react";
+import { ArrowLeft, BookOpen, Brain, Calculator, CalendarDays, Car, CheckCircle2, Dices, FlaskConical, Flame, Globe2, HeartPulse, Landmark, Languages, MapPin, MessagesSquare, Palette, PiggyBank, Scale, ShieldCheck, Sparkles, Vote, XCircle, type LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n";
 import { todayTrivia, useToday } from "@/lib/live";
 import { logEvent } from "@/lib/quest";
 import { TOPICS, bandLabel, getBand, loadDailyTrivia, loadMoreTrivia, nextTrivia, setBand, setTodayTrivia, shuffled, unseenCount, type Band, type Topic, type Trivia } from "@/lib/trivia";
 
-const TOPIC_ICON: Record<string, LucideIcon> = { mix: Dices, oggi: CalendarDays, italiano: BookOpen, english: Languages, storia: Landmark, geografia: Globe2, scienze: FlaskConical, mate: Calculator, arte: Palette, civica: Scale, modi: MessagesSquare, locale: MapPin };
+const TOPIC_ICON: Record<string, LucideIcon> = { mix: Dices, oggi: CalendarDays, patente: Car, diritti: Vote, salute: HeartPulse, soldi: PiggyBank, digitale: ShieldCheck, italiano: BookOpen, english: Languages, storia: Landmark, geografia: Globe2, scienze: FlaskConical, mate: Calculator, arte: Palette, civica: Scale, modi: MessagesSquare, locale: MapPin };
 const topicIcon = (id: string, cls: string) => {
   const I = TOPIC_ICON[id] ?? Sparkles;
   return <I className={`${cls} shrink-0`} />;

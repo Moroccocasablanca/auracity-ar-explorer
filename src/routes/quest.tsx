@@ -190,8 +190,21 @@ function Mission({ icon, title, done, goal, now }: { icon: React.ReactNode; titl
   );
 }
 
+type TabId = "quiz" | "today" | "hunt" | "me";
+const TABS: { id: TabId; label: "quest.tab.quiz" | "quest.tab.today" | "quest.tab.hunt" | "quest.tab.me" }[] = [
+  { id: "quiz", label: "quest.tab.quiz" },
+  { id: "today", label: "quest.tab.today" },
+  { id: "hunt", label: "quest.tab.hunt" },
+  { id: "me", label: "quest.tab.me" },
+];
+
 function Quest() {
   const { t, lang } = useI18n();
+  const [tab, setTab] = useState<TabId>("quiz");
+  useEffect(() => {
+    try { const v = localStorage.getItem("aura_quest_tab"); if (v === "quiz" || v === "today" || v === "hunt" || v === "me") setTab(v); } catch { /* ignore */ }
+  }, []);
+  const pickTab = (id: TabId) => { setTab(id); try { localStorage.setItem("aura_quest_tab", id); } catch { /* ignore */ } };
   const q = useQuestState();
   const { data: nodes = [] } = useQuery(nodesQuery);
   const chars = useMemo(() => nodes.filter(isGardenObject), [nodes]);
@@ -217,12 +230,28 @@ function Quest() {
           </div>
         </header>
 
-        <TodayCard />
-        <TriviaCard />
-        <Challenges />
-        <HuntCard />
-        <RiddleCard audience="kids" />
+        {/* One thing at a time: the page is split in four tabs instead of one very long scroll. */}
+        <nav className="sticky top-2 z-10 grid grid-cols-4 gap-1 rounded-full border border-border bg-card/95 p-1 shadow-lg" aria-label="sections">
+          {TABS.map((x) => (
+            <button key={x.id} type="button" onClick={() => pickTab(x.id)} aria-pressed={tab === x.id} className={`rounded-full px-1 py-2 text-xs font-bold ${tab === x.id ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}>{t(x.label)}</button>
+          ))}
+        </nav>
 
+        {tab === "quiz" && (
+          <>
+            <TriviaCard />
+            <RiddleCard audience="kids" />
+          </>
+        )}
+        {tab === "today" && (
+          <>
+            <TodayCard />
+            <Challenges />
+          </>
+        )}
+        {tab === "hunt" && <HuntCard />}
+
+        {tab === "hunt" && (
         <section>
           <h2 className="text-xl font-bold">{t("quest.missions")}</h2>
           <ul className="mt-3 space-y-2">
@@ -232,7 +261,10 @@ function Quest() {
             <Mission icon={<Sparkles className="size-6" />} title={t("quest.m.riddle")} goal={1} now={q.riddles} done={q.riddles >= 1} />
           </ul>
         </section>
+        )}
 
+        {tab === "me" && (
+        <>
         <Leaderboard points={q.stars} />
 
         <section>
@@ -267,6 +299,8 @@ function Quest() {
             </ul>
           )}
         </section>
+        </>
+        )}
 
         <p className="text-center text-sm"><Link to="/explore" className="text-primary underline">{t("quest.back")}</Link></p>
       </div>

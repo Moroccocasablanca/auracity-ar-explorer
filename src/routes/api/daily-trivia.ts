@@ -3,7 +3,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 const MODELS = ["gemini-3.5-flash-lite", "gemini-3.1-flash-lite"]; // fastest ones that answer for our key (checked 2026-10-13)
-const TOPICS = ["italiano", "english", "storia", "geografia", "scienze", "mate", "arte", "civica", "modi", "locale"];
+const TOPICS = ["italiano", "english", "storia", "geografia", "scienze", "mate", "arte", "civica", "modi", "locale", "patente", "diritti", "salute", "soldi", "digitale"];
 const inflight = new Map<string, Promise<unknown[]>>();
 
 type Raw = { band?: string; topic?: string; q?: string; options?: unknown; why?: string };
@@ -24,7 +24,7 @@ function clean(list: Raw[], day: string) {
 
 async function generate(key: string, day: string, focus?: { topic: string; band: string }) {
   const prompt = focus
-    ? `Oggi è ${day}. Scrivi 10 NUOVE domande a scelta multipla in italiano per un'app di quiz educativa e divertente. Materia: ${focus.topic} (${focus.topic === "english" ? "come si dice in inglese, falsi amici, frasi utili" : focus.topic === "modi" ? "modi di dire italiani" : focus.topic === "locale" ? "Piemonte, Langhe, Bra, cibo e vino" : "programma scolastico italiano"}). Livello: ${focus.band === "kids" ? "bambini 8-11 anni" : focus.band === "teen" ? "ragazzi delle scuole medie e superiori" : "adulti"}. Ogni domanda su un argomento DIVERSO dentro la materia (non ripetere gli stessi temi). Regole: SOLO fatti certi e verificabili; 4 risposte diverse, la PRIMA è sempre quella giusta; spiegazione di 1-2 frasi che insegna qualcosa; tono chiaro e simpatico. Campi: band="${focus.band}", topic="${focus.topic}".`
+    ? `Oggi è ${day}. Scrivi 10 NUOVE domande a scelta multipla in italiano per un'app di quiz educativa e divertente. Materia: ${focus.topic} (${focus.topic === "english" ? "come si dice in inglese, falsi amici, frasi utili" : focus.topic === "modi" ? "modi di dire italiani" : focus.topic === "locale" ? "Piemonte, Langhe, Bra, cibo e vino" : focus.topic === "patente" ? "codice della strada italiano, segnali e regole" : focus.topic === "diritti" ? "Costituzione, istituzioni e diritti dei cittadini italiani" : focus.topic === "salute" ? "salute, primo soccorso e prevenzione" : focus.topic === "soldi" ? "vita quotidiana degli adulti in Italia: tasse, bollette, contratti, banca, lavoro" : focus.topic === "digitale" ? "sicurezza online, password, truffe, privacy" : "programma scolastico italiano, come nei libri di testo"}). Livello: ${focus.band === "kids" ? "bambini 8-11 anni" : focus.band === "teen" ? "ragazzi delle scuole medie e superiori" : "adulti"}. Ogni domanda su un argomento DIVERSO dentro la materia (non ripetere gli stessi temi). Regole: SOLO fatti certi e verificabili; 4 risposte diverse, la PRIMA è sempre quella giusta; spiegazione di 1-2 frasi che insegna qualcosa; tono chiaro e simpatico. Campi: band="${focus.band}", topic="${focus.topic}".`
     : `Oggi è ${day}. Scrivi 18 domande a scelta multipla in italiano per un'app di quiz educativa e divertente: 6 per bambini (8-11 anni, "kids"), 6 per ragazzi delle scuole medie e superiori ("teen"), 6 per adulti ("adult").
 Varia le materie tra: ${TOPICS.join(", ")} (english = come si dice in inglese, falsi amici, frasi utili; modi = modi di dire italiani; locale = Piemonte, Langhe, Bra, cibo e vino).
 Regole: SOLO fatti certi e verificabili (niente dubbi, niente notizie recenti); 4 risposte diverse, la PRIMA è sempre quella giusta; spiegazione di 1-2 frasi che insegna qualcosa; tono chiaro e simpatico; nessuna domanda che dipende dalla data odierna.`;

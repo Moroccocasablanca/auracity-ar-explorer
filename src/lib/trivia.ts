@@ -1,12 +1,17 @@
 // Quiz bank for everyone: kids, teenagers at school, adults. Every question has the answer and a "did you know" note,
 // so the player learns something on the spot (no "search the internet" step).
 export type Band = "kids" | "teen" | "adult";
-export type Topic = "oggi" | "italiano" | "english" | "storia" | "geografia" | "scienze" | "mate" | "arte" | "civica" | "modi" | "locale";
+export type Topic = "oggi" | "patente" | "diritti" | "salute" | "soldi" | "digitale" | "italiano" | "english" | "storia" | "geografia" | "scienze" | "mate" | "arte" | "civica" | "modi" | "locale";
 
 export type Trivia = { id: string; topic: Topic; bands: Band[]; q: string; options: string[]; ok: number; why: string; ai?: boolean };
 
 export const TOPICS: { id: Topic; label: string; icon: string }[] = [
   { id: "oggi", label: "Accade oggi", icon: "oggi" },
+  { id: "patente", label: "Patente e strada", icon: "patente" },
+  { id: "diritti", label: "Cittadinanza e diritti", icon: "diritti" },
+  { id: "salute", label: "Salute e primo soccorso", icon: "salute" },
+  { id: "soldi", label: "Soldi, casa e lavoro", icon: "soldi" },
+  { id: "digitale", label: "Sicurezza online", icon: "digitale" },
   { id: "italiano", label: "Italiano", icon: "italiano" },
   { id: "english", label: "Inglese", icon: "english" },
   { id: "storia", label: "Storia", icon: "storia" },
@@ -142,9 +147,105 @@ export const BANK: Trivia[] = [
   q("locale", ALL, "Come si chiama la salsa piemontese di acciughe, aglio e olio in cui si intingono le verdure?", ["Bagna càuda", "Pesto", "Salsa verde", "Bagnetto rosso"], "«Bagna càuda» significa «salsa calda» in piemontese."),
   q("locale", ALL, "Quale manifestazione biennale dedicata ai formaggi di qualità si tiene a Bra?", ["Cheese", "Vinitaly", "Salone del Gusto", "Slow Fish"], "«Cheese» ha luogo a Bra ogni due anni, organizzata da Slow Food."),
   q("locale", KT, "Come si chiama la città con la grande torre «Mole Antonelliana»?", ["Torino", "Bra", "Cuneo", "Asti"], "La Mole Antonelliana è il simbolo di Torino e oggi ospita il Museo del Cinema."),
+  // ---------- Patente e strada (codice della strada)
+  q("patente", TA, "Qual è il limite generale di velocità nei centri abitati?", ["50 km/h", "30 km/h", "60 km/h", "70 km/h"], "Salvo cartelli diversi, nei centri abitati il limite è 50 km/h."),
+  q("patente", TA, "Qual è il limite generale sulle strade extraurbane secondarie?", ["90 km/h", "110 km/h", "70 km/h", "130 km/h"], "90 km/h; 110 km/h sulle extraurbane principali e 130 km/h in autostrada."),
+  q("patente", TA, "Qual è il limite generale di velocità in autostrada, con tempo buono?", ["130 km/h", "110 km/h", "150 km/h", "120 km/h"], "130 km/h; con la pioggia scende a 110 km/h."),
+  q("patente", TA, "Il semaforo diventa giallo: che cosa devi fare?", ["Fermarti, se puoi farlo in sicurezza", "Accelerare per passare", "Passare sempre", "Suonare il clacson"], "Il giallo avvisa che sta per scattare il rosso: ci si ferma, tranne se si è già troppo vicini per frenare in sicurezza."),
+  q("patente", TA, "Che cosa indica un segnale rotondo con il bordo rosso?", ["Un divieto", "Un obbligo", "Un pericolo", "Un'indicazione"], "Rotondo con bordo rosso = divieto; rotondo blu = obbligo; triangolare = pericolo."),
+  q("patente", TA, "Che cosa indica un segnale triangolare con il bordo rosso?", ["Pericolo", "Divieto", "Obbligo", "Fine di un divieto"], "I triangoli con il bordo rosso avvisano di un pericolo davanti a te."),
+  q("patente", ALL, "Che forma ha il segnale di STOP?", ["Ottagonale", "Rotonda", "Triangolare", "Quadrata"], "È l'unico segnale ottagonale: si deve fermarsi e dare la precedenza."),
+  q("patente", TA, "Chi deve allacciare la cintura di sicurezza in auto?", ["Tutti gli occupanti", "Solo il conducente", "Solo chi siede davanti", "Solo fuori città"], "La cintura è obbligatoria per tutti, davanti e dietro: riduce moltissimo il rischio in caso di urto."),
+  q("patente", TA, "Qual è il tasso alcolemico massimo per un conducente con patente da più di tre anni?", ["0,5 g/l", "0,8 g/l", "1,0 g/l", "0,2 g/l"], "0,5 grammi di alcol per litro di sangue; per i neopatentati e i giovani sotto i 21 anni il limite è zero."),
+  q("patente", TA, "Puoi usare lo smartphone tenendolo in mano mentre guidi?", ["No, è vietato", "Sì, se vai piano", "Sì, per le chiamate brevi", "Sì, in autostrada"], "È vietato e molto pericoloso: ti distrai per secondi, come se guidassi a occhi chiusi per decine di metri."),
+  q("patente", TA, "A un incrocio senza segnali, chi ha la precedenza?", ["Chi arriva da destra", "Chi arriva da sinistra", "Chi va più veloce", "Chi suona per primo"], "Vale la regola della precedenza a destra."),
+  q("patente", TA, "Fuori dai centri abitati, dove cammina un pedone se non c'è il marciapiede?", ["Sul margine sinistro della strada", "Sul margine destro", "Al centro della carreggiata", "Dove vuole"], "Camminando a sinistra vede arrivare i veicoli in faccia e può spostarsi in tempo."),
+  q("patente", TA, "Dopo un incidente, che cosa si fa per prima cosa?", ["Mettere in sicurezza la zona e chiamare i soccorsi", "Spostare subito i feriti", "Fotografare le auto", "Andare via"], "Si accendono le quattro frecce, si indossa il giubbino e si chiama il 112. I feriti non vanno spostati."),
+  // ---------- Cittadinanza e diritti
+  q("diritti", TA, "Chi nomina il Presidente del Consiglio dei ministri?", ["Il Presidente della Repubblica", "Il Parlamento da solo", "Il popolo con un voto diretto", "La Corte costituzionale"], "Lo nomina il Capo dello Stato, e il governo deve ottenere la fiducia di Camera e Senato."),
+  q("diritti", TA, "Quanto dura una legislatura, cioè il mandato del Parlamento?", ["5 anni", "4 anni", "7 anni", "10 anni"], "5 anni, salvo scioglimento anticipato delle Camere."),
+  q("diritti", TA, "A che età si può essere eletti al Senato?", ["40 anni", "25 anni", "18 anni", "30 anni"], "Al Senato servono 40 anni, alla Camera 25."),
+  q("diritti", TA, "Che cos'è il referendum abrogativo?", ["Un voto dei cittadini per cancellare una legge", "Un voto per eleggere il Presidente", "Una nuova legge del governo", "Una sentenza della Corte"], "I cittadini decidono se abrogare una legge; vale se vota almeno la metà più uno degli aventi diritto."),
+  q("diritti", TA, "Quale articolo della Costituzione dice che tutti i cittadini sono uguali davanti alla legge?", ["L'articolo 3", "L'articolo 1", "L'articolo 12", "L'articolo 21"], "L'articolo 3 afferma la pari dignità e l'uguaglianza di tutti, senza distinzioni."),
+  q("diritti", TA, "Votare, secondo la Costituzione, è…", ["Un dovere civico", "Un obbligo punito con una multa", "Solo un favore ai partiti", "Una scelta senza valore"], "L'articolo 48 lo definisce «dovere civico»: è un diritto e una responsabilità."),
+  q("diritti", TA, "Chi controlla che le leggi rispettino la Costituzione?", ["La Corte costituzionale", "Il Parlamento", "Il Presidente del Consiglio", "I sindaci"], "La Corte costituzionale ha 15 giudici e può dichiarare illegittima una legge."),
+  q("diritti", ALL, "Che cosa si celebra il 25 aprile?", ["La Liberazione dal nazifascismo", "La nascita della Repubblica", "L'Unità d'Italia", "La Festa dei lavoratori"], "Nel 1945 l'Italia fu liberata dall'occupazione nazista e dal fascismo."),
+  q("diritti", ALL, "Che cosa si celebra il 1° maggio?", ["La Festa dei lavoratori", "La Liberazione", "La Repubblica", "L'Epifania"], "Ricorda le lotte per i diritti dei lavoratori, come la giornata di otto ore."),
+  q("diritti", TA, "In quale palazzo si riunisce la Camera dei deputati?", ["Palazzo Montecitorio", "Palazzo Madama", "Palazzo Chigi", "Quirinale"], "Montecitorio per la Camera, Palazzo Madama per il Senato, Palazzo Chigi per il governo."),
+  // ---------- Salute e primo soccorso
+  q("salute", ALL, "Una persona non risponde e non respira: che cosa fai?", ["Chiami il 112 e inizi le compressioni sul torace", "Le dai da bere", "Aspetti che si svegli", "La metti seduta"], "Si chiama subito il 112 e si comincia il massaggio cardiaco: ogni minuto conta."),
+  q("salute", TA, "A che ritmo si fanno le compressioni toraciche nella rianimazione?", ["100-120 al minuto", "40-60 al minuto", "60-80 al minuto", "150-200 al minuto"], "Circa due compressioni al secondo, al ritmo di «Stayin' Alive»."),
+  q("salute", ALL, "Che cosa fai su una piccola ustione?", ["La raffreddi con acqua corrente fredda", "Ci metti burro o olio", "Ci metti il ghiaccio diretto", "La copri con cotone asciutto"], "Si tiene sotto acqua fredda corrente per diversi minuti; burro e olio peggiorano il danno."),
+  q("salute", TA, "Che cosa fai per fermare una ferita che sanguina molto?", ["Premi con una garza pulita sulla ferita", "Lavi senza premere", "Applichi un laccio stretto", "Aspetti che smetta"], "La pressione diretta con una garza o un panno pulito è il primo gesto."),
+  q("salute", TA, "Come si chiama la manovra per liberare le vie aeree da un soffocamento?", ["Manovra di Heimlich", "Manovra di Kocher", "Massaggio di Mozart", "Manovra di Torino"], "Si danno colpi tra le scapole e poi compressioni sopra lo stomaco (Heimlich)."),
+  q("salute", TA, "Ogni quanti anni si fa il richiamo del vaccino antitetanico?", ["Ogni 10 anni", "Ogni anno", "Ogni 3 anni", "Mai"], "Il richiamo dura 10 anni: protegge dal tetano anche dopo una ferita sporca."),
+  q("salute", TA, "Quante ore di sonno servono in media a un adulto?", ["7-9 ore", "4-5 ore", "10-12 ore", "2-3 ore"], "Dormire poco fa male all'attenzione, all'umore e alla salute."),
+  q("salute", KT, "Quanto tempo devi lavare le mani con il sapone?", ["Almeno 20 secondi", "2 secondi", "5 secondi", "Basta l'acqua"], "Il tempo di cantare due volte «tanti auguri a te»."),
+  // ---------- Soldi, casa e lavoro
+  q("soldi", TA, "Che cos'è il codice fiscale?", ["Un codice che identifica ogni persona per il fisco e i servizi", "Il numero della carta di credito", "Il codice della patente", "Il numero del conto in banca"], "Ha 16 caratteri e si usa per tasse, lavoro, sanità e contratti."),
+  q("soldi", TA, "Qual è l'aliquota ordinaria dell'IVA in Italia?", ["22%", "10%", "4%", "30%"], "L'IVA, imposta sul valore aggiunto, è del 22%; per alcuni beni è ridotta (10%, 5% e 4%)."),
+  q("soldi", TA, "A che cosa serve l'ISEE?", ["Ottenere bonus e agevolazioni in base alla situazione economica", "Pagare l'affitto", "Aprire un conto in banca", "Ottenere il passaporto"], "L'Indicatore della Situazione Economica Equivalente misura reddito e patrimonio della famiglia."),
+  q("soldi", TA, "Che cos'è la busta paga?", ["Il documento con stipendio lordo, trattenute e netto", "Un contratto di affitto", "Una carta prepagata", "La lettera di assunzione"], "Mostra quanto guadagni e quante tasse e contributi vengono trattenuti."),
+  q("soldi", TA, "Che cos'è lo SPID?", ["L'identità digitale per i servizi online della Pubblica Amministrazione", "Una carta di credito", "Un tipo di contratto", "Un conto corrente"], "Con lo SPID (o la CIE) accedi a INPS, Agenzia delle Entrate, sanità e molto altro."),
+  q("soldi", TA, "Che cos'è la PEC?", ["Posta elettronica con valore legale", "Una carta per i pagamenti", "Un tipo di pensione", "Un programma di scrittura"], "La Posta Elettronica Certificata ha valore di raccomandata con ricevuta."),
+  q("soldi", TA, "Che cosa indica il TAEG di un prestito?", ["Il costo totale annuo, comprese le spese", "Solo gli interessi", "La durata del prestito", "L'importo della rata"], "Confrontando il TAEG si capisce quale finanziamento costa davvero di meno."),
+  q("soldi", TA, "Che cosa significa «interesse composto»?", ["Gli interessi producono altri interessi", "Un interesse che non cambia mai", "Un interesse pagato una volta sola", "Un interesse senza rischi"], "Gli interessi maturati si sommano al capitale e fruttano a loro volta: per questo conviene iniziare presto a risparmiare."),
+  q("soldi", TA, "Con quale modello gli italiani, lavoratori dipendenti e pensionati, fanno spesso la dichiarazione dei redditi?", ["Modello 730", "Modello 118", "Modello A4", "Modello F24 soltanto"], "Il 730 è la dichiarazione precompilata dell'Agenzia delle Entrate."),
+  q("soldi", TA, "A che cosa serve l'IBAN?", ["A identificare un conto per fare bonifici", "A pagare con il telefono", "A chiedere un mutuo", "A ricaricare il cellulare"], "Il codice IBAN italiano inizia con IT e ha 27 caratteri."),
+  // ---------- Digitale e sicurezza online
+  q("digitale", ALL, "Che cos'è il phishing?", ["Una truffa che finge di essere qualcun altro per rubare i tuoi dati", "Un gioco online", "Un tipo di pesca", "Un antivirus"], "Falsi messaggi di banche, corrieri o amici che ti chiedono password e codici. Non cliccare i link sospetti."),
+  q("digitale", ALL, "Qual è una password sicura?", ["Lunga, con lettere, numeri e simboli, diversa per ogni servizio", "Il tuo nome e la data di nascita", "123456", "La stessa password per tutto"], "Più è lunga e unica, più è difficile da indovinare: un gestore di password aiuta a ricordarle."),
+  q("digitale", ALL, "Ricevi un messaggio con un link e una richiesta urgente: che cosa fai?", ["Non clicchi e controlli con il mittente in un altro modo", "Clicchi subito", "Inoltri a tutti", "Dai i tuoi dati"], "L'urgenza è il trucco dei truffatori: fermati e verifica."),
+  q("digitale", TA, "Che cosa significa «https» all'inizio di un indirizzo?", ["La connessione con il sito è cifrata", "Il sito è sicuro al 100%", "Il sito è gratuito", "Il sito è italiano"], "Il lucchetto protegge i dati in viaggio, ma anche un sito truffa può averlo: controlla sempre il nome."),
+  q("digitale", TA, "A che cosa serve l'autenticazione a due fattori?", ["Aggiunge un secondo controllo oltre alla password", "Raddoppia la velocità", "Cancella i virus", "Serve a salvare le foto"], "Anche se qualcuno scopre la password, senza il codice sul tuo telefono non entra."),
+  // ---------- Scuola: Italiano
+  q("italiano", KT, "Qual è l'aggettivo nella frase «una casa grande»?", ["grande", "casa", "una", "nessuno"], "L'aggettivo dice com'è il nome: la casa è grande."),
+  q("italiano", KT, "Che parte del discorso è «velocemente»?", ["Avverbio", "Aggettivo", "Verbo", "Nome"], "Gli avverbi come «velocemente» spiegano come si fa un'azione."),
+  q("italiano", KT, "Qual è il participio passato di «prendere»?", ["preso", "prendato", "prenduto", "prendi"], "Prendere → preso: «ho preso il treno»."),
+  q("italiano", TA, "Che figura retorica è «dolce come il miele»?", ["Una similitudine", "Una metafora", "Un'iperbole", "Un ossimoro"], "La similitudine paragona due cose con «come» o «simile a»."),
+  q("italiano", TA, "«La pioggia cantava sul tetto» è un esempio di…", ["Personificazione", "Similitudine", "Antitesi", "Onomatopea"], "Si attribuiscono azioni umane (cantare) a una cosa."),
+  q("italiano", TA, "Chi scrisse il «Decameron»?", ["Giovanni Boccaccio", "Dante Alighieri", "Francesco Petrarca", "Ludovico Ariosto"], "Boccaccio, nel Trecento: cento novelle raccontate da dieci giovani durante la peste."),
+  q("italiano", TA, "Chi scrisse «Il Gattopardo»?", ["Giuseppe Tomasi di Lampedusa", "Italo Svevo", "Luigi Pirandello", "Elsa Morante"], "Il romanzo racconta la Sicilia durante l'unità d'Italia."),
+  // ---------- Scuola: Matematica
+  q("mate", KT, "Quanto fa 3/4 + 1/4?", ["1", "4/8", "3/8", "2"], "Stesso denominatore: 3 + 1 = 4 quarti, cioè un intero."),
+  q("mate", KT, "Qual è l'area di un rettangolo con base 8 e altezza 5?", ["40", "13", "26", "45"], "Area = base × altezza = 8 × 5."),
+  q("mate", KT, "Qual è il perimetro di un quadrato di lato 6?", ["24", "12", "36", "18"], "Perimetro = 4 × lato = 4 × 6."),
+  q("mate", TA, "Quanto fa 2 elevato alla 5?", ["32", "10", "25", "16"], "2 × 2 × 2 × 2 × 2 = 32."),
+  q("mate", TA, "Risolvi: x + 7 = 15. Quanto vale x?", ["8", "22", "7", "9"], "Si sottrae 7 da entrambi i lati: x = 15 − 7."),
+  q("mate", TA, "Qual è il massimo comune divisore di 12 e 18?", ["6", "3", "36", "2"], "6 è il numero più grande che divide sia 12 sia 18."),
+  q("mate", TA, "In un triangolo rettangolo i cateti misurano 3 e 4: quanto misura l'ipotenusa?", ["5", "7", "6", "12"], "Teorema di Pitagora: 3² + 4² = 9 + 16 = 25, e la radice di 25 è 5."),
+  q("mate", ALL, "Quanto è il 10% di 350?", ["35", "3,5", "70", "10"], "Il 10% è un decimo: 350 ÷ 10."),
+  // ---------- Scuola: Scienze
+  q("scienze", KT, "Quali sono i tre stati della materia?", ["Solido, liquido, gassoso", "Caldo, tiepido, freddo", "Duro, molle, fluido", "Acqua, aria, terra"], "Cambiano con la temperatura: il ghiaccio fonde, l'acqua evapora."),
+  q("scienze", TA, "Che cos'è la cellula?", ["L'unità di base di tutti gli esseri viventi", "Una parte del cervello", "Un tipo di batterio", "Un organo"], "Tutti i viventi sono fatti di cellule: alcuni ne hanno una sola, noi miliardi."),
+  q("scienze", KT, "Che cosa causa le stagioni?", ["L'inclinazione dell'asse terrestre", "La distanza dalla Luna", "Le nuvole", "Il vento"], "La Terra è inclinata: i raggi del Sole arrivano in modo diverso durante l'anno."),
+  q("scienze", KT, "Quale pianeta è famoso per i suoi anelli?", ["Saturno", "Marte", "Venere", "Mercurio"], "Saturno ha anelli di ghiaccio e roccia."),
+  q("scienze", TA, "Qual è il simbolo chimico dell'oro?", ["Au", "Or", "Ag", "Go"], "Au viene dal latino «aurum»."),
+  q("scienze", TA, "Quale vitamina produce la pelle con il sole?", ["Vitamina D", "Vitamina C", "Vitamina A", "Vitamina B12"], "La vitamina D serve alle ossa: bastano pochi minuti di sole sulla pelle."),
+  q("scienze", KT, "Come si chiama il passaggio dell'acqua da liquido a vapore?", ["Evaporazione", "Condensazione", "Solidificazione", "Fusione"], "Il Sole scalda l'acqua e la fa salire come vapore: è l'inizio del ciclo dell'acqua."),
+  q("scienze", TA, "Qual è l'unità di misura della forza?", ["Il newton", "Il watt", "Il joule", "Il pascal"], "Si chiama così in onore di Isaac Newton."),
+  // ---------- Scuola: Storia e Geografia
+  q("storia", TA, "Chi guidò la spedizione dei Mille nel 1860?", ["Giuseppe Garibaldi", "Camillo Cavour", "Giuseppe Mazzini", "Vittorio Emanuele II"], "Garibaldi partì da Quarto con circa mille volontari e conquistò il Sud."),
+  q("storia", TA, "Chi fu Camillo Cavour?", ["Primo ministro del Regno di Sardegna e artefice dell'unità", "Un generale", "Un re", "Un poeta"], "Era piemontese: con la diplomazia preparò l'unità d'Italia."),
+  q("storia", ALL, "In quale città dell'antica Grecia nacque la democrazia?", ["Atene", "Sparta", "Tebe", "Corinto"], "Ad Atene i cittadini votavano le decisioni nell'assemblea."),
+  q("storia", ALL, "Quanti furono i re di Roma, secondo la tradizione?", ["7", "5", "10", "12"], "Da Romolo a Tarquinio il Superbo, poi nacque la Repubblica."),
+  q("storia", TA, "Quando cadde il muro di Berlino?", ["1989", "1961", "1975", "2001"], "Nel novembre del 1989: la Germania si riunì l'anno dopo."),
+  q("storia", TA, "Che cosa fu il Rinascimento?", ["Un periodo di grande rinnovamento di arte e cultura", "Una guerra", "Una malattia", "Un tipo di governo"], "Nei secoli XV e XVI Leonardo, Michelangelo e Raffaello rinnovarono l'arte."),
+  q("geografia", KT, "Qual è il continente più grande?", ["Asia", "Africa", "America", "Europa"], "L'Asia occupa circa un terzo delle terre emerse."),
+  q("geografia", ALL, "Qual è la montagna più alta del mondo?", ["Everest", "Monte Bianco", "K2", "Kilimangiaro"], "L'Everest supera gli 8.800 metri, tra Nepal e Tibet."),
+  q("geografia", TA, "Qual è il fiume più lungo d'Europa?", ["Il Volga", "Il Danubio", "Il Reno", "La Senna"], "Il Volga, in Russia, è lungo circa 3.500 km."),
+  q("geografia", KT, "Quali sono le due isole maggiori d'Italia?", ["Sicilia e Sardegna", "Capri e Ischia", "Elba e Giglio", "Sicilia e Corsica"], "La Sicilia è la più grande del Mediterraneo."),
+  q("geografia", KT, "Qual è la capitale della Francia?", ["Parigi", "Lione", "Marsiglia", "Nizza"], "Parigi si trova sul fiume Senna."),
+  // ---------- Scuola: Inglese
+  q("english", KT, "Come si dice «giallo» in inglese?", ["yellow", "green", "red", "blue"], "Yellow = giallo, green = verde, red = rosso, blue = blu."),
+  q("english", KT, "Qual è il plurale di «child»?", ["children", "childs", "childes", "childrens"], "È un plurale irregolare: one child, two children."),
+  q("english", KT, "Che cosa significa «I'm hungry»?", ["Ho fame", "Sono arrabbiato", "Sono stanco", "Ho sete"], "Hungry = affamato; thirsty = assetato."),
+  q("english", TA, "Qual è il passato di «to eat»?", ["ate", "eated", "eaten", "eat"], "Eat – ate – eaten."),
+  q("english", KT, "Come si risponde di solito a «How are you?»", ["I'm fine, thank you", "I am twelve", "Yes, please", "See you"], "Significa «come stai?»: si risponde «sto bene, grazie»."),
+  q("english", KT, "Qual è il contrario di «big»?", ["small", "tall", "fast", "cold"], "Big = grande, small = piccolo."),
 ];
 
-export const bandLabel: Record<Band, string> = { kids: "Bambino", teen: "Ragazzo", adult: "Adulto" };
+export const bandLabel: Record<Band, string> = { kids: "Elementari", teen: "Medie e superiori", adult: "Adulti" };
 
 const KEY_PROFILE = "aura_trivia_band";
 const KEY_SEEN = "aura_trivia_seen";
