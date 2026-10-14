@@ -67,6 +67,8 @@ export function ArView() {
   // The camera never opens without the visitor accepting the one-sentence safety notice, every time the AR screen is opened.
   const [safetyAsk, setSafetyAsk] = useState<"live" | "demo" | null>(null);
   const [consented, setConsented] = useState(false);
+  const [camError, setCamError] = useState<string | null>(null); // why the camera did not open (shown to the visitor)
+  const [attempt, setAttempt] = useState(0); // "try again" runs the camera start once more
   const [closedGreet, setClosedGreet] = useState<string | null>(null);
   const { playing, play, stop } = useNarrator();
   const tooFast = !loc.demo && loc.speed != null && loc.speed > FAST_MPS;
@@ -112,8 +114,10 @@ export function ArView() {
         streamRef.current = stream;
         if (videoRef.current) videoRef.current.srcObject = stream;
         setCameraOk(true);
-      } catch {
+        setCamError(null);
+      } catch (e) {
         setCameraOk(false);
+        setCamError(e instanceof Error ? e.name : "error");
       }
     })();
     return () => {
@@ -121,7 +125,7 @@ export function ArView() {
       streamRef.current?.getTracks().forEach((tr) => tr.stop());
       streamRef.current = null;
     };
-  }, [cameraWanted]);
+  }, [cameraWanted, attempt]);
 
   useEffect(() => {
     if (cameraOk && videoRef.current && streamRef.current) videoRef.current.srcObject = streamRef.current;
@@ -224,12 +228,15 @@ export function ArView() {
     loc.demoReason === "outside"
       ? t("ar.outside")
       : loc.demoReason === "nogps"
-        ? t("ar.nogps")
+        ? t("ar.gps.help")
         : loc.demoReason === "manual"
           ? t("ar.demo.note")
           : !cameraOk
-            ? t("ar.nocamera")
+            ? camError === "NotAllowedError" || camError === "SecurityError"
+              ? t("ar.cam.denied")
+              : t("ar.nocamera")
             : null;
+  const needsHelp = loc.demoReason === "nogps" || (!cameraOk && camError !== null);
 
   return (
     <div
@@ -345,8 +352,11 @@ export function ArView() {
       <Crosshair className="pointer-events-none absolute left-1/2 top-[66%] size-5 -translate-x-1/2 -translate-y-1/2 text-primary/60" />
 
       {notice && !selectedItem && (
-        <div className="glass pointer-events-none absolute inset-x-4 bottom-24 mx-auto max-w-sm rounded-xl px-3 py-2 text-center text-xs text-muted-foreground">
+        <div className="glass pointer-events-auto absolute inset-x-4 bottom-24 mx-auto max-w-sm rounded-xl px-3 py-2 text-center text-xs text-muted-foreground" onPointerDown={(e) => e.stopPropagation()}>
           {notice}
+          {needsHelp && (
+            <button type="button" onClick={() => { setAttempt((a) => a + 1); void loc.start(); }} className="mt-2 block w-full rounded-full bg-primary px-3 py-2 text-sm font-bold text-primary-foreground">{t("ar.retry")}</button>
+          )}
         </div>
       )}
       {placed.length === 0 && (

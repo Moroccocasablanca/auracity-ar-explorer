@@ -187,5 +187,8 @@
   "auth.adult": "J’ai au moins 18 ans et j’utiliserai mon téléphone de façon responsable : au bon moment, au bon endroit, en regardant où je marche et loin de la route.",
   "safety.cam.one": "Attention : regardez où vous marchez et n’utilisez jamais la caméra près de la circulation.",
   "node.guide.hello": "Bonjour ! Je suis votre guide : je vous raconte l’histoire de {name}.",
-  "voice.off": "La voix naturelle n’est pas disponible pour le moment : lisez le texte, réessayez bientôt."
+  "voice.off": "La voix naturelle n’est pas disponible pour le moment : lisez le texte, réessayez bientôt.",
+  "ar.gps.help": "Le GPS ne répond pas. Vérifiez Réglages → Confidentialité et sécurité → Localisation → AURACITY (« Lorsque l’app est active »), puis réessayez.",
+  "ar.cam.denied": "La caméra est bloquée. Allez dans Réglages → AURACITY → Caméra et activez-la, puis réessayez.",
+  "ar.retry": "Réessayer"
 }

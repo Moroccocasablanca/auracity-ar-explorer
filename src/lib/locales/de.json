@@ -187,5 +187,8 @@
   "auth.adult": "Ich bin mindestens 18 Jahre alt und nutze mein Handy verantwortungsvoll: zur richtigen Zeit und am richtigen Ort, mit Blick auf meinen Weg und Abstand zur Straße.",
   "safety.cam.one": "Achtung: Schau, wohin du gehst, und nutze die Kamera nie in der Nähe von Verkehr.",
   "node.guide.hello": "Hallo! Ich bin deine Führerin: Ich erzähle dir die Geschichte von {name}.",
-  "voice.off": "Die natürliche Stimme ist gerade nicht verfügbar: lies den Text, versuche es bald wieder."
+  "voice.off": "Die natürliche Stimme ist gerade nicht verfügbar: lies den Text, versuche es bald wieder.",
+  "ar.gps.help": "Das GPS antwortet nicht. Prüfe Einstellungen → Datenschutz & Sicherheit → Ortungsdienste → AURACITY („Beim Verwenden der App“) und versuche es erneut.",
+  "ar.cam.denied": "Die Kamera ist gesperrt. Gehe zu Einstellungen → AURACITY → Kamera, aktiviere sie und versuche es erneut.",
+  "ar.retry": "Erneut versuchen"
 }

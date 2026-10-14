@@ -105,6 +105,7 @@ export function LocationProvider({ children }: { children: ReactNode }) {
   const start = useCallback(
     async (opts?: { demo?: boolean }) => {
       setActive(true);
+      stopWatching(); // never two watchers at once (the map may have started the position already)
       // Compass (iOS needs an explicit permission request from a user gesture)
       try {
         const DOE = (window as unknown as { DeviceOrientationEvent?: { requestPermission?: () => Promise<string> } })
@@ -124,7 +125,7 @@ export function LocationProvider({ children }: { children: ReactNode }) {
         return;
       }
       const native = isNative();
-      if (!native && !("geolocation" in navigator)) {
+      if (!("geolocation" in navigator) && !native) {
         goDemo("nogps");
         return;
       }
@@ -155,26 +156,27 @@ export function LocationProvider({ children }: { children: ReactNode }) {
       const options = { enableHighAccuracy: true, maximumAge: 1000, timeout: 15000 };
       if (native) {
         // Inside the iPhone app the position is asked by the phone itself: the permission box says "AURACITY", not a web address.
+        // If anything goes wrong there, the browser's own location (which always worked) takes over: GPS must never just stop.
         try {
           const { Geolocation } = await import("@capacitor/geolocation");
           const perm = await Geolocation.requestPermissions({ permissions: ["location"] });
-          if (perm.location !== "granted" && perm.coarseLocation !== "granted") {
-            goDemo("nogps");
+          if (perm.location === "granted" || perm.coarseLocation === "granted") {
+            const id = await Geolocation.watchPosition(options, (p, err) => {
+              if (err || !p) return;
+              onFix(p.coords);
+            });
+            nativeStop.current = () => void Geolocation.clearWatch({ id });
             return;
           }
-          const id = await Geolocation.watchPosition(options, (p, err) => {
-            if (err || !p) return;
-            onFix(p.coords);
-          });
-          nativeStop.current = () => void Geolocation.clearWatch({ id });
-        } catch {
-          goDemo("nogps");
+          console.warn("native location not granted, using the browser location");
+        } catch (e) {
+          console.warn("native location failed, using the browser location", e);
         }
-        return;
       }
+      if (!("geolocation" in navigator)) return goDemo("nogps");
       watchId.current = navigator.geolocation.watchPosition((p) => onFix(p.coords), () => goDemo("nogps"), options);
     },
-    [goDemo, onOrientation, batterySaver],
+    [goDemo, onOrientation, batterySaver, stopWatching],
   );
 
   const simulate = useCallback((p: LatLng) => {

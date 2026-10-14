@@ -187,5 +187,8 @@
   "auth.adult": "Am cel puțin 18 ani și voi folosi telefonul responsabil: la momentul și în locul potrivit, cu atenție pe unde merg și departe de carosabil.",
   "safety.cam.one": "Atenție: uită-te pe unde mergi și nu folosi niciodată camera lângă trafic.",
   "node.guide.hello": "Salut! Sunt ghida ta: îți povestesc istoria locului {name}.",
-  "voice.off": "Vocea naturală nu este disponibilă acum: citește textul, încearcă din nou în curând."
+  "voice.off": "Vocea naturală nu este disponibilă acum: citește textul, încearcă din nou în curând.",
+  "ar.gps.help": "GPS-ul nu răspunde. Verifică Setări → Confidențialitate și securitate → Servicii de localizare → AURACITY („În timpul utilizării aplicației”), apoi încearcă din nou.",
+  "ar.cam.denied": "Camera este blocată. Mergi la Setări → AURACITY → Cameră, activeaz-o și încearcă din nou.",
+  "ar.retry": "Încearcă din nou"
 }

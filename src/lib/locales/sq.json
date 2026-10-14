@@ -187,5 +187,8 @@
   "auth.adult": "Jam të paktën 18 vjeç dhe do ta përdor telefonin me përgjegjësi: në kohën dhe vendin e duhur, duke parë ku eci dhe duke qëndruar larg rrugës.",
   "safety.cam.one": "Kujdes: shiko ku ecën dhe mos e përdor kurrë kamerën afër trafikut.",
   "node.guide.hello": "Përshëndetje! Jam udhëzuesja jote: po të tregoj historinë e {name}.",
-  "voice.off": "Zëri natyral nuk është i disponueshëm tani: lexo tekstin, provo përsëri së shpejti."
+  "voice.off": "Zëri natyral nuk është i disponueshëm tani: lexo tekstin, provo përsëri së shpejti.",
+  "ar.gps.help": "GPS-i nuk përgjigjet. Kontrollo Cilësimet → Privatësia dhe siguria → Shërbimet e vendndodhjes → AURACITY («Gjatë përdorimit të aplikacionit») dhe provo përsëri.",
+  "ar.cam.denied": "Kamera është e bllokuar. Shko te Cilësimet → AURACITY → Kamera, aktivizoje dhe provo përsëri.",
+  "ar.retry": "Provo përsëri"
 }
