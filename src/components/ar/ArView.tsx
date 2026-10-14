@@ -36,12 +36,12 @@ function AutoTalk({ node, play }: { node: NodeRow; play: ReturnType<typeof useNa
         const m = messages?.[0];
         talked.add(node.id);
         markDiscovered(node.id);
-        if (m) play(node.id, { nodeId: node.id, source: "message", messageId: m.id }, m.body);
-        else play(node.id, { nodeId: node.id, source: "history" }, `${tx.name}. ${tx.history || tx.description}`);
+        if (m) play(node.id, { nodeId: node.id, source: "message", messageId: m.id, persona: VoicePersona.HUNT_DYNAMIC }, m.body);
+        else play(node.id, { nodeId: node.id, source: "history", persona: VoicePersona.HUNT_DYNAMIC }, `${tx.name}. ${tx.history || tx.description}`);
       } else {
         const text = `${tx.name}. ${tx.history || tx.description}`;
         talked.add(node.id);
-        play(node.id, { nodeId: node.id, source: "history", persona: VoicePersona.MONUMENT_FEMALE }, text);
+        play(node.id, { nodeId: node.id, source: "history", persona: VoicePersona.MONUMENT_FEMALE, full: true }, text);
       }
     }, 1200);
     return () => window.clearTimeout(timer);

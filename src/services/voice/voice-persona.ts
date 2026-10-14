@@ -1,22 +1,30 @@
-// Voice profiles: who speaks depends on what is speaking.
+// Voice profiles: WHO speaks depends only on WHAT is speaking. No general setting overrides them.
+//   monuments, streets, services  -> elegant, warm Italian woman
+//   bars, restaurants, gyms        -> the merchant's choice (man by default, or the woman if the owner picks her)
+//   talking benches, trees, games  -> a young, proud, curious voice
 export enum VoicePersona {
-  MONUMENT_FEMALE = "FEMALE_NARRATIVE", // woman's narrating voice for monuments and history
-  BUSINESS_USER = "MERCHANT_CHOICE", // man by default, or the voice chosen by the venue
-  HUNT_DYNAMIC = "TEEN_PLAYFUL", // young, lively voice for games
+  MONUMENT_FEMALE = "FEMALE_NARRATIVE",
+  BUSINESS_USER = "MERCHANT_CHOICE",
+  HUNT_DYNAMIC = "TEEN_PLAYFUL",
 }
 
-export type VoiceKind = "female" | "male";
+export type VoiceKind = "female" | "male" | "young";
 
-/** Which voice and delivery a profile uses. `venue` is the venue's own choice for BUSINESS_USER. */
-export function personaVoice(p: unknown, venue?: VoiceKind): { kind: VoiceKind | null; rate: number; pitchUp: boolean } {
+/** Which voice a profile uses. `venue` is the merchant's own choice (BUSINESS_USER only). Anything unknown is the young voice. */
+export function personaVoice(p: unknown, venue?: "female" | "male"): { kind: VoiceKind } {
   switch (p) {
     case VoicePersona.MONUMENT_FEMALE:
-      return { kind: "female", rate: 0.94, pitchUp: false };
+      return { kind: "female" };
     case VoicePersona.BUSINESS_USER:
-      return { kind: venue ?? "male", rate: 1, pitchUp: false }; // bars and restaurants: a man unless the owner picked a woman
-    case VoicePersona.HUNT_DYNAMIC:
-      return { kind: "female", rate: 1.1, pitchUp: true };
+      return { kind: venue ?? "male" };
     default:
-      return { kind: null, rate: 1, pitchUp: false };
+      return { kind: "young" };
   }
+}
+
+/** The right profile for a place of the map. */
+export function personaForKind(kind: string): VoicePersona {
+  if (kind === "business") return VoicePersona.BUSINESS_USER;
+  if (kind === "tree" || kind === "bench") return VoicePersona.HUNT_DYNAMIC;
+  return VoicePersona.MONUMENT_FEMALE; // monuments, streets, services
 }

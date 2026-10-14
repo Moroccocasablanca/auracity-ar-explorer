@@ -66,3 +66,21 @@ describe("long stories are cut at sentence ends for a continuous voice", () => {
     expect(chunkForServer("Ciao a tutti. Benvenuti a Bra.")).toEqual(["Ciao a tutti. Benvenuti a Bra."]);
   });
 });
+
+import { personaForKind, personaVoice, VoicePersona } from "@/services/voice/voice-persona";
+describe("each profile has its own voice and nothing overrides it", () => {
+  it("monuments, streets and services: the woman", () => {
+    for (const k of ["monument", "street", "service"]) expect(personaVoice(personaForKind(k)).kind).toBe("female");
+  });
+  it("talking benches and trees: the young voice", () => {
+    for (const k of ["bench", "tree"]) expect(personaVoice(personaForKind(k)).kind).toBe("young");
+    expect(personaVoice(VoicePersona.HUNT_DYNAMIC).kind).toBe("young");
+    expect(personaVoice("kid").kind).toBe("young");
+    expect(personaVoice(undefined).kind).toBe("young");
+  });
+  it("bars and restaurants: the merchant's choice, the man by default", () => {
+    expect(personaVoice(personaForKind("business")).kind).toBe("male");
+    expect(personaVoice(VoicePersona.BUSINESS_USER, "female").kind).toBe("female");
+    expect(personaVoice(VoicePersona.BUSINESS_USER, "male").kind).toBe("male");
+  });
+});

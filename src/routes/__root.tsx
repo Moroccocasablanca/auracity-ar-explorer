@@ -19,7 +19,7 @@ import { ProximityWatcher } from "../components/ProximityWatcher";
 import { Toaster } from "../components/ui/sonner";
 import { PrivacyConsent } from "@/components/account/PrivacyConsent";
 import { TestPanel } from "@/components/admin/TestPanel";
-import { primeAudio } from "@/services/voice/neuralVoice";
+import { primeAudio } from "@/services/voice/speech";
 import { registerServiceWorker } from "@/services/notifications/notify";
 import { AppEnvironment } from "../components/AppEnvironment";
 

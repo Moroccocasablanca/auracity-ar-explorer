@@ -15,8 +15,7 @@ import { placeStyle, PLACE_STYLE } from "@/lib/place-style";
 import { speakAny } from "@/services/voice/speech";
 import { VoicePersona } from "@/services/voice/voice-persona";
 import { contentLang, detectTextLang, greetingWithName, nameLanguage, nameThenText } from "@/services/voice/text-speech";
-import { warmNeuralVoice } from "@/services/voice/neuralVoice";
-import { history, description, nodeMenu, promo, messagesQuery, nodesQuery, shortStory, tagline, type NodeRow } from "@/lib/nodes";
+import { history, description, nodeMenu, promo, messagesQuery, nodesQuery, tagline, type NodeRow } from "@/lib/nodes";
 import { explorePriority, matchesExploreFilter, type ExploreFilter } from "@/lib/explore-rules";
 import { useNarrator } from "@/components/ListenButton";
 import { isGardenObject } from "@/lib/node-rules";
@@ -119,26 +118,21 @@ function Explore() {
       }
       if (n.kind === "monument") {
         logEvent("monument", n.id);
-        play(n.id, { nodeId: n.id, source: "history", lang: contentLang(lang), persona: VoicePersona.MONUMENT_FEMALE }, nameThenText(n.name, shortStory(history(n, lang) || description(n, lang)), contentLang(lang)));
+        // Monuments tell their COMPLETE story, start to finish.
+        play(n.id, { nodeId: n.id, source: "history", lang: contentLang(lang), persona: VoicePersona.MONUMENT_FEMALE, full: true }, nameThenText(n.name, history(n, lang) || description(n, lang), contentLang(lang)));
         return;
       }
       const msgs = await qc.fetchQuery(messagesQuery(n.id));
       const m = msgs[0];
       markDiscovered(n.id);
       if (!m) {
-        void speakAny(greetingWithName(t("garden.hello", { name: "§" }), n.name, lang, t("garden.empty")), lang);
+        void speakAny(greetingWithName(t("garden.hello", { name: "§" }), n.name, lang, t("garden.empty")), lang, undefined, VoicePersona.HUNT_DYNAMIC);
         return;
       }
-      play(n.id, { nodeId: n.id, source: "message", messageId: m.id, persona: "kid", lang: detectTextLang(m.body, lang) }, m.body);
+      play(n.id, { nodeId: n.id, source: "message", messageId: m.id, persona: VoicePersona.HUNT_DYNAMIC, lang: detectTextLang(m.body, lang) }, m.body);
     },
     [qc, play, playing, stop, lang],
   );
-  useEffect(() => {
-    // Both voices are ready before the first tap: the woman for monuments, the man for bars and restaurants.
-    warmNeuralVoice(contentLang(lang), "female");
-    const id = window.setTimeout(() => warmNeuralVoice(contentLang(lang), "male"), 20000);
-    return () => window.clearTimeout(id);
-  }, [lang]);
   const talkLabel = t("garden.talk");
 
   const [legend, setLegend] = useState(false);

@@ -12,7 +12,7 @@ import { useNodeText } from "@/services/translate/use-node-text";
 import { logEvent } from "@/lib/quest";
 import { nameLanguage, nameThenText } from "@/services/voice/text-speech";
 import { VenueAvatar } from "@/components/ar/VenueAvatar";
-import { VoicePersona } from "@/services/voice/voice-persona";
+import { personaForKind, VoicePersona } from "@/services/voice/voice-persona";
 import { MonumentModel } from "@/components/ar/MonumentOverlay";
 import { STORY_SOURCES } from "@/data/story-sources";
 import { placeStyleKey } from "@/lib/place-style";
@@ -169,9 +169,9 @@ function NodeDetail({
               <Landmark className="size-4" /> {t("node.history")}
             </h2>
             <div className="flex flex-wrap items-center justify-end gap-2">
-              <ListenButton text={nameThenText(node.name, shortStory(story || tx.description), tx.speakLang)} voice={{ nodeId: node.id, source: "history", lang: tx.speakLang, persona: VoicePersona.MONUMENT_FEMALE }} />
-              {story && story.length > 260 && (
-                <ListenButton text={nameThenText(node.name, story, tx.speakLang)} voice={{ nodeId: node.id, source: "history", full: true, lang: tx.speakLang, persona: VoicePersona.MONUMENT_FEMALE }} label={t("audio.more")} />
+              <ListenButton text={nameThenText(node.name, node.kind === "monument" ? story || tx.description : shortStory(story || tx.description), tx.speakLang)} voice={{ nodeId: node.id, source: "history", lang: tx.speakLang, persona: personaForKind(node.kind), full: node.kind === "monument" }} />
+              {story && story.length > 260 && node.kind !== "monument" && (
+                <ListenButton text={nameThenText(node.name, story, tx.speakLang)} voice={{ nodeId: node.id, source: "history", full: true, lang: tx.speakLang, persona: personaForKind(node.kind) }} label={t("audio.more")} />
               )}
             </div>
           </div>

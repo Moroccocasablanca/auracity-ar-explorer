@@ -9,7 +9,6 @@ import { isGardenObject } from "@/lib/node-rules";
 import { isRestaurant } from "@/lib/explore-rules";
 import { speakNatural, stopSpeaking } from "@/services/voice/speech";
 import { VoicePersona } from "@/services/voice/voice-persona";
-import { warmNeuralVoice } from "@/services/voice/neuralVoice";
 import { contentLang } from "@/services/voice/text-speech";
 import { buildLiveQuestions, moonName, useToday, weatherWord, type LiveQuestion } from "@/lib/live";
 import { isOpenNow } from "@/utils/geo";
@@ -55,7 +54,7 @@ function RiddleCard({ audience }: { audience: "kids" | "adults" }) {
   const [picked, setPicked] = useState<number | null>(null);
   const [reading, setReading] = useState(false);
   const txt = riddleText(riddle, lang);
-  useEffect(() => { warmNeuralVoice(contentLang(lang)); return () => stopSpeaking(); }, [lang]);
+  useEffect(() => () => stopSpeaking(), []);
   const read = () => {
     if (reading) { stopSpeaking(); setReading(false); return; }
     setReading(true);

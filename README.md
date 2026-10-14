@@ -34,10 +34,15 @@ Prova sul telefono (tunnel temporaneo): vedi `docs/stato.md`. App iPhone (Capaci
 
 ## Voci
 
-- Voce naturale: `src/routes/api/tts.ts` crea la voce con Google (donna Kore, uomo Charon, giovane Puck) e la tiene in memoria.
-  Serve la chiave `GEMINI_API_KEY` sul server (in locale: file `~/.auracity-gemini-key`, mai nel codice).
-- Storie già registrate: `public/audio/<id-luogo>.m4a` (elenco in `manifest.json`).
-- Senza queste, l'app usa la voce gratuita del telefono o quella offline (Piper).
+Tre voci, ognuna per il suo ruolo (nessuna impostazione generale le cambia): `src/services/voice/voice-persona.ts`.
+- **Monumenti, vie, servizi:** donna elegante (Kore).
+- **Bar, ristoranti, palestre:** la scelta del locale, l'uomo (Charon) se non ha scelto.
+- **Panchine e alberi parlanti, giochi, messaggi dei visitatori:** voce giovane e curiosa (Puck).
+
+Come parlano, in ordine: 1) storia **registrata** (`public/audio/<id>.m4a` breve, `<id>-full.m4a` completa), istantanea e offline;
+2) voce naturale del server (`src/routes/api/tts.ts`, Google, in 9 lingue, a pezzi senza pause); 3) solo se tutto manca, la voce del telefono.
+Chiave: `GEMINI_API_KEY` sul server (in locale `~/.auracity-gemini-key`, mai nel codice).
+Registrare le storie mancanti: `bun run scripts/genaudio.mjs` (brevi) e `bun run scripts/genaudio.mjs --full` (storie complete dei monumenti); gira più modelli Google a rotazione e riprende dove si è fermato.
 
 ## Regole del progetto
 

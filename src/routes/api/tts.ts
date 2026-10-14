@@ -5,7 +5,7 @@ import { createFileRoute } from "@tanstack/react-router";
 const VOICES = { female: "Kore", male: "Charon", young: "Puck" } as const;
 const MODEL = "gemini-2.5-flash-preview-tts";
 const MAX_CHARS = 700;
-const LANG_NAMES: Record<string, string> = { it: "Italian", en: "English", fr: "French", de: "German", es: "Spanish", ar: "Arabic" };
+const LANG_NAMES: Record<string, string> = { it: "Italian", en: "English", fr: "French", de: "German", es: "Spanish", ar: "Arabic", ro: "Romanian", sq: "Albanian", hi: "Hindi" };
 const MAX_PER_DAY = 300;
 let day = "";
 let count = 0;

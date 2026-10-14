@@ -11,6 +11,7 @@ import { detectTextLang, greetingWithName } from "@/services/voice/text-speech";
 import { useLocalMessages } from "@/lib/local-messages";
 import { canUseTestAdmin } from "@/config/systemConfig";
 import { speakAny, speakNatural, stopSpeaking } from "@/services/voice/speech";
+import { VoicePersona } from "@/services/voice/voice-persona";
 
 export function GardenFace({ kind, speaking, size = 88 }: { kind: string; speaking: boolean; size?: number }) {
   const Icon = kind === "bench" ? Armchair : TreePine;
@@ -51,21 +52,21 @@ export function GardenCharacter({ node, inRange }: { node: NodeRow; inRange: boo
   const readOne = (m: { id: string; body: string }) => {
     run.current++;
     setReading(m.id);
-    void speakNatural(m.body, detectTextLang(m.body, lang), () => setReading((r) => (r === m.id ? null : r)));
+    void speakNatural(m.body, detectTextLang(m.body, lang), () => setReading((r) => (r === m.id ? null : r)), VoicePersona.HUNT_DYNAMIC);
   };
   const readAll = () => {
     const my = ++run.current;
     const step = (i: number) => {
       if (my !== run.current || i >= feed.length) return setReading(null);
       setReading(feed[i]!.id);
-      void speakNatural(feed[i]!.body, detectTextLang(feed[i]!.body, lang), () => setTimeout(() => step(i + 1), 500));
+      void speakNatural(feed[i]!.body, detectTextLang(feed[i]!.body, lang), () => setTimeout(() => step(i + 1), 500), VoicePersona.HUNT_DYNAMIC);
     };
     step(0);
   };
   const invite = () => {
     run.current++;
     setReading("invite");
-    void speakAny(greetingWithName(t("garden.hello", { name: "§" }), node.name, lang, t("garden.empty")), lang, () => setReading(null));
+    void speakAny(greetingWithName(t("garden.hello", { name: "§" }), node.name, lang, t("garden.empty")), lang, () => setReading(null), VoicePersona.HUNT_DYNAMIC);
   };
   const stop = () => {
     run.current++;

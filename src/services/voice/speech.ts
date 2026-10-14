@@ -1,20 +1,15 @@
-// Narration: natural AI voice (woman/man, cached per clip) with on-device speech as fallback.
+// Narration. Natural voices only: recorded stories first (instant), then our server voice (Google), and the phone's own
+// voice only as a last resort when nothing else works. Who speaks is decided by `voice-persona.ts`, never by a general setting.
 import { LOCALE_TAG, type Lang } from "@/lib/i18n";
-import { hasNeuralVoice, isNeuralReady, speakNeural, stopNeural, warmNeuralVoice } from "@/services/voice/neuralVoice";
 import { speechText, splitSentences, type Speakable } from "@/services/voice/text-speech";
 import { vlog } from "@/services/voice/voice-log";
 import { cachedJson } from "@/utils/cache";
 import { resolveCached } from "@/utils/assetCache";
-import { personaVoice, VoicePersona, type VoiceKind } from "@/services/voice/voice-persona";
+import { personaForKind, personaVoice, VoicePersona, type VoiceKind } from "@/services/voice/voice-persona";
 
-export type VoiceChoice = "female" | "male" | "device";
+export { personaForKind };
+export type Persona = string | undefined;
 export const canSpeak = () => typeof window !== "undefined" && "speechSynthesis" in window;
-
-export function voiceChoice(): VoiceChoice {
-  const v = typeof localStorage !== "undefined" ? localStorage.getItem("aura_voice_kind") : null;
-  return v === "male" || v === "device" ? v : "female";
-}
-export const setVoiceChoice = (v: VoiceChoice) => localStorage.setItem("aura_voice_kind", v);
 
 function rate() {
   const r = Number(localStorage.getItem("aura_voice_rate") ?? "1");
@@ -23,49 +18,60 @@ function rate() {
 
 let current: HTMLAudioElement | null = null;
 
-/** Ranks the phone's voices so the least robotic one wins (premium/neural/Siri/Google before basic ones). */
-function voiceScore(v: SpeechSynthesisVoice) {
+// ---------------------------------------------------------------- audio unlock (iPhone only plays after a tap)
+let shared: HTMLAudioElement | null = null;
+let unlocked = false;
+/** The first tap unlocks one audio element that is then reused for every clip, so later clips can start without a new tap. */
+export function primeAudio(): void {
+  if (typeof window === "undefined" || unlocked) return;
+  const unlock = () => {
+    if (unlocked) return;
+    shared = new Audio("data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAESsAACJWAAACABAAZGF0YQAAAAA=");
+    shared.play().then(() => { unlocked = true; }).catch(() => { shared = null; });
+    window.removeEventListener("pointerdown", unlock);
+    window.removeEventListener("touchend", unlock);
+  };
+  window.addEventListener("pointerdown", unlock, { passive: true });
+  window.addEventListener("touchend", unlock, { passive: true });
+}
+
+// ---------------------------------------------------------------- the phone's own voice (last resort)
+const FEMALE_NAMES = /alice|federica|paola|elsa|isabella|giorgia|silvia|carla|chiara|amelie|marie|anna|monica|helena|laura|sara|ioana|zira/i;
+const MALE_NAMES = /luca|diego|cosimo|jorge|thomas|daniel|reed|eddy|marco|paulo|yannick|markus|andrei/i;
+
+function voiceScore(v: SpeechSynthesisVoice, kind: VoiceKind) {
   const n = v.name;
   let score = 0;
   if (/premium|enhanced|natural|neural|studio|wavenet/i.test(n)) score += 50;
   if (/siri|google|microsoft .*online/i.test(n)) score += 30;
-  if (/alice|federica|luca|paola|elsa|isabella|diego/i.test(n)) score += 20; // good Italian voices on Apple/Windows
+  if (kind === "male" ? MALE_NAMES.test(n) : FEMALE_NAMES.test(n)) score += 25; // the right sex for the profile
+  if (kind !== "male" && MALE_NAMES.test(n)) score -= 25;
   if (/compact|espeak|robot|fred|zarvox|trinoids|whisper|bad news|bubbles/i.test(n)) score -= 100;
-  if (!v.localService) score += 10; // network voices are usually more natural
+  if (!v.localService) score += 10;
   return score;
 }
 
-export function pickDeviceVoice(tag: string) {
+export function pickDeviceVoice(tag: string, kind: VoiceKind = "female") {
   const code = tag.slice(0, 2).toLowerCase();
   const all = window.speechSynthesis.getVoices().filter((v) => v.lang.toLowerCase().startsWith(code));
   const exact = all.filter((v) => v.lang.toLowerCase().replace("_", "-") === tag.toLowerCase());
-  return [...(exact.length ? exact : all)].sort((a, b) => voiceScore(b) - voiceScore(a))[0] ?? null;
+  return [...(exact.length ? exact : all)].sort((a, b) => voiceScore(b, kind) - voiceScore(a, kind))[0] ?? null;
 }
 
-function sentences(text: string) {
-  return splitSentences(text);
-}
-
-/** Kept for callers; every voice now sounds like a guide telling a story. */
-export type Persona = string | undefined;
-
-export function speak(raw: string, lang: Lang, onEnd?: () => void, persona?: Persona) {
+export function speak(raw: string, lang: Lang, onEnd?: () => void, kind: VoiceKind = "female") {
   const text = speechText(raw, lang);
   if (!canSpeak()) return onEnd?.();
   const synth = window.speechSynthesis;
   synth.cancel();
   const tag = LOCALE_TAG[lang];
-  const voice = pickDeviceVoice(tag);
-  const parts = sentences(text);
+  const voice = pickDeviceVoice(tag, kind);
+  const parts = splitSentences(text);
   if (parts.length === 0) return onEnd?.();
-  vlog(`telefono: ${parts.length} frasi, voce ${voice?.name ?? "predefinita"}`);
-  // Guide / storyteller delivery: calm pace, natural pitch (the persona flag is kept for callers but no longer raises the pitch).
-  void persona;
+  vlog(`telefono (ultima scelta): ${parts.length} frasi, voce ${voice?.name ?? "predefinita"}`);
   let finished = false;
   const done = () => {
     if (finished) return;
     finished = true;
-    vlog("telefono: finito");
     window.clearInterval(keepAlive);
     onEnd?.();
   };
@@ -74,25 +80,25 @@ export function speak(raw: string, lang: Lang, onEnd?: () => void, persona?: Per
     const u = new SpeechSynthesisUtterance(p);
     u.lang = tag;
     u.voice = voice;
-    u.rate = Math.min(1.1, rate() * 0.93);
-    u.pitch = 1;
+    u.rate = Math.min(1.1, rate() * 0.95);
+    u.pitch = kind === "young" ? 1.1 : 1;
     if (i === parts.length - 1) {
       u.onend = done;
       u.onerror = done;
     }
     synth.speak(u);
   });
-  // Chrome and Safari silently pause long speech: nudge it every few seconds until the last sentence ends.
+  // Safari silently pauses long speech: nudge it every few seconds until the last sentence ends.
   const keepAlive = window.setInterval(() => {
     if (!synth.speaking && !synth.pending) return done();
     if (synth.paused) synth.resume();
   }, 4000);
 }
 
-/** Italian, English, French, German, Spanish and Arabic. */
-const SERVER_LANGS = new Set<Lang>(["it", "en", "fr", "de", "es", "ar"]);
+// ---------------------------------------------------------------- the natural voice of our server (Google), all nine languages
+const SERVER_LANGS = new Set<Lang>(["it", "en", "fr", "de", "es", "ar", "ro", "sq", "hi"]);
 let serverOffUntil = 0;
-let serverRun = 0; // changes every time speech is started or stopped, so an old chain of clips stops by itself
+let serverRun = 0; // changes every time speech starts or stops, so an old chain of clips stops by itself
 
 /** Cuts a long text at sentence ends into pieces the server can voice in one go (it accepts up to 700 characters). */
 export function chunkForServer(text: string, max = 600): string[] {
@@ -108,8 +114,7 @@ export function chunkForServer(text: string, max = 600): string[] {
   return out.flatMap((c) => (c.length <= max + 80 ? [c] : c.match(new RegExp(`.{1,${max}}(\\s|$)`, "g")) ?? [c]));
 }
 
-/** One piece of text -> a playable address (null when the server cannot make it right now). */
-async function serverClip(text: string, kind: VoiceKind | "young", lang: Lang): Promise<string | null> {
+async function serverClip(text: string, kind: VoiceKind, lang: Lang): Promise<string | null> {
   try {
     const res = await fetch("/api/tts", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ text, voice: kind, lang }) });
     if (!res.ok) {
@@ -124,23 +129,25 @@ async function serverClip(text: string, kind: VoiceKind | "young", lang: Lang): 
   }
 }
 
-function playClip(url: string): Promise<boolean> {
-  return new Promise((resolve) => {
-    const a = new Audio(url);
-    a.playbackRate = rate();
-    current = a;
+/** Starts one clip on the unlocked audio element (or a new one). `started` says whether the phone allowed it, `ended` when it is over. */
+function startClip(url: string): { started: Promise<boolean>; ended: Promise<boolean> } {
+  const a = shared && unlocked ? shared : new Audio();
+  a.onended = null;
+  a.onerror = null;
+  a.src = url;
+  a.playbackRate = rate();
+  current = a;
+  const ended = new Promise<boolean>((resolve) => {
     a.onended = () => resolve(true);
     a.onerror = () => resolve(false);
-    a.play().catch(() => resolve(false));
   });
+  const started = a.play().then(() => true, () => false);
+  return { started, ended };
 }
 
-/**
- * The natural (Google) voice, made by our own server and kept there. Long texts are cut into pieces: the next piece is already
- * prepared while the current one plays, so the voice goes on without pauses. False if the server voice is not available at all.
- */
-async function speakFromServer(text: string, kind: VoiceKind | "young", lang: Lang, onEnd?: () => void): Promise<boolean> {
-  if (Date.now() < serverOffUntil) return false;
+/** Natural voice, in pieces: the next piece is prepared while the current one plays, so there are no pauses. */
+async function speakFromServer(text: string, kind: VoiceKind, lang: Lang, onEnd?: () => void): Promise<boolean> {
+  if (Date.now() < serverOffUntil || !SERVER_LANGS.has(lang)) return false;
   const parts = chunkForServer(text);
   if (!parts.length) return false;
   const my = ++serverRun;
@@ -150,14 +157,15 @@ async function speakFromServer(text: string, kind: VoiceKind | "young", lang: La
     let url: string = first;
     for (let i = 0; i < parts.length; i++) {
       const upcoming = i + 1 < parts.length ? serverClip(parts[i + 1]!, kind, lang) : null;
-      const played = await playClip(url);
+      const clip = startClip(url);
+      const played = (await clip.started) && (await clip.ended);
       URL.revokeObjectURL(url);
       if (my !== serverRun) return;
-      if (!played && i === 0) return void speak(parts.join(" "), lang, onEnd); // the phone refused to play: say it with the phone voice
+      if (!played && i === 0) return void speak(parts.join(" "), lang, onEnd, kind);
       if (!upcoming) break;
       const nextUrl = await upcoming;
       if (my !== serverRun) return;
-      if (!nextUrl) return void speak(parts.slice(i + 1).join(" "), lang, onEnd); // carry on from where the server stopped
+      if (!nextUrl) return void speak(parts.slice(i + 1).join(" "), lang, onEnd, kind); // carry on from where the server stopped
       url = nextUrl;
     }
     onEnd?.();
@@ -165,83 +173,51 @@ async function speakFromServer(text: string, kind: VoiceKind | "young", lang: La
   return true;
 }
 
-/** Best available voice: free on-device neural voice first, the phone's own voice only as a last resort. */
-export async function speakNatural(raw: string, lang: Lang, onEnd?: () => void, persona?: Persona, venueVoice?: VoiceKind) {
+/** The voice that fits the profile: server (natural) first, the phone's own voice only if that fails. */
+export async function speakNatural(raw: string, lang: Lang, onEnd?: () => void, persona?: Persona, venueVoice?: "female" | "male") {
   const text = speechText(raw, lang);
-  const pv = personaVoice(persona, venueVoice);
-  const choice = pv.kind && voiceChoice() !== "device" ? pv.kind : voiceChoice();
-  // The natural voices (our server, Google) speak all six languages: woman for monuments, the merchant's choice for venues, a young voice for games.
-  const serverKind = persona === VoicePersona.HUNT_DYNAMIC || persona === "kid" ? "young" : persona === VoicePersona.BUSINESS_USER || persona === VoicePersona.MONUMENT_FEMALE ? choice : null;
-  if (serverKind && serverKind !== "device" && SERVER_LANGS.has(lang) && (await speakFromServer(text, serverKind, lang, onEnd))) return;
-  // A voice that is not downloaded yet must never freeze the screen: start it in the background and use the phone voice meanwhile.
-  if (choice !== "device" && !isNeuralReady(lang, choice)) {
-    warmNeuralVoice(lang, choice);
-    return speak(text, lang, onEnd, persona);
-  }
-  if (choice !== "device" && hasNeuralVoice(lang)) {
-    const res = await speakNeural(text, lang, choice, rate() * pv.rate, persona, () => onEnd?.());
-    if (res.ok) return;
-    // Carry on from the sentence where the neural voice failed, instead of starting over.
-    vlog(`passo alla voce del telefono dalla frase rimasta (${res.remaining.length} caratteri)`);
-    if (res.remaining.trim()) return speak(res.remaining, lang, onEnd, persona);
-    return onEnd?.();
-  }
-  speak(text, lang, onEnd, persona);
+  const { kind } = personaVoice(persona, venueVoice);
+  if (await speakFromServer(text, kind, lang, onEnd)) return;
+  speak(text, lang, onEnd, kind);
 }
 
-export type VoiceRequest = { nodeId: string; source: "history" | "message"; messageId?: string; persona?: Persona; /** language of the text being read (defaults to the app language) */ lang?: Lang; /** read the whole text from the client (the "tell me more" button) */ full?: boolean };
-type Fetcher = (req: VoiceRequest & { lang: Lang; voice: "female" | "male" }) => Promise<{ ok: boolean; url?: string }>;
-
+// ---------------------------------------------------------------- recorded stories (instant, offline)
 let clipList: Promise<Set<string>> | null = null;
-/** Stories recorded once with the natural voices and shipped inside the app (public/audio), so they play with no server and no cost. */
-async function bundledClip(nodeId: string): Promise<string | null> {
+/** The recorded story of a place: the complete one when it exists, otherwise the short one (never for a "tell me everything" request). */
+async function bundledClip(nodeId: string, wantFull: boolean): Promise<string | null> {
   clipList ??= cachedJson<string[]>("/audio/manifest.json").then((l) => new Set(l ?? []));
-  const file = `${nodeId}.m4a`;
-  return (await clipList).has(file) ? resolveCached(`/audio/${file}`) : null; // the local copy when it is already stored
+  const set = await clipList;
+  const pick = set.has(`${nodeId}-full.m4a`) ? `${nodeId}-full.m4a` : !wantFull && set.has(`${nodeId}.m4a`) ? `${nodeId}.m4a` : null;
+  return pick ? resolveCached(`/audio/${pick}`) : null; // the local copy when it is already stored
 }
 
-/** Plays a clip with the chosen voice; falls back to the phone voice if the natural voice is unavailable. */
-export async function narrate(fetcher: Fetcher, request: VoiceRequest, text: Speakable, lang: Lang, onEnd: () => void) {
+export type VoiceRequest = { nodeId: string; source: "history" | "message"; messageId?: string; persona?: Persona; /** language of the text being read (defaults to the app language) */ lang?: Lang; /** read the whole text, not the short version */ full?: boolean };
+
+/** Plays the story of a place: the recording if there is one, otherwise the natural voice, always the profile's own voice. */
+export async function narrate(request: VoiceRequest, text: Speakable, lang: Lang, onEnd: () => void) {
   const { persona, full, lang: textLang, ...req } = request;
   lang = textLang ?? lang;
   stopSpeaking();
-  const pk = personaVoice(persona).kind;
-  const choice = voiceChoice() !== "device" && pk ? pk : voiceChoice(); // monuments always get the woman, whatever the general setting
-  if (choice !== "device" && persona !== "kid" && !full) {
-    try {
-      const bundled = req.source === "history" && lang === "it" ? await bundledClip(req.nodeId) : null;
-      if (bundled) {
-        vlog("voce registrata nell'app");
-        const a = new Audio(bundled);
-        a.playbackRate = rate();
-        current = a;
-        a.onended = () => onEnd();
-        a.onerror = () => onEnd();
-        await a.play();
+  if (req.source === "history" && lang === "it") {
+    const url = await bundledClip(req.nodeId, Boolean(full));
+    if (url) {
+      vlog("voce registrata nell'app");
+      serverRun++;
+      const clip = startClip(url);
+      if (await clip.started) {
+        void clip.ended.then(() => onEnd());
         return;
       }
-      const res = await fetcher({ ...req, lang, voice: choice });
-      vlog(`voce AI del server: ${res.ok ? "ok" : "non disponibile"}`);
-      if (res.ok && res.url) {
-        const a = new Audio(res.url);
-        a.playbackRate = rate();
-        current = a;
-        a.onended = () => onEnd();
-        a.onerror = () => onEnd();
-        await a.play();
-        return;
-      }
-    } catch {
-      vlog("voce AI del server: errore, uso la voce gratuita");
     }
   }
-  void speakAny(text, lang, onEnd, persona ?? (req.source === "message" ? "kid" : undefined));
+  // Messages left by visitors always speak with the young voice.
+  void speakAny(text, lang, onEnd, persona ?? (req.source === "message" ? VoicePersona.HUNT_DYNAMIC : undefined));
 }
 
 let segRun = 0;
 
 /** Reads pieces in their own languages one after the other (e.g. an Italian place name inside an English sentence). */
-export async function speakSegments(segs: { text: string; lang: Lang }[], onEnd?: () => void, persona?: Persona, venueVoice?: VoiceKind) {
+export async function speakSegments(segs: { text: string; lang: Lang }[], onEnd?: () => void, persona?: Persona, venueVoice?: "female" | "male") {
   const my = ++segRun;
   for (const seg of segs) {
     if (my !== segRun) return;
@@ -251,15 +227,15 @@ export async function speakSegments(segs: { text: string; lang: Lang }[], onEnd?
   if (my === segRun) onEnd?.();
 }
 
-export const speakAny = (x: Speakable, lang: Lang, onEnd?: () => void, persona?: Persona, venueVoice?: VoiceKind) =>
+export const speakAny = (x: Speakable, lang: Lang, onEnd?: () => void, persona?: Persona, venueVoice?: "female" | "male") =>
   typeof x === "string" ? speakNatural(x, lang, onEnd, persona, venueVoice) : speakSegments(x, onEnd, persona, venueVoice);
 
 export function stopSpeaking() {
   segRun++;
   serverRun++;
-  stopNeural();
   if (current) {
     current.pause();
+    current.onended = null;
     current = null;
   }
   if (canSpeak()) window.speechSynthesis.cancel();

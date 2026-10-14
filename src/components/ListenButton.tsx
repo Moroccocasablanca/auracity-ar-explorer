@@ -1,24 +1,21 @@
 import { useCallback, useEffect, useState } from "react";
-import { useServerFn } from "@tanstack/react-start";
 import { Settings2, Square, Volume2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n";
-import { narrate, setVoiceChoice, stopSpeaking, voiceChoice, type VoiceChoice, type VoiceRequest } from "@/services/voice/speech";
-import { naturalVoice } from "@/services/voice/voice.functions";
+import { narrate, stopSpeaking, type VoiceRequest } from "@/services/voice/speech";
 import { speakableIsEmpty, type Speakable } from "@/services/voice/text-speech";
 
 /** Shared narration state: natural voice with phone-voice fallback. */
 export function useNarrator() {
   const { lang } = useI18n();
-  const fetcher = useServerFn(naturalVoice);
   const [playing, setPlaying] = useState<string | null>(null);
   useEffect(() => () => stopSpeaking(), []);
   const play = useCallback(
     (id: string, req: VoiceRequest, text: Speakable) => {
       setPlaying(id);
-      void narrate((d) => fetcher({ data: d }), req, text, lang, () => setPlaying((p) => (p === id ? null : p)));
+      void narrate(req, text, lang, () => setPlaying((p) => (p === id ? null : p)));
     },
-    [fetcher, lang],
+    [lang],
   );
   const stop = useCallback(() => {
     stopSpeaking();
@@ -29,29 +26,12 @@ export function useNarrator() {
 
 export function VoiceSettings() {
   const { t } = useI18n();
-  const [choice, setChoice] = useState<VoiceChoice>("female");
   const [rate, setRate] = useState("1");
   useEffect(() => {
-    setChoice(voiceChoice());
     setRate(localStorage.getItem("aura_voice_rate") ?? "1");
   }, []);
   return (
     <div className="space-y-3">
-      <div>
-        <p className="text-xs font-medium">{t("audio.voice")}</p>
-        <div className="mt-1 grid grid-cols-3 gap-1">
-          {(["female", "male", "device"] as const).map((v) => (
-            <button
-              key={v}
-              type="button"
-              onClick={() => { setChoice(v); setVoiceChoice(v); }}
-              className={`rounded-md border px-2 py-1.5 text-xs ${choice === v ? "border-primary bg-primary/15" : "border-input"}`}
-            >
-              {t(v === "female" ? "audio.female" : v === "male" ? "audio.male" : "audio.device")}
-            </button>
-          ))}
-        </div>
-      </div>
       <label className="block text-xs font-medium">{t("audio.speed")}
         <input aria-label={t("audio.speed")} className="mt-2 w-full accent-primary" type="range" min="0.8" max="1.2" step="0.05" value={rate} onChange={(e) => { setRate(e.target.value); localStorage.setItem("aura_voice_rate", e.target.value); }} />
       </label>
