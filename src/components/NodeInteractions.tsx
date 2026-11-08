@@ -14,7 +14,10 @@ import { LOCALE_TAG, useI18n, type Lang } from "@/lib/i18n";
 import { useLocation } from "@/lib/location";
 import { messagesQuery, nodeHours, reviewsQuery, type NodeRow } from "@/lib/nodes";
 import { QrScanner, canScanQr } from "./QrScanner";
-import { isGardenObject } from "@/lib/node-rules";
+import { GARDEN_MESSAGE_RADIUS_M, isGardenObject } from "@/lib/node-rules";
+import { useTranslated } from "@/lib/translate";
+import { DictateButton } from "@/components/VoiceInputButton";
+import { supabase } from "@/integrations/supabase/client";
 
 const MAX_ACCURACY_M = 60;
 
@@ -32,7 +35,9 @@ export function usePresence(node: NodeRow) {
   const loc = useLocation();
   const real = loc.active && !loc.demo && loc.pos != null;
   const dist = real && loc.pos ? distanceM(loc.pos, node) : null;
-  const inRange = dist != null && dist <= node.radius_m && loc.accuracy <= MAX_ACCURACY_M;
+  // a talking bench or tree: you must be right next to it (10 m), so two benches close together are never mixed up
+  const reach = isGardenObject(node) ? GARDEN_MESSAGE_RADIUS_M : node.radius_m;
+  const inRange = dist != null && dist <= reach && loc.accuracy <= MAX_ACCURACY_M;
   return { loc, dist, inRange };
 }
 
@@ -47,7 +52,7 @@ export function PresenceBanner({ node, dist, inRange }: { node: NodeRow; dist: n
     text = t("node.presence.ok");
     tone = "text-success";
   } else {
-    text = t("node.presence.far", { r: node.radius_m, d: `${Math.round(dist)} m` });
+    text = t("node.presence.far", { r: isGardenObject(node) ? GARDEN_MESSAGE_RADIUS_M : node.radius_m, d: `${Math.round(dist)} m` });
   }
   return (
     <div className={`glass flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm ${tone}`}>
@@ -90,12 +95,13 @@ export function MessageBoard({ node }: { node: NodeRow }) {
   const qc = useQueryClient();
   const sendPublic = useServerFn(postMessage);
   const sendBench = useServerFn(postBenchMessage);
-  const isBench = isGardenObject(node);
+  const isBench = isGardenObject(node) && !node.id.startsWith("fun-"); // the fun spots for kids have no visitor messages
   const send = isBench ? sendBench : sendPublic;
   const { session, ready } = useSession();
   const testMode = typeof window !== "undefined" && canUseTestAdmin(window.location.hostname, import.meta.env.DEV);
   const locked = isBench && ready && !session && !testMode;
   const { data: messages = [] } = useQuery(messagesQuery(node.id));
+  const shownMsgs = useTranslated(messages.map((m) => m.body), lang); // visitors write in any language: shown in yours
   const [name, setName] = useAuthorName();
   const [body, setBody] = useState("");
   const [busy, setBusy] = useState(false);
@@ -103,12 +109,26 @@ export function MessageBoard({ node }: { node: NodeRow }) {
   async function submit() {
     if (!loc.pos) return;
     setBusy(true);
-    // Test mode (owner's phone): messages on talking gardens are saved on this phone, so the whole flow can be tried.
-    if (isBench && testMode && !session) {
-      addLocalMessage(node.id, body.trim());
-      toast.success(t("msg.local"));
-      setBody("");
-      setBusy(false);
+    // Benches and trees: the message goes to OUR server (it checks you are within 10 m, moderates the text and keeps it for 48 hours).
+    if (isBench) {
+      try {
+        const token = (await supabase.auth.getSession()).data.session?.access_token;
+        const r = await fetch("/api/bench-messages", {
+          method: "POST",
+          headers: { "content-type": "application/json", ...(token ? { authorization: `Bearer ${token}` } : {}) },
+          body: JSON.stringify({ nodeId: node.id, lat: loc.pos.lat, lng: loc.pos.lng, accuracy: loc.accuracy, author: name, body }),
+        });
+        const res = (await r.json()) as ActionResult;
+        if (res.ok) {
+          toast.success(t("form.sent"));
+          setBody("");
+          qc.invalidateQueries({ queryKey: ["messages", node.id] });
+        } else toast.error(errorText(t, res));
+      } catch {
+        toast.error(t("err.unavailable"));
+      } finally {
+        setBusy(false);
+      }
       return;
     }
     try {
@@ -147,15 +167,19 @@ export function MessageBoard({ node }: { node: NodeRow }) {
           disabled={!inRange || busy || locked}
           onChange={(e) => setName(e.target.value)}
         />
-        <textarea
-          className={inputCls}
-          rows={3}
-          placeholder={t("form.message")}
-          value={body}
-          maxLength={280}
-          disabled={!inRange || busy || locked}
-          onChange={(e) => setBody(e.target.value)}
-        />
+        <div className="relative">
+          <textarea
+            className={`${inputCls} pr-14`}
+            rows={3}
+            placeholder={t("form.message")}
+            value={body}
+            maxLength={280}
+            disabled={!inRange || busy || locked}
+            onChange={(e) => setBody(e.target.value)}
+          />
+          {/* leave the message with your VOICE: the words are written while you speak, then you send */}
+          {inRange && !locked && !busy && <DictateButton value={body} setValue={(v) => setBody(v.slice(0, 280))} className="absolute bottom-2 right-2" />}
+        </div>
         <button
           type="button"
           className={btnCls}
@@ -173,14 +197,14 @@ export function MessageBoard({ node }: { node: NodeRow }) {
       </div>
       <ul className="space-y-2">
         {messages.length === 0 && <li className="text-sm text-muted-foreground">{t("messages.empty")}</li>}
-        {messages.map((m) => (
+        {messages.map((m, i) => (
           <li key={m.id} className="rounded-xl border border-border bg-card/60 p-3">
             <div className="flex items-baseline justify-between">
               <span className="text-sm font-semibold">{t("privacy.visitor")}</span>
               <span className="mono-label !text-[0.58rem]">{timeAgo(m.created_at, lang)}</span>
             </div>
             <div className="mt-1 flex items-start gap-2">
-              <p className="flex-1 text-sm text-foreground/90">{m.body}</p>
+              <p className="flex-1 text-sm text-foreground/90">{shownMsgs[i] ?? m.body}</p>
               <ListenButton compact text={m.body} voice={{ nodeId: node.id, source: "message", messageId: m.id }} />
             </div>
           </li>

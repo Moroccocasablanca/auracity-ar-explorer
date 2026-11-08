@@ -95,7 +95,7 @@ export function TestPanel() {
         type="button"
         onClick={() => setOpen(true)}
         aria-label={t("test.admin")}
-        className="fixed left-3 bottom-[6.4rem] z-[60] flex size-9 items-center justify-center rounded-full border-2 border-amber-300 bg-amber-300/95 text-black shadow-lg"
+        className="fixed right-3 top-[calc(env(safe-area-inset-top,0px)+4.6rem)] z-[60] flex size-7 items-center justify-center rounded-full border border-amber-300/70 bg-amber-300/70 text-black opacity-60"
       >
         <FlaskConical className="size-4" />
         <span className="sr-only">{t("test.admin")}</span>

@@ -32,3 +32,21 @@ dist-ssr
 *.sw?
 .voice-cache
 .daily-cache
+.served
+.served.new
+.app-data
+
+# AURACITY: never published (keys, visitors' messages, caches, builds)
+.env
+.app-data/
+.daily-cache/
+.voice-cache/
+.served*
+.claude/
+capacitor-www/
+ios/App/Pods/
+ios/App/build/
+ios/DerivedData/
+**/xcuserdata/
+.DS_Store
+ios/App/App/config *.xml

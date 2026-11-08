@@ -16,6 +16,7 @@ import { VoicePersona } from "@/services/voice/voice-persona";
 import { bump } from "@/lib/merchant";
 import { systemConfig, venueFeaturesEnabled } from "@/config/systemConfig";
 import { VenueGreeter } from "@/components/ar/VenueGreeter";
+import { useFollowing } from "@/services/notifications/follow";
 
 const TALK_ANGLE = 12;
 const TALK_DIST = 80;
@@ -160,7 +161,9 @@ export function ArView() {
   // autoPlayOnProximity: a monument starts telling its story once, when you are inside the radius (50 m).
   const nearMonument = tooFast ? null : placed.filter((p) => p.n.kind === "monument" && p.d <= systemConfig.proximityLoadingRadiusMeters).sort((a, b) => a.d - b.d)[0]?.n ?? null;
   // A bar or restaurant within reach: its mascot welcomes you and shows today's offer and 3D menu.
-  const nearBiz = tooFast ? null : placed.filter((p) => p.n.kind === "business" && venueFeaturesEnabled(p.n.subscribed) && Math.max(0, p.d - Math.min(loc.accuracy, 40)) <= 60).sort((a, b) => a.d - b.d)[0]?.n ?? null;
+  // The venue's mascot welcomes you by itself ONLY if you follow that venue; for all the others you look them up yourself (tap the place).
+  const followed = useFollowing();
+  const nearBiz = tooFast ? null : placed.filter((p) => p.n.kind === "business" && Boolean(followed.store[p.n.id]?.nearby) && venueFeaturesEnabled(p.n.subscribed) && Math.max(0, p.d - Math.min(loc.accuracy, 40)) <= 60).sort((a, b) => a.d - b.d)[0]?.n ?? null;
   const speakingMonument = placed.find((p) => p.n.kind === "monument" && playing === p.n.id)?.n ?? null;
   const focus = tooFast
     ? null

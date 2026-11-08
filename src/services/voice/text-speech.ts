@@ -1,6 +1,7 @@
 // Turns written text into text that sounds right when read aloud: no "barra", no letters-by-letters abbreviations,
 // and sentence splitting that does not break on "a.C.", "S. Chiara" or "n. 5".
 import type { Lang } from "@/lib/i18n";
+import NAME_LANGS from "@/data/name-langs.json";
 
 const ORD_IT = ["", "primo", "secondo", "terzo", "quarto", "quinto", "sesto", "settimo", "ottavo", "nono", "decimo", "undicesimo", "dodicesimo", "tredicesimo", "quattordicesimo", "quindicesimo", "sedicesimo", "diciassettesimo", "diciottesimo", "diciannovesimo", "ventesimo", "ventunesimo"];
 const ROMAN: Record<string, number> = { I: 1, V: 5, X: 10, L: 50 };
@@ -119,6 +120,9 @@ const NAME_WORDS: Partial<Record<Lang, string>> = {
  *  language when the name is clearly foreign ("Harry's Bar", "Bistrot", "Chez Marie"), otherwise it is Italian. */
 export function nameLanguage(name: string, kind: string = "business"): Lang {
   if (kind !== "business") return "it";
+  // The AI already decided in which language this venue's name is pronounced (see scripts/gennamelangs.mjs and /api/name-lang).
+  const decided = (NAME_LANGS as Record<string, string>)[name] ?? learnedNameLangs()[name];
+  if (decided) return decided as Lang;
   if (/[\u0600-\u06FF]/.test(name)) return "ar";
   if (/\b\p{L}+['’]s\b/u.test(name)) return "en";
   if (/ñ/i.test(name)) return "es";
@@ -153,3 +157,56 @@ export function greetingWithName(tpl: string, name: string, uiLang: Lang, rest: 
 }
 
 export const speakableIsEmpty = (x: Speakable) => (typeof x === "string" ? !x.trim() : x.every((p) => !p.text.trim()));
+
+/** Cuts a long text at sentence ends into pieces the server can voice in one go (it accepts up to 700 characters). */
+export function chunkForServer(text: string, max = 600): string[] {
+  const out: string[] = [];
+  let cur = "";
+  for (const s of splitSentences(text)) {
+    if (cur && (cur + " " + s).length > max) {
+      out.push(cur);
+      cur = s;
+    } else cur = cur ? `${cur} ${s}` : s;
+  }
+  if (cur) out.push(cur);
+  return out.flatMap((c) => (c.length <= max + 80 ? [c] : c.match(new RegExp(`.{1,${max}}(\\s|$)`, "g")) ?? [c]));
+}
+
+
+/** The first piece is kept short (about a sentence or two) so the voice starts within a couple of seconds, the rest follows. */
+export function shortFirst(parts: string[]): string[] {
+  const first = parts[0];
+  if (!first || first.length <= 200) return parts;
+  const sents = splitSentences(first);
+  let head = "";
+  let i = 0;
+  while (i < sents.length && (head.length < 90 || !head)) head = head ? `${head} ${sents[i++]}` : sents[i++]!;
+  const rest = sents.slice(i).join(" ");
+  return head && rest && head.length <= 260 ? [head, rest, ...parts.slice(1)] : parts;
+}
+
+
+/** The exact pieces the server voice is asked for (the same on the phone and on the server, so a clip prepared in advance is the one that gets played). */
+export const partsForSpeech = (raw: string, lang: Lang): string[] => shortFirst(chunkForServer(speechText(raw, lang)));
+
+// ---- names the AI classified while the app was running (new venues): kept on the phone
+const LEARNED = "aura_name_langs";
+let learned: Record<string, string> | null = null;
+function learnedNameLangs(): Record<string, string> {
+  if (learned) return learned;
+  try { learned = typeof localStorage === "undefined" ? {} : (JSON.parse(localStorage.getItem(LEARNED) ?? "{}") as Record<string, string>); } catch { learned = {}; }
+  return learned;
+}
+
+/** Asks the server (AI) for the language of venue names the app does not know yet; the answers are remembered. */
+export async function learnNameLangs(names: string[]): Promise<void> {
+  const unknown = [...new Set(names)].filter((n) => n && !(n in (NAME_LANGS as Record<string, string>)) && !(n in learnedNameLangs())).slice(0, 40);
+  if (!unknown.length) return;
+  try {
+    const r = await fetch("/api/name-lang", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ names: unknown }) });
+    if (!r.ok) return;
+    const { langs } = (await r.json()) as { langs: Record<string, string> };
+    learned = { ...learnedNameLangs(), ...langs };
+    try { localStorage.setItem(LEARNED, JSON.stringify(learned)); } catch { /* private mode */ }
+  } catch { /* offline: the built-in rules are used */ }
+}

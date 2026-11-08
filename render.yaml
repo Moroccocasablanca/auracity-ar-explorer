@@ -4,7 +4,11 @@ services:
   - type: web
     name: auracity
     runtime: docker
-    plan: free
+    plan: starter   # always on (the free plan falls asleep) and with a disk, so nothing is lost at each update
+    disk:
+      name: auracity-data
+      mountPath: /data
+      sizeGB: 2
     autoDeployTrigger: checksPass
     healthCheckPath: /explore
     envVars:

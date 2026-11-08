@@ -4,7 +4,9 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { ListenButton } from "@/components/ListenButton";
 import { refreshMenu } from "@/lib/auracity.functions";
-import { ArrowLeft, Clock, Landmark, MapPin, Sparkles, Tag, Zap, Box } from "lucide-react";
+import { ArrowLeft, Clock, Heart, Landmark, MapPin, Share2, Sparkles, Tag, Zap, Box } from "lucide-react";
+import { toast } from "sonner";
+import { useFavorites } from "@/lib/favorites";
 import { MessageBoard, PresenceBanner, ReviewBoard, usePresence } from "@/components/NodeInteractions";
 import { isOpenNow, formatDistance } from "@/utils/geo";
 import { kindKey, LOCALE_TAG, useI18n } from "@/lib/i18n";
@@ -33,10 +35,10 @@ export const Route = createFileRoute("/node/$slug")({
     const name = params.slug.replace(/-/g, " ");
     return {
       meta: [
-        { title: `${name} — AURACITY node in Bra` },
-        { name: "description", content: `Interactive AR node "${name}" in Bra: messages, reviews and local info.` },
-        { property: "og:title", content: `${name} — AURACITY node in Bra` },
-        { property: "og:description", content: `Interactive AR node "${name}" in Bra.` },
+        { title: `${name} — AURACITY a Bra` },
+        { name: "description", content: `Scopri "${name}" a Bra: la sua storia, i messaggi e le informazioni utili.` },
+        { property: "og:title", content: `${name} — AURACITY a Bra` },
+        { property: "og:description", content: `Scopri "${name}" a Bra con AURACITY.` },
         { property: "og:type", content: "article" },
         { name: "twitter:card", content: "summary" },
       ],
@@ -107,6 +109,15 @@ function NodeDetail({
   };
   const qc = useQueryClient();
   const refresh = useServerFn(refreshMenu);
+  const favs = useFavorites();
+  // Share the page of this place (the phone's share sheet; the link is copied if sharing is not available).
+  const shareIt = async () => {
+    const url = window.location.href;
+    try {
+      if (navigator.share) await navigator.share({ title: node.name, text: `${node.name} — AURACITY Bra`, url });
+      else { await navigator.clipboard.writeText(url); toast(t("share.copied")); }
+    } catch { /* the person closed the share sheet */ }
+  };
 
   // Menus update themselves: the server re-reads the venue's page once per day.
   useEffect(() => {
@@ -139,7 +150,17 @@ function NodeDetail({
         <p className="mono-label" style={{ color: "var(--kind)" }}>
           {t(kindKey(node.kind))}
         </p>
-        <h1 className="mt-1 text-4xl font-bold">{tx.name}</h1>
+        <div className="mt-1 flex items-start gap-3">
+          <h1 className="min-w-0 flex-1 text-4xl font-bold">{tx.name}</h1>
+          <div className="mt-1 flex shrink-0 gap-2">
+            <button type="button" onClick={() => favs.toggle(node.id)} aria-pressed={favs.has(node.id)} aria-label={t(favs.has(node.id) ? "fav.remove" : "fav.add")} className={`flex size-10 items-center justify-center rounded-full border transition active:scale-90 ${favs.has(node.id) ? "border-transparent bg-rose-500 text-white" : "border-border"}`}>
+              <Heart className={`size-5 ${favs.has(node.id) ? "fill-current" : ""}`} />
+            </button>
+            <button type="button" onClick={shareIt} aria-label={t("share.label")} className="flex size-10 items-center justify-center rounded-full border border-border transition active:scale-90">
+              <Share2 className="size-5" />
+            </button>
+          </div>
+        </div>
         <p className="mt-1 text-muted-foreground">{tx.tagline}</p>
         <div className="mt-4 flex flex-wrap gap-2 text-xs">
           <span className="glass inline-flex items-center gap-1.5 rounded-full px-3 py-1.5">
@@ -170,7 +191,7 @@ function NodeDetail({
           </h2>
           {/* A guide stands next to the story and tells it: she stays still while she speaks (glow + sound waves). */}
           <div className="mt-3 flex items-end gap-2">
-            <TalkingMascot src="/mascots/guide.png" speaking={guideTalking} className="h-48 w-auto" />
+            <TalkingMascot src="/mascots/guide.webp" speaking={guideTalking} className="h-48 w-auto" />
             <div className="mb-3 min-w-0 flex-1 rounded-3xl rounded-bl-md border border-border bg-card/80 p-4 shadow-lg">
               <p className="text-sm font-medium leading-snug">{t("node.guide.hello", { name: node.name.split(" · ")[0] ?? node.name })}</p>
               <div className="mt-3">
@@ -199,7 +220,7 @@ function NodeDetail({
 
       {node.kind === "business" && (
         <div className="mt-6 flex items-center gap-4 rounded-3xl border border-border bg-card/60 p-4">
-          <VenueAvatar style={placeStyleKey(node)} speaking={talking} size={92} />
+          <VenueAvatar voice={vc.voice} speaking={talking} size={92} />
           <div className="min-w-0 flex-1">
             <p className="mono-label !text-[0.6rem]">{t("venue.avatar")}</p>
             <p className="mt-1 text-sm text-muted-foreground">{t("venue.avatar.sub")}</p>

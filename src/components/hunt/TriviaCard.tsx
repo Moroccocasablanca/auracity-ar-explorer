@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { translateTexts } from "@/lib/translate";
 import { ArrowLeft, BookOpen, Brain, Calculator, CalendarDays, Car, CheckCircle2, Dices, FlaskConical, Flame, Globe2, HeartPulse, Landmark, Languages, MapPin, MessagesSquare, Palette, PiggyBank, Scale, ShieldCheck, Sparkles, Vote, XCircle, type LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n";
@@ -14,7 +15,9 @@ const topicIcon = (id: string, cls: string) => {
 
 /** Quiz for every age: the player first chooses the subject (history, languages, English, "on this day"...), then answers; the solution and a short explanation appear at once. */
 export function TriviaCard() {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
+  const langRef = useRef(lang);
+  langRef.current = lang;
   const { data: today } = useToday();
   const [band, setBandState] = useState<Band>("adult");
   const [topic, setTopic] = useState<Topic | "mix" | null>(null); // null = the subject has not been chosen yet
@@ -27,8 +30,17 @@ export function TriviaCard() {
     setItem(q);
     setOpts(q ? shuffled(q) : []);
     setPicked(null);
+    // The quiz is written in Italian: in another language the question, the answers and the explanation are translated (same order, so the right answer stays right).
+    const L = langRef.current;
+    if (q && L !== "it") {
+      void translateTexts([q.q, ...q.options, q.why], L, "it").then((tr) => {
+        const qq: Trivia = { ...q, q: tr[0] ?? q.q, options: q.options.map((_, i) => tr[i + 1] ?? q.options[i]!), why: tr[q.options.length + 1] ?? q.why };
+        setItem((cur) => (cur && cur.id === q.id ? qq : cur));
+        setOpts((cur) => (cur.length === q.options.length && cur.every((o) => q.options.includes(o.text)) ? cur.map((o) => ({ ...o, text: tr[q.options.indexOf(o.text) + 1] ?? o.text })) : cur));
+      });
+    }
     // Running out of fresh questions on this subject: the AI writes some more in the background.
-    if (unseenCount(b, tp) < 4) void loadMoreTrivia(b, tp);
+    if (unseenCount(b, tp) < 8) void loadMoreTrivia(b, tp);
   }, []);
   useEffect(() => {
     setBandState(getBand());

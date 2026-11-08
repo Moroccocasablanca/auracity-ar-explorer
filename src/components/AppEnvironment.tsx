@@ -9,7 +9,7 @@ import { cachedJson } from "@/utils/cache";
 import { cleanOldCaches, precacheAssets, whenIdle } from "@/utils/assetCache";
 
 /** Media that is always worth having ready on the phone: the mascots and the standard dish pictures. */
-const CORE_MEDIA = ["barista", "chef", "tree", "bench", "hunt-owl", "hunt-cube", "hunt-orb"].map((n) => `/mascots/${n}.png`);
+const CORE_MEDIA = ["barista", "chef", "tree", "bench", "hunt-owl", "hunt-cube", "hunt-orb"].map((n) => `/mascots/${n}.webp`);
 
 type BatteryManager = EventTarget & { level: number; charging: boolean };
 type BatteryNavigator = Navigator & { getBattery?: () => Promise<BatteryManager> };
@@ -30,12 +30,16 @@ export function AppEnvironment() {
   }, [t]);
   // Pre-store the recorded voices and the mascots as soon as the phone is idle: playback is then instant, also offline.
   useEffect(() => {
-    whenIdle(async () => {
-      await cleanOldCaches();
-      const clips = (await cachedJson<string[]>("/audio/manifest.json")) ?? [];
-      await precacheAssets(CORE_MEDIA);
-      await precacheAssets(clips.map((f) => `/audio/${f}`));
-    });
+    // Not at start-up: the map needs the whole phone and the whole connection first. About 20 seconds later, quietly, one file at a time.
+    const id = window.setTimeout(() => {
+      whenIdle(async () => {
+        await cleanOldCaches();
+        const clips = (await cachedJson<string[]>("/audio/manifest.json")) ?? [];
+        await precacheAssets(CORE_MEDIA, 1);
+        await precacheAssets(clips.map((f) => `/audio/${f}`), 1);
+      });
+    }, 20_000);
+    return () => window.clearTimeout(id);
   }, []);
   useEffect(() => {
     let battery: BatteryManager | undefined;
@@ -50,7 +54,7 @@ export function AppEnvironment() {
     if (systemConfig.pwaDeploymentReady) {
       const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
       const standalone = window.matchMedia("(display-mode: standalone)").matches || Boolean((navigator as Navigator & { standalone?: boolean }).standalone);
-      setInstallHint(ios && !standalone && localStorage.getItem("aura_ios_install_hint") !== "1");
+      setInstallHint(ios && !standalone && !(window as unknown as { Capacitor?: { isNativePlatform?: () => boolean } }).Capacitor?.isNativePlatform?.() && localStorage.getItem("aura_ios_install_hint") !== "1");
     }
     return () => { document.removeEventListener("visibilitychange", syncPower); window.removeEventListener(POWER_EVENT, onPreference); battery?.removeEventListener("levelchange", syncPower); battery?.removeEventListener("chargingchange", syncPower); };
   }, []);

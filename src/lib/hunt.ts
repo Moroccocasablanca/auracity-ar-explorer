@@ -15,7 +15,7 @@ export interface HuntElement {
 }
 
 /** Modern 3D illustrations (made with AI) for the weekly mascots. */
-export const AVATAR_IMG: Record<HuntAvatar, string> = { CUBE_MAGIC: "/mascots/hunt-cube.png", ANIMAL_MASCOT: "/mascots/hunt-owl.png", MYSTERY_OBJECT: "/mascots/hunt-orb.png" };
+export const AVATAR_IMG: Record<HuntAvatar, string> = { CUBE_MAGIC: "/mascots/hunt-cube.webp", ANIMAL_MASCOT: "/mascots/hunt-owl.webp", MYSTERY_OBJECT: "/mascots/hunt-orb.webp" };
 const AVATARS: HuntAvatar[] = ["CUBE_MAGIC", "ANIMAL_MASCOT", "MYSTERY_OBJECT"];
 const REWARDS = [
   { it: "Sticker «Esploratore di Bra»", en: "“Bra Explorer” sticker" },

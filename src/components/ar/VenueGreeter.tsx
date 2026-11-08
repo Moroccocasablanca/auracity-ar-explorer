@@ -10,7 +10,7 @@ import { useI18n } from "@/lib/i18n";
 import { bump, useFlash } from "@/lib/merchant";
 import { inviteBody } from "@/services/notifications/invites";
 import { nodeMenu, specials, type NodeRow } from "@/lib/nodes";
-import { placeStyleKey } from "@/lib/place-style";
+import { venueMascot } from "@/lib/venue-mascot";
 import { speakAny, stopSpeaking } from "@/services/voice/speech";
 import { contentLang, greetingWithName, nameLanguage } from "@/services/voice/text-speech";
 import { useVenueContent } from "@/lib/venue-content";
@@ -64,7 +64,7 @@ export function VenueGreeter({ node, onClose }: { node: NodeRow; onClose: () => 
 
   return (
     <div className="absolute inset-x-2 bottom-24 z-30 mx-auto flex max-w-md items-end gap-1" onPointerDown={(e) => e.stopPropagation()}>
-      <TalkingMascot src={placeStyleKey(node) === "restaurant" ? "/mascots/chef.png" : "/mascots/barista.png"} speaking={talking} className="h-64 w-auto" />
+      <TalkingMascot src={venueMascot(vc.voice)} speaking={talking} className="h-64 w-auto" />
       <div className="glass relative min-w-0 flex-1 rounded-3xl p-3">
       <button type="button" aria-label={t("greet.close")} onClick={() => { stopSpeaking(); onClose(); }} className="absolute right-3 top-3 rounded-full p-1.5 text-muted-foreground">
         <X className="size-4" />

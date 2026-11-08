@@ -10,7 +10,7 @@ export const cityConfig = {
   timezone: "Europe/Rome",
   center: BRA_CENTER,
   /** Farther than this from the centre, the app switches to demo mode (the visitor is not in town). */
-  maxDistanceFromCenterM: 8000,
+  maxDistanceFromCenterM: 20000,
   /** Discovery radius shown in AR for free visitors. */
   freeRangeM: 250,
 } as const;

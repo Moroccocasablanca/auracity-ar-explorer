@@ -1,0 +1,154 @@
+[
+ {
+  "id": "bench_4469780_785122",
+  "kind": "bench",
+  "name": "La panchina dei misteri",
+  "lat": 44.6977962,
+  "lng": 7.8512238,
+  "text": "Ciao! Sono la panchina più accogliente del parco e ho un enigma per te! Ho le ali ma non sono un uccello, volo leggera ma non faccio rumore. Chi sono? La farfalla! Hai indovinato?"
+ },
+ {
+  "id": "tree_4469728_785269",
+  "kind": "tree",
+  "name": "L'albero chiacchierone",
+  "lat": 44.6972822,
+  "lng": 7.8526948,
+  "text": "Ehi guarda in alto, sono io! Sapete cosa dice un albero a un altro quando si incontrano a primavera? Che gioia rivederti, sei proprio una sagoma! Ahah, fantastica vero?"
+ },
+ {
+  "id": "tree_4469635_784721",
+  "kind": "tree",
+  "name": "L'albero degli animali",
+  "lat": 44.6963464,
+  "lng": 7.8472063,
+  "text": "Ciao amico! Sapevi che le lontre marine si tengono per mano mentre dormono? Lo fanno per non farsi trascinare via dalla corrente dell'acqua! Non è una cosa tenerissima?"
+ },
+ {
+  "id": "bench_4470153_784752",
+  "kind": "bench",
+  "name": "La panchina verde",
+  "lat": 44.7015344,
+  "lng": 7.8475247,
+  "text": "Ehi, ti va di ascoltare un mio segreto verde? Gli alberi comunicano tra loro sotto terra attraverso una rete invisibile fatta dalle radici e dai funghi! Si aiutano e si mandano il cibo, proprio come veri amici!"
+ },
+ {
+  "id": "bench_4470216_784673",
+  "kind": "bench",
+  "name": "La panchina delle sfide",
+  "lat": 44.7021568,
+  "lng": 7.846728,
+  "text": "Ciao super esploratore! Facciamo un gioco al volo senza muoverci da qui? Chiudi gli occhi per cinque secondi e dimmi tre suoni diversi che riesci a sentire attorno a noi. Pronti, partenza... via!"
+ },
+ {
+  "id": "tree_4469576_784436",
+  "kind": "tree",
+  "name": "L'albero dello starnuto",
+  "lat": 44.6957603,
+  "lng": 7.8443605,
+  "text": "Ehi, ciao! Lo sapevi che quando fai uno starnuto, l'aria esce dal tuo naso a una velocità pazzesca di oltre centosessanta chilometri all'ora? È più veloce di un'automobile in autostrada!"
+ },
+ {
+  "id": "tree_4470066_784303",
+  "kind": "tree",
+  "name": "L'albero astronomo",
+  "lat": 44.7006565,
+  "lng": 7.8430268,
+  "text": "Ciao terrestre! Sapevi che sullo spazio non c'è la gravità e quindi gli astronauti non possono piangere come facciamo noi, perché le lacrime non scendono lungo il viso? Che strano, vero?"
+ },
+ {
+  "id": "tree_4469541_785735",
+  "kind": "tree",
+  "name": "L'albero poeta",
+  "lat": 44.695413,
+  "lng": 7.857348,
+  "text": "Ciao! Senti che bella filastrocca ho inventato per te: Alto e forte guardo il cielo, d'estate verde e d'inverno col velo. Ai passanti regalo la mia ombra, e la gioia mai si scombina!"
+ },
+ {
+  "id": "tree_4470238_784405",
+  "kind": "tree",
+  "name": "L'albero indovino",
+  "lat": 44.7023835,
+  "lng": 7.844051,
+  "text": "Ehi, vieni qui vicino! Ascolta questo indovinello: più ne togli e più diventa grande, cos'è? È una buca nella terra! Te lo saresti mai aspettato?"
+ },
+ {
+  "id": "bench_4469504_785804",
+  "kind": "bench",
+  "name": "La panchina barzelletta",
+  "lat": 44.6950394,
+  "lng": 7.8580441,
+  "text": "Ciao! Siediti e ascolta questa: cosa fa un pomodoro al mattino presto? Si sveglia e dice: oggi mi sento proprio in forma! Ti è piaciuta? Io muoio dal ridere ogni volta!"
+ },
+ {
+  "id": "bench_4469462_785894",
+  "kind": "bench",
+  "name": "La panchina del sapere",
+  "lat": 44.6946161,
+  "lng": 7.8589352,
+  "text": "Ciao! Ascolta questa curiosità pazzesca sui fenicotteri rosa: diventano di quel colore meraviglioso perché mangiano tantissimi gamberetti rossi! Se smettessero, tornerebbero bianchi!"
+ },
+ {
+  "id": "bench_4469309_785813",
+  "kind": "bench",
+  "name": "La panchina botanica",
+  "lat": 44.6930918,
+  "lng": 7.8581318,
+  "text": "Ehi! Lo sapevi che un grande albero in una giornata estiva può assorbire fino a quattrocento litri d'acqua dal terreno? È come se bevesse tantissime vasche da bagno intere!"
+ },
+ {
+  "id": "tree_4468888_785441",
+  "kind": "tree",
+  "name": "L'albero equilibrista",
+  "lat": 44.6888838,
+  "lng": 7.8544127,
+  "text": "Ciao! Vuoi fare una mini sfida facilissima e sicura insieme a me? Prova a rimanere in equilibrio su un solo piede per dieci secondi senza dondolare! Tre, due, uno... resisti!"
+ },
+ {
+  "id": "bench_4470670_784237",
+  "kind": "bench",
+  "name": "La panchina curiosa",
+  "lat": 44.7066963,
+  "lng": 7.8423652,
+  "text": "Ciao! Ti svelo una cosa incredibile sul tuo corpo: il tuo cuore batte circa centomila volte in un solo giorno senza fermarsi mai! È il motore più forte e resistente che esista!"
+ },
+ {
+  "id": "tree_4470795_785584",
+  "kind": "tree",
+  "name": "L'albero spaziale",
+  "lat": 44.7079493,
+  "lng": 7.8558375,
+  "text": "Ciao esploratore delle stelle! Sapevi che un anno sul pianeta Venere dura meno di un solo giorno su Venere stesso? Ruota così lentamente che il suo giorno è più lungo del suo anno!"
+ },
+ {
+  "id": "tree_4470788_784463",
+  "kind": "tree",
+  "name": "L'albero canterino",
+  "lat": 44.707876,
+  "lng": 7.8446298,
+  "text": "Ehi ciao! Ecco quattro versi tutti per te: Vola il vento tra le foglie, ogni stanchezza oggi si scioglie. Un bel sorriso manda via le nuvole, e rende la giornata una favola!"
+ },
+ {
+  "id": "tree_4470776_785694",
+  "kind": "tree",
+  "name": "L'albero dei segreti",
+  "lat": 44.7077596,
+  "lng": 7.8569359,
+  "text": "Ehi, ascolta attentamente: ha i denti ma non morde, cosa sarà mai? È il pettine! Facile, vero? Scommetto che avevi pensato a un mostro simpatico!"
+ },
+ {
+  "id": "bench_4470772_784396",
+  "kind": "bench",
+  "name": "La panchina allegra",
+  "lat": 44.7077218,
+  "lng": 7.843955,
+  "text": "Ciao piccolo amico! Cosa fa una mucca quando chiude gli occhi? Fa il latte concentrato! Ahah, questa è la mia barzelletta preferita di sempre!"
+ },
+ {
+  "id": "tree_4470796_784124",
+  "kind": "tree",
+  "name": "L'albero degli abissi",
+  "lat": 44.7079603,
+  "lng": 7.8412406,
+  "text": "Ciao! Sapevi che i polpi hanno ben tre cuori e che il loro sangue è di colore blu? Proprio così, blu come il mare profondo! Non è fantastico?"
+ }
+]

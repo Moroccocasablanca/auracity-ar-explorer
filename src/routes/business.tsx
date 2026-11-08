@@ -6,17 +6,17 @@ import { useI18n, type TKey } from "@/lib/i18n";
 export const Route = createFileRoute("/business")({
   head: () => ({
     meta: [
-      { title: "AURACITY for Business — AR avatars and proximity marketing" },
+      { title: "AURACITY per i locali — avatar parlanti e promozioni di prossimità" },
       {
         name: "description",
         content:
-          "Local businesses subscribe to manage their AR avatar, publish menus and run proximity campaigns with verified reviews.",
+          "I locali di Bra gestiscono il proprio avatar parlante, pubblicano il menu e lanciano offerte a chi passa vicino, con recensioni verificate.",
       },
-      { property: "og:title", content: "AURACITY for Business — AR avatars and proximity marketing" },
+      { property: "og:title", content: "AURACITY per i locali — avatar parlanti e promozioni di prossimità" },
       {
         property: "og:description",
         content:
-          "Local businesses subscribe to manage their AR avatar, publish menus and run proximity campaigns with verified reviews.",
+          "I locali di Bra gestiscono il proprio avatar parlante, pubblicano il menu e lanciano offerte a chi passa vicino, con recensioni verificate.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

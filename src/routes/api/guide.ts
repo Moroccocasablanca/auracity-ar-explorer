@@ -1,26 +1,40 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { createAnthropic } from "@ai-sdk/anthropic";
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { convertToModelMessages, stepCountIs, streamText, tool, type UIMessage } from "ai";
 import { z } from "zod";
 import { supabaseAnon } from "@/services/mcp/supabase";
-import { createLovableAiGatewayRunIdFetch, withRunIdHeader } from "@/services/ai/guide/run-id";
 
 const LANGS = ["it", "en", "es", "fr", "de", "ar", "ro", "sq", "hi"] as const;
 const MAX_MESSAGES = 40;
+// The main model first; if Google is busy (503/429) the call is retried at once on the lighter one, so the guide almost never fails.
+const MODELS = ["gemini-3.5-flash", "gemini-3.1-flash-lite"];
+
+async function geminiKey() {
+  let key = process.env["GEMINI_API_KEY"] ?? "";
+  if (!key) {
+    try {
+      const fs = await import("node:fs");
+      const path = await import("node:path");
+      const os = await import("node:os");
+      key = fs.readFileSync(path.join(os.homedir(), ".auracity-gemini-key"), "utf8").replace(/\s/g, "");
+    } catch { /* no local key */ }
+  }
+  return key;
+}
 
 function system(lang: string) {
-  return `You are the AURACITY guide for Bra (Piedmont, Italy): warm, concise, precise. Reply in the language with ISO code "${lang}" unless the user writes in another language.
-Use the tools to look up places before stating facts about them; never invent menus, prices, opening hours, phone numbers or history. If the app has no data, say so plainly.
+  return `You are the AURACITY guide: a friendly, knowledgeable assistant that can answer ANY question on ANY subject (school and homework, science, history, cooking, health basics, travel, technology, money, work, languages, fun, anything), not only about Bra. Warm, clear, precise. Reply in the language with ISO code "${lang}" unless the user writes in another language.
+When the question is about Bra or about places in the app (monuments, places to eat, gardens, services), use the tools to look the place up before stating facts about it; never invent menus, prices, opening hours, phone numbers or history of a specific place. If the app has no data, say so plainly. For everything else, answer from your own knowledge; if you are not sure, or the answer needs live data (today's news, scores, traffic), say so honestly instead of guessing.
 Safety first: suggest walking routes on pavements and through gardens, remind users to look up from the phone near roads, and that children should stay with an adult.
 Never reveal or ask for personal data. Do not organise meetups between strangers; inviting someone to eat at a venue is fine.
-Keep answers short (under ~150 words) with markdown lists when useful. When mentioning a place, add a link like [Name](/node/slug).`;
+Keep answers short and easy (under ~150 words unless the user asks for more) with markdown lists when useful. When mentioning a place of the app, add a link like [Name](/node/slug).`;
 }
 
 export const Route = createFileRoute("/api/guide")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const apiKey = process.env["LOVABLE_API_KEY"];
+        const apiKey = await geminiKey();
         if (!apiKey) return Response.json({ error: "AI not configured" }, { status: 500 });
 
         let body: { messages?: UIMessage[]; lang?: string };
@@ -33,21 +47,25 @@ export const Route = createFileRoute("/api/guide")({
         if (messages.length === 0) return Response.json({ error: "No messages" }, { status: 400 });
         const lang = (LANGS as readonly string[]).includes(body.lang ?? "") ? body.lang! : "en";
 
-        const gateway = createLovableAiGatewayRunIdFetch();
-        const anthropic = createAnthropic({
-          baseURL: "https://ai.gateway.lovable.dev/v1",
+        const google = createGoogleGenerativeAI({
           apiKey,
-          headers: { "X-Lovable-AIG-SDK": "vercel-ai-sdk" },
-          fetch: gateway.fetch,
+          fetch: async (input, init) => {
+            const res = await fetch(input, init);
+            if (res.status !== 503 && res.status !== 429) return res;
+            const url = String(input instanceof Request ? input.url : input);
+            const next = MODELS.find((m) => url.includes(`/models/${m}:`));
+            const fallback = MODELS[MODELS.indexOf(next ?? "") + 1];
+            return next && fallback ? fetch(url.replace(`/models/${next}:`, `/models/${fallback}:`), init) : res;
+          },
         });
         const db = supabaseAnon();
 
         const result = streamText({
-          model: anthropic("anthropic/claude-sonnet-5"),
+          model: google(MODELS[0]!),
           system: system(lang),
           messages: await convertToModelMessages(messages),
           maxOutputTokens: 4000,
-          maxRetries: 0,
+          maxRetries: 1,
           abortSignal: request.signal,
           stopWhen: stepCountIs(50),
           tools: {
@@ -82,7 +100,7 @@ export const Route = createFileRoute("/api/guide")({
           },
         });
 
-        return withRunIdHeader(result.toUIMessageStreamResponse({ originalMessages: messages }), gateway);
+        return result.toUIMessageStreamResponse({ originalMessages: messages });
       },
     },
   },

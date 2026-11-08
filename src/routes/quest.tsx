@@ -10,10 +10,10 @@ import { isRestaurant } from "@/lib/explore-rules";
 import { speakNatural, stopSpeaking } from "@/services/voice/speech";
 import { VoicePersona } from "@/services/voice/voice-persona";
 import { contentLang } from "@/services/voice/text-speech";
-import { moonName, useToday, weatherWord } from "@/lib/live";
+import { airWord, moonName, pollenWord, useToday, uvWord, weatherWord } from "@/lib/live";
 import { isOpenNow } from "@/utils/geo";
 import { HuntCard } from "@/components/hunt/HuntCard";
-import { DutyLine, useClock } from "@/components/DutyCard";
+import { DutyLine, EventsLine, NewsLine, TvLine, useClock } from "@/components/DutyCard";
 import { TriviaCard } from "@/components/hunt/TriviaCard";
 import { getNick, setNick, useLeaderboard } from "@/lib/leaderboard";
 import { nodeHours } from "@/lib/nodes";
@@ -114,9 +114,13 @@ function TodayCard() {
         <li>{t("live.range", { a: d.tempMin, b: d.tempMax })} · {t("live.rain", { p: d.rainPct })}</li>
         <li>{t("live.sun", { a: d.sunrise, b: d.sunset })}</li>
         <li>{t("live.moon", { m: moonName(d.moon, lang) })}</li>
+        {d.aqi != null && <li>{t("live.air", { a: airWord(d.aqi, lang), uv: d.uv != null ? uvWord(d.uv, lang) : "–", p: d.pollen != null ? pollenWord(d.pollen, lang) : "–" })}</li>}
         <li>{t("live.open", { n: open })}</li>
       </ul>
       <DutyLine className="mt-3" />
+      <NewsLine className="mt-3" />
+      <EventsLine className="mt-3" />
+      <TvLine className="mt-3" />
       {d.saints[0] && <p className="mt-3 rounded-2xl bg-yellow-300/15 p-3 text-sm font-semibold">{t("live.auguri", { s: d.saints[0].title, n: [...new Set(d.saints.slice(0, 3).map((x) => x.name))].join(", ") })}</p>}
       {d.saintInfo && <p className="mt-2 text-sm text-foreground/90">{d.saintInfo}</p>}
       {d.event && <p className="mt-3 rounded-2xl bg-black/20 p-3 text-sm"><b>{t("live.event", { y: d.event.year })}</b> {d.event.text}</p>}
@@ -195,19 +199,16 @@ function Mission({ icon, title, done, goal, now }: { icon: React.ReactNode; titl
 
 type TabId = "quiz" | "today" | "hunt" | "me";
 const TABS: { id: TabId; label: "quest.tab.quiz" | "quest.tab.today" | "quest.tab.hunt" | "quest.tab.me" }[] = [
-  { id: "quiz", label: "quest.tab.quiz" },
   { id: "today", label: "quest.tab.today" },
-  { id: "hunt", label: "quest.tab.hunt" },
+  { id: "quiz", label: "quest.tab.quiz" },
   { id: "me", label: "quest.tab.me" },
 ];
 
 function Quest() {
   const { t, lang } = useI18n();
-  const [tab, setTab] = useState<TabId>("quiz");
-  useEffect(() => {
-    try { const v = localStorage.getItem("aura_quest_tab"); if (v === "quiz" || v === "today" || v === "hunt" || v === "me") setTab(v); } catch { /* ignore */ }
-  }, []);
-  const pickTab = (id: TabId) => { setTab(id); try { localStorage.setItem("aura_quest_tab", id); } catch { /* ignore */ } };
+  // "Oggi" always comes first and is what opens: the day's news, events, weather, pharmacy and TV.
+  const [tab, setTab] = useState<TabId>("today");
+  const pickTab = (id: TabId) => setTab(id);
   const q = useQuestState();
   const { data: nodes = [] } = useQuery(nodesQuery);
   const chars = useMemo(() => nodes.filter(isGardenObject), [nodes]);
@@ -278,7 +279,7 @@ function Quest() {
               const got = q.foundChars.includes(c.id);
               return (
                 <li key={c.id} className={`aspect-square rounded-2xl border p-2 text-center text-[0.65rem] font-semibold leading-tight ${got ? "border-yellow-300/70 bg-yellow-300/15" : "border-dashed border-border bg-card/40 text-muted-foreground"}`}>
-                  <span className={`flex h-2/3 items-center justify-center text-4xl ${got ? "" : "opacity-40 grayscale"}`}>{got ? <img src={c.kind === "tree" ? "/mascots/tree.png" : "/mascots/bench.png"} alt="" className="h-full w-auto object-contain" /> : "?"}</span>
+                  <span className={`flex h-2/3 items-center justify-center text-4xl ${got ? "" : "opacity-40 grayscale"}`}>{got ? <img src={c.kind === "tree" ? "/mascots/tree.webp" : "/mascots/bench.webp"} alt="" className="h-full w-auto object-contain" /> : "?"}</span>
                   <span className="line-clamp-2">{got ? c.name : t("quest.locked")}</span>
                 </li>
               );

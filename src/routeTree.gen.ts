@@ -13,15 +13,28 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as BusinessRouteImport } from './routes/business'
 import { Route as ExploreRouteImport } from './routes/explore'
+import { Route as FunRouteImport } from './routes/fun'
 import { Route as GuideRouteImport } from './routes/guide'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as QuestRouteImport } from './routes/quest'
+import { Route as TourRouteImport } from './routes/tour'
+import { Route as ApiBenchMessagesRouteImport } from './routes/api/bench-messages'
+import { Route as ApiCharacterChatRouteImport } from './routes/api/character-chat'
+import { Route as ApiDailyChatterRouteImport } from './routes/api/daily-chatter'
 import { Route as ApiDailyTriviaRouteImport } from './routes/api/daily-trivia'
+import { Route as ApiEventsBraRouteImport } from './routes/api/events-bra'
 import { Route as ApiGuideRouteImport } from './routes/api/guide'
 import { Route as ApiHuntRiddlesRouteImport } from './routes/api/hunt-riddles'
+import { Route as ApiNameLangRouteImport } from './routes/api/name-lang'
+import { Route as ApiNewsBraRouteImport } from './routes/api/news-bra'
 import { Route as ApiPharmacyDutyRouteImport } from './routes/api/pharmacy-duty'
 import { Route as ApiPromoRouteImport } from './routes/api/promo'
+import { Route as ApiTranscribeRouteImport } from './routes/api/transcribe'
+import { Route as ApiTranslateRouteImport } from './routes/api/translate'
 import { Route as ApiTtsRouteImport } from './routes/api/tts'
+import { Route as ApiTtsReadyRouteImport } from './routes/api/tts-ready'
+import { Route as ApiTvTonightRouteImport } from './routes/api/tv-tonight'
+import { Route as ApiVersionRouteImport } from './routes/api/version'
 import { Route as AttivitaIdRouteImport } from './routes/attivita.$id'
 import { Route as NodeSlugRouteImport } from './routes/node.$slug'
 
@@ -45,6 +58,11 @@ const ExploreRoute = ExploreRouteImport.update({
   path: '/explore',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FunRoute = FunRouteImport.update({
+  id: '/fun',
+  path: '/fun',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const GuideRoute = GuideRouteImport.update({
   id: '/guide',
   path: '/guide',
@@ -60,9 +78,34 @@ const QuestRoute = QuestRouteImport.update({
   path: '/quest',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TourRoute = TourRouteImport.update({
+  id: '/tour',
+  path: '/tour',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiBenchMessagesRoute = ApiBenchMessagesRouteImport.update({
+  id: '/api/bench-messages',
+  path: '/api/bench-messages',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiCharacterChatRoute = ApiCharacterChatRouteImport.update({
+  id: '/api/character-chat',
+  path: '/api/character-chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiDailyChatterRoute = ApiDailyChatterRouteImport.update({
+  id: '/api/daily-chatter',
+  path: '/api/daily-chatter',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiDailyTriviaRoute = ApiDailyTriviaRouteImport.update({
   id: '/api/daily-trivia',
   path: '/api/daily-trivia',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiEventsBraRoute = ApiEventsBraRouteImport.update({
+  id: '/api/events-bra',
+  path: '/api/events-bra',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiGuideRoute = ApiGuideRouteImport.update({
@@ -75,6 +118,16 @@ const ApiHuntRiddlesRoute = ApiHuntRiddlesRouteImport.update({
   path: '/api/hunt-riddles',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiNameLangRoute = ApiNameLangRouteImport.update({
+  id: '/api/name-lang',
+  path: '/api/name-lang',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiNewsBraRoute = ApiNewsBraRouteImport.update({
+  id: '/api/news-bra',
+  path: '/api/news-bra',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPharmacyDutyRoute = ApiPharmacyDutyRouteImport.update({
   id: '/api/pharmacy-duty',
   path: '/api/pharmacy-duty',
@@ -85,9 +138,34 @@ const ApiPromoRoute = ApiPromoRouteImport.update({
   path: '/api/promo',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiTranscribeRoute = ApiTranscribeRouteImport.update({
+  id: '/api/transcribe',
+  path: '/api/transcribe',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiTranslateRoute = ApiTranslateRouteImport.update({
+  id: '/api/translate',
+  path: '/api/translate',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiTtsRoute = ApiTtsRouteImport.update({
   id: '/api/tts',
   path: '/api/tts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiTtsReadyRoute = ApiTtsReadyRouteImport.update({
+  id: '/api/tts-ready',
+  path: '/api/tts-ready',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiTvTonightRoute = ApiTvTonightRouteImport.update({
+  id: '/api/tv-tonight',
+  path: '/api/tv-tonight',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiVersionRoute = ApiVersionRouteImport.update({
+  id: '/api/version',
+  path: '/api/version',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AttivitaIdRoute = AttivitaIdRouteImport.update({
@@ -106,15 +184,28 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/business': typeof BusinessRoute
   '/explore': typeof ExploreRoute
+  '/fun': typeof FunRoute
   '/guide': typeof GuideRoute
   '/privacy': typeof PrivacyRoute
   '/quest': typeof QuestRoute
+  '/tour': typeof TourRoute
+  '/api/bench-messages': typeof ApiBenchMessagesRoute
+  '/api/character-chat': typeof ApiCharacterChatRoute
+  '/api/daily-chatter': typeof ApiDailyChatterRoute
   '/api/daily-trivia': typeof ApiDailyTriviaRoute
+  '/api/events-bra': typeof ApiEventsBraRoute
   '/api/guide': typeof ApiGuideRoute
   '/api/hunt-riddles': typeof ApiHuntRiddlesRoute
+  '/api/name-lang': typeof ApiNameLangRoute
+  '/api/news-bra': typeof ApiNewsBraRoute
   '/api/pharmacy-duty': typeof ApiPharmacyDutyRoute
   '/api/promo': typeof ApiPromoRoute
+  '/api/transcribe': typeof ApiTranscribeRoute
+  '/api/translate': typeof ApiTranslateRoute
   '/api/tts': typeof ApiTtsRoute
+  '/api/tts-ready': typeof ApiTtsReadyRoute
+  '/api/tv-tonight': typeof ApiTvTonightRoute
+  '/api/version': typeof ApiVersionRoute
   '/attivita/$id': typeof AttivitaIdRoute
   '/node/$slug': typeof NodeSlugRoute
 }
@@ -123,15 +214,28 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/business': typeof BusinessRoute
   '/explore': typeof ExploreRoute
+  '/fun': typeof FunRoute
   '/guide': typeof GuideRoute
   '/privacy': typeof PrivacyRoute
   '/quest': typeof QuestRoute
+  '/tour': typeof TourRoute
+  '/api/bench-messages': typeof ApiBenchMessagesRoute
+  '/api/character-chat': typeof ApiCharacterChatRoute
+  '/api/daily-chatter': typeof ApiDailyChatterRoute
   '/api/daily-trivia': typeof ApiDailyTriviaRoute
+  '/api/events-bra': typeof ApiEventsBraRoute
   '/api/guide': typeof ApiGuideRoute
   '/api/hunt-riddles': typeof ApiHuntRiddlesRoute
+  '/api/name-lang': typeof ApiNameLangRoute
+  '/api/news-bra': typeof ApiNewsBraRoute
   '/api/pharmacy-duty': typeof ApiPharmacyDutyRoute
   '/api/promo': typeof ApiPromoRoute
+  '/api/transcribe': typeof ApiTranscribeRoute
+  '/api/translate': typeof ApiTranslateRoute
   '/api/tts': typeof ApiTtsRoute
+  '/api/tts-ready': typeof ApiTtsReadyRoute
+  '/api/tv-tonight': typeof ApiTvTonightRoute
+  '/api/version': typeof ApiVersionRoute
   '/attivita/$id': typeof AttivitaIdRoute
   '/node/$slug': typeof NodeSlugRoute
 }
@@ -141,15 +245,28 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/business': typeof BusinessRoute
   '/explore': typeof ExploreRoute
+  '/fun': typeof FunRoute
   '/guide': typeof GuideRoute
   '/privacy': typeof PrivacyRoute
   '/quest': typeof QuestRoute
+  '/tour': typeof TourRoute
+  '/api/bench-messages': typeof ApiBenchMessagesRoute
+  '/api/character-chat': typeof ApiCharacterChatRoute
+  '/api/daily-chatter': typeof ApiDailyChatterRoute
   '/api/daily-trivia': typeof ApiDailyTriviaRoute
+  '/api/events-bra': typeof ApiEventsBraRoute
   '/api/guide': typeof ApiGuideRoute
   '/api/hunt-riddles': typeof ApiHuntRiddlesRoute
+  '/api/name-lang': typeof ApiNameLangRoute
+  '/api/news-bra': typeof ApiNewsBraRoute
   '/api/pharmacy-duty': typeof ApiPharmacyDutyRoute
   '/api/promo': typeof ApiPromoRoute
+  '/api/transcribe': typeof ApiTranscribeRoute
+  '/api/translate': typeof ApiTranslateRoute
   '/api/tts': typeof ApiTtsRoute
+  '/api/tts-ready': typeof ApiTtsReadyRoute
+  '/api/tv-tonight': typeof ApiTvTonightRoute
+  '/api/version': typeof ApiVersionRoute
   '/attivita/$id': typeof AttivitaIdRoute
   '/node/$slug': typeof NodeSlugRoute
 }
@@ -160,15 +277,28 @@ export interface FileRouteTypes {
     | '/auth'
     | '/business'
     | '/explore'
+    | '/fun'
     | '/guide'
     | '/privacy'
     | '/quest'
+    | '/tour'
+    | '/api/bench-messages'
+    | '/api/character-chat'
+    | '/api/daily-chatter'
     | '/api/daily-trivia'
+    | '/api/events-bra'
     | '/api/guide'
     | '/api/hunt-riddles'
+    | '/api/name-lang'
+    | '/api/news-bra'
     | '/api/pharmacy-duty'
     | '/api/promo'
+    | '/api/transcribe'
+    | '/api/translate'
     | '/api/tts'
+    | '/api/tts-ready'
+    | '/api/tv-tonight'
+    | '/api/version'
     | '/attivita/$id'
     | '/node/$slug'
   fileRoutesByTo: FileRoutesByTo
@@ -177,15 +307,28 @@ export interface FileRouteTypes {
     | '/auth'
     | '/business'
     | '/explore'
+    | '/fun'
     | '/guide'
     | '/privacy'
     | '/quest'
+    | '/tour'
+    | '/api/bench-messages'
+    | '/api/character-chat'
+    | '/api/daily-chatter'
     | '/api/daily-trivia'
+    | '/api/events-bra'
     | '/api/guide'
     | '/api/hunt-riddles'
+    | '/api/name-lang'
+    | '/api/news-bra'
     | '/api/pharmacy-duty'
     | '/api/promo'
+    | '/api/transcribe'
+    | '/api/translate'
     | '/api/tts'
+    | '/api/tts-ready'
+    | '/api/tv-tonight'
+    | '/api/version'
     | '/attivita/$id'
     | '/node/$slug'
   id:
@@ -194,15 +337,28 @@ export interface FileRouteTypes {
     | '/auth'
     | '/business'
     | '/explore'
+    | '/fun'
     | '/guide'
     | '/privacy'
     | '/quest'
+    | '/tour'
+    | '/api/bench-messages'
+    | '/api/character-chat'
+    | '/api/daily-chatter'
     | '/api/daily-trivia'
+    | '/api/events-bra'
     | '/api/guide'
     | '/api/hunt-riddles'
+    | '/api/name-lang'
+    | '/api/news-bra'
     | '/api/pharmacy-duty'
     | '/api/promo'
+    | '/api/transcribe'
+    | '/api/translate'
     | '/api/tts'
+    | '/api/tts-ready'
+    | '/api/tv-tonight'
+    | '/api/version'
     | '/attivita/$id'
     | '/node/$slug'
   fileRoutesById: FileRoutesById
@@ -212,15 +368,28 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   BusinessRoute: typeof BusinessRoute
   ExploreRoute: typeof ExploreRoute
+  FunRoute: typeof FunRoute
   GuideRoute: typeof GuideRoute
   PrivacyRoute: typeof PrivacyRoute
   QuestRoute: typeof QuestRoute
+  TourRoute: typeof TourRoute
+  ApiBenchMessagesRoute: typeof ApiBenchMessagesRoute
+  ApiCharacterChatRoute: typeof ApiCharacterChatRoute
+  ApiDailyChatterRoute: typeof ApiDailyChatterRoute
   ApiDailyTriviaRoute: typeof ApiDailyTriviaRoute
+  ApiEventsBraRoute: typeof ApiEventsBraRoute
   ApiGuideRoute: typeof ApiGuideRoute
   ApiHuntRiddlesRoute: typeof ApiHuntRiddlesRoute
+  ApiNameLangRoute: typeof ApiNameLangRoute
+  ApiNewsBraRoute: typeof ApiNewsBraRoute
   ApiPharmacyDutyRoute: typeof ApiPharmacyDutyRoute
   ApiPromoRoute: typeof ApiPromoRoute
+  ApiTranscribeRoute: typeof ApiTranscribeRoute
+  ApiTranslateRoute: typeof ApiTranslateRoute
   ApiTtsRoute: typeof ApiTtsRoute
+  ApiTtsReadyRoute: typeof ApiTtsReadyRoute
+  ApiTvTonightRoute: typeof ApiTvTonightRoute
+  ApiVersionRoute: typeof ApiVersionRoute
   AttivitaIdRoute: typeof AttivitaIdRoute
   NodeSlugRoute: typeof NodeSlugRoute
 }
@@ -255,6 +424,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ExploreRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/fun': {
+      id: '/fun'
+      path: '/fun'
+      fullPath: '/fun'
+      preLoaderRoute: typeof FunRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/guide': {
       id: '/guide'
       path: '/guide'
@@ -276,11 +452,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof QuestRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/tour': {
+      id: '/tour'
+      path: '/tour'
+      fullPath: '/tour'
+      preLoaderRoute: typeof TourRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/bench-messages': {
+      id: '/api/bench-messages'
+      path: '/api/bench-messages'
+      fullPath: '/api/bench-messages'
+      preLoaderRoute: typeof ApiBenchMessagesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/character-chat': {
+      id: '/api/character-chat'
+      path: '/api/character-chat'
+      fullPath: '/api/character-chat'
+      preLoaderRoute: typeof ApiCharacterChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/daily-chatter': {
+      id: '/api/daily-chatter'
+      path: '/api/daily-chatter'
+      fullPath: '/api/daily-chatter'
+      preLoaderRoute: typeof ApiDailyChatterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/daily-trivia': {
       id: '/api/daily-trivia'
       path: '/api/daily-trivia'
       fullPath: '/api/daily-trivia'
       preLoaderRoute: typeof ApiDailyTriviaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/events-bra': {
+      id: '/api/events-bra'
+      path: '/api/events-bra'
+      fullPath: '/api/events-bra'
+      preLoaderRoute: typeof ApiEventsBraRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/guide': {
@@ -297,6 +508,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiHuntRiddlesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/name-lang': {
+      id: '/api/name-lang'
+      path: '/api/name-lang'
+      fullPath: '/api/name-lang'
+      preLoaderRoute: typeof ApiNameLangRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/news-bra': {
+      id: '/api/news-bra'
+      path: '/api/news-bra'
+      fullPath: '/api/news-bra'
+      preLoaderRoute: typeof ApiNewsBraRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/pharmacy-duty': {
       id: '/api/pharmacy-duty'
       path: '/api/pharmacy-duty'
@@ -311,11 +536,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPromoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/transcribe': {
+      id: '/api/transcribe'
+      path: '/api/transcribe'
+      fullPath: '/api/transcribe'
+      preLoaderRoute: typeof ApiTranscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/translate': {
+      id: '/api/translate'
+      path: '/api/translate'
+      fullPath: '/api/translate'
+      preLoaderRoute: typeof ApiTranslateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/tts': {
       id: '/api/tts'
       path: '/api/tts'
       fullPath: '/api/tts'
       preLoaderRoute: typeof ApiTtsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/tts-ready': {
+      id: '/api/tts-ready'
+      path: '/api/tts-ready'
+      fullPath: '/api/tts-ready'
+      preLoaderRoute: typeof ApiTtsReadyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/tv-tonight': {
+      id: '/api/tv-tonight'
+      path: '/api/tv-tonight'
+      fullPath: '/api/tv-tonight'
+      preLoaderRoute: typeof ApiTvTonightRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/version': {
+      id: '/api/version'
+      path: '/api/version'
+      fullPath: '/api/version'
+      preLoaderRoute: typeof ApiVersionRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/attivita/$id': {
@@ -340,15 +600,28 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   BusinessRoute: BusinessRoute,
   ExploreRoute: ExploreRoute,
+  FunRoute: FunRoute,
   GuideRoute: GuideRoute,
   PrivacyRoute: PrivacyRoute,
   QuestRoute: QuestRoute,
+  TourRoute: TourRoute,
+  ApiBenchMessagesRoute: ApiBenchMessagesRoute,
+  ApiCharacterChatRoute: ApiCharacterChatRoute,
+  ApiDailyChatterRoute: ApiDailyChatterRoute,
   ApiDailyTriviaRoute: ApiDailyTriviaRoute,
+  ApiEventsBraRoute: ApiEventsBraRoute,
   ApiGuideRoute: ApiGuideRoute,
   ApiHuntRiddlesRoute: ApiHuntRiddlesRoute,
+  ApiNameLangRoute: ApiNameLangRoute,
+  ApiNewsBraRoute: ApiNewsBraRoute,
   ApiPharmacyDutyRoute: ApiPharmacyDutyRoute,
   ApiPromoRoute: ApiPromoRoute,
+  ApiTranscribeRoute: ApiTranscribeRoute,
+  ApiTranslateRoute: ApiTranslateRoute,
   ApiTtsRoute: ApiTtsRoute,
+  ApiTtsReadyRoute: ApiTtsReadyRoute,
+  ApiTvTonightRoute: ApiTvTonightRoute,
+  ApiVersionRoute: ApiVersionRoute,
   AttivitaIdRoute: AttivitaIdRoute,
   NodeSlugRoute: NodeSlugRoute,
 }

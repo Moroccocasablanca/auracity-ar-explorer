@@ -9,6 +9,7 @@ RUN NITRO_PRESET=bun bun run build
 FROM oven/bun:1-slim
 WORKDIR /app
 COPY --from=build /app/.output ./.output
-ENV NODE_ENV=production PORT=10000
+# DATA_DIR is the persistent disk of the hosting service: visitors' messages, translations and voices live there and survive every update
+ENV NODE_ENV=production PORT=10000 DATA_DIR=/data
 EXPOSE 10000
 CMD ["bun", ".output/server/index.mjs"]

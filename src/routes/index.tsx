@@ -4,15 +4,15 @@ import { ArView } from "@/components/ar/ArView";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "AURACITY — AR view of Bra" },
+      { title: "AURACITY — Bra in realtà aumentata" },
       {
         name: "description",
-        content: "Point your phone at Bra and see streets, monuments and shops as interactive augmented-reality nodes.",
+        content: "Scopri Bra in realtà aumentata: monumenti, panchine e alberi che parlano, locali, eventi, farmacia di turno e una guida AI sempre con te.",
       },
-      { property: "og:title", content: "AURACITY — AR view of Bra" },
+      { property: "og:title", content: "AURACITY — Bra in realtà aumentata" },
       {
         property: "og:description",
-        content: "Point your phone at Bra and see streets, monuments and shops as interactive augmented-reality nodes.",
+        content: "Scopri Bra in realtà aumentata: monumenti, panchine e alberi che parlano, locali, eventi, farmacia di turno e una guida AI sempre con te.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

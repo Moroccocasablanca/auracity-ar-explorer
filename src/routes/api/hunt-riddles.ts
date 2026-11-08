@@ -62,7 +62,7 @@ export const Route = createFileRoute("/api/hunt-riddles")({
         const items = (body.items ?? []).slice(0, 6).map((i) => ({ id: String(i.id).slice(0, 80), name: String(i.name).slice(0, 80), description: String(i.description ?? "").slice(0, 500) })).filter((i) => i.description.length > 40);
         if (!items.length) return Response.json({}, { status: 400 });
         const hash = crypto.createHash("sha256").update(JSON.stringify([body.week, items])).digest("hex").slice(0, 16);
-        const dir = path.join(process.cwd(), ".daily-cache");
+        const dir = path.join(process.env["DATA_DIR"] ?? process.cwd(), ".daily-cache");
         const file = path.join(dir, `hunt-${hash}.json`);
         if (fs.existsSync(file)) return new Response(fs.readFileSync(file), { headers: { "content-type": "application/json" } });
         let key = process.env["GEMINI_API_KEY"] ?? "";

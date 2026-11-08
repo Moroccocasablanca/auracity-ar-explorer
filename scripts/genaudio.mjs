@@ -21,6 +21,8 @@ const manifest = () => fs.writeFileSync("public/audio/manifest.json", JSON.strin
 
 const FULL = process.argv.includes("--full");
 const nodes = await (await fetch(`${env.VITE_SUPABASE_URL}/rest/v1/nodes?select=id,name,kind,description_it,history_it&kind=in.(monument,street,service,tree,bench)`, { headers: { apikey: env.VITE_SUPABASE_PUBLISHABLE_KEY } })).json();
+// The fun benches and trees for kids live in the app itself (src/data/fun-spots.json): they get their young voice too.
+if (fs.existsSync("src/data/fun-spots.json")) for (const s of JSON.parse(fs.readFileSync("src/data/fun-spots.json", "utf8"))) nodes.push({ id: `fun-${s.id}`, name: s.name, kind: s.kind, description_it: s.text, history_it: s.text });
 const fileOf = (n) => `public/audio/${n.id}${FULL ? "-full" : ""}.m4a`;
 const todo = nodes
   .filter((n) => !FULL || n.kind === "monument")

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Settings2, Square, Volume2 } from "lucide-react";
+import { Loader2, Settings2, Square, Volume2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n";
 import { narrate, stopSpeaking, type VoiceRequest } from "@/services/voice/speech";
@@ -45,9 +45,18 @@ export function ListenButton({ text, voice, compact = false, label, onPlayingCha
   const [settings, setSettings] = useState(false);
   const id = `${voice.nodeId}:${voice.messageId ?? voice.source}${voice.full ? ":full" : ""}`;
   const on = playing === id;
+  // between the tap and the first sound (a new text takes a few seconds to be voiced) the button shows it is working
+  const [heard, setHeard] = useState(false);
+  useEffect(() => {
+    setHeard(false);
+    if (!on) return;
+    const h = () => setHeard(true);
+    window.addEventListener("aura-voice-start", h);
+    return () => window.removeEventListener("aura-voice-start", h);
+  }, [on]);
   useEffect(() => onPlayingChange?.(on), [on, onPlayingChange]);
   if (speakableIsEmpty(text)) return null;
-  const Icon = on ? Square : Volume2;
+  const Icon = on ? (heard ? Square : Loader2) : Volume2;
   return (
     <div className="relative flex shrink-0 items-center gap-1">
       <Button
@@ -57,7 +66,7 @@ export function ListenButton({ text, voice, compact = false, label, onPlayingCha
         aria-label={on ? t("audio.stop") : t("audio.listen")}
         className={compact ? "size-8 rounded-full p-0" : "h-10 rounded-full px-4"}
       >
-        <Icon className="size-4" />
+        <Icon className={`size-4 ${on && !heard ? "animate-spin" : ""}`} />
         {!compact && (on ? t("audio.stop") : (label ?? t("audio.listen")))}
       </Button>
       {!compact && (

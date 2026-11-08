@@ -312,22 +312,40 @@ export function nextTrivia(band: Band, topic: Topic | "mix"): Trivia | null {
   return pick;
 }
 
-/** Asks the AI (on our server) for more questions of this subject when the player is running out; they are kept for the day. */
+/** Which batch of the day we are on for this age and subject (kept on the phone, so a new day starts again from the first). */
+const batchKey = (band: Band, topic: Topic | "mix") => `aura_trivia_batch_${new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Rome" })}_${band}_${topic}`;
+const getBatch = (band: Band, topic: Topic | "mix") => {
+  try { return Number(localStorage.getItem(batchKey(band, topic)) ?? 0) || 0; } catch { return 0; }
+};
+const setBatch = (band: Band, topic: Topic | "mix", n: number) => {
+  try { localStorage.setItem(batchKey(band, topic), String(n)); } catch { /* ignore */ }
+};
+
+/** Asks the AI (on our server) for more questions of this subject when the player is running out. When a set has already been loaded, a NEW set is requested (the server never repeats earlier questions). */
+const loading = new Set<string>();
 export async function loadMoreTrivia(band: Band, topic: Topic | "mix"): Promise<void> {
-  if (topic === "oggi") return;
+  if (topic === "oggi" || loading.has(batchKey(band, topic))) return;
+  loading.add(batchKey(band, topic));
   try {
-    for (let attempt = 0; attempt < 4; attempt++) {
-      const r = await fetch(`/api/daily-trivia?topic=${topic}&band=${band}`);
-      if (r.status === 200) {
-        const list = (await r.json()) as Trivia[];
-        const have = new Set(daily.map((t) => t.id));
-        daily = [...daily, ...list.filter((t) => Array.isArray(t.options) && t.options.length >= 3 && !have.has(t.id))];
-        return;
+    for (let round = 0; round < 2; round++) {
+      const batch = getBatch(band, topic);
+      let list: Trivia[] | null = null;
+      for (let attempt = 0; attempt < 6 && !list; attempt++) {
+        const r = await fetch(`/api/daily-trivia?topic=${topic}&band=${band}${batch ? `&batch=${batch}` : ""}`);
+        if (r.status === 200) list = (await r.json()) as Trivia[];
+        else if (r.status !== 202) return;
+        else await new Promise((res) => setTimeout(res, 15_000));
       }
-      if (r.status !== 202) return;
-      await new Promise((res) => setTimeout(res, 15_000));
+      if (!list) return;
+      const have = new Set(daily.map((t) => t.id));
+      const fresh = list.filter((t) => Array.isArray(t.options) && t.options.length >= 3 && !have.has(t.id));
+      daily = [...daily, ...fresh];
+      if (fresh.length) return;
+      setBatch(band, topic, batch + 1); // this set was already in the pool: ask for a brand new one
     }
-  } catch { /* offline or no key: the built-in bank is enough */ }
+  } catch { /* offline or no key: the built-in bank is enough */ } finally {
+    loading.delete(batchKey(band, topic));
+  }
 }
 
 /** Shows the options in a different order every time (the right one is always written first in the bank). */

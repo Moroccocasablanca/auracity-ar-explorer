@@ -18,6 +18,9 @@ export type Today = {
   moon: number; // 0..1
   event: { year: number; text: string } | null;
   aqi: number | null;
+  /** UV index now, and the highest pollen count (grains/m3) of the main Italian allergens now. */
+  uv: number | null;
+  pollen: number | null;
   quake: { mag: number; place: string } | null;
   birth: { year: number; name: string; others: string[] } | null;
   /** Saints of the day, e.g. { title: "San Serafino da Montegranaro", name: "Serafino" }. */
@@ -56,7 +59,7 @@ export async function load(): Promise<Today> {
   const history = fetch(`https://it.wikipedia.org/api/rest_v1/feed/onthisday/events/${mm}/${dd}`)
     .then((r) => r.json())
     .catch(() => null);
-  const air = fetch("https://air-quality-api.open-meteo.com/v1/air-quality?latitude=44.6985&longitude=7.8538&current=european_aqi&timezone=Europe%2FRome")
+  const air = fetch("https://air-quality-api.open-meteo.com/v1/air-quality?latitude=44.6985&longitude=7.8538&current=european_aqi,uv_index,alder_pollen,birch_pollen,grass_pollen,mugwort_pollen,ragweed_pollen,olive_pollen&timezone=Europe%2FRome")
     .then((r) => r.json())
     .catch(() => null);
   const quake = fetch("https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_day.geojson")
@@ -134,6 +137,12 @@ export async function load(): Promise<Today> {
     moon: getMoonIllumination(new Date()).phase,
     event: pick ? { year: pick.year, text: pick.text } : null,
     aqi: typeof a?.current?.european_aqi === "number" ? Math.round(a.current.european_aqi) : null,
+    uv: typeof a?.current?.uv_index === "number" ? Math.round(a.current.uv_index * 10) / 10 : null,
+    pollen: (() => {
+      const c = a?.current as Record<string, unknown> | undefined;
+      const v = ["alder_pollen", "birch_pollen", "grass_pollen", "mugwort_pollen", "ragweed_pollen", "olive_pollen"].map((k) => c?.[k]).filter((x): x is number => typeof x === "number");
+      return v.length ? Math.max(...v) : null;
+    })(),
     quake: top ? { mag: Math.round(top.properties.mag * 10) / 10, place: top.properties.place } : null,
     birth: bp ? { year: bp.year, name: person(bp.text), others: born.filter((e) => e !== bp).slice(0, 8).map((e) => person(e.text)) } : null,
     saints,
@@ -151,7 +160,7 @@ export function useToday() {
     let off = false;
     try {
       const c = JSON.parse(sessionStorage.getItem("aura_today") ?? "null") as { at: number; day: string; d: Today } | null;
-      if (c && c.day === romeDate(new Date()) && Date.now() - c.at < 20 * 60_000 && "aqi" in c.d && "saintInfo" in c.d) {
+      if (c && c.day === romeDate(new Date()) && Date.now() - c.at < 20 * 60_000 && "aqi" in c.d && "uv" in c.d && "saintInfo" in c.d) {
         setData(c.d);
         return;
       }
@@ -218,3 +227,17 @@ export function todayTrivia(d: Today): Trivia[] {
   if (d.birth && d.birth.others.length >= 2) add("b", `Chi è nato proprio oggi, nel ${d.birth.year}?`, d.birth.name, shuffle(d.birth.others, rnd).slice(0, 2), `${d.birth.name} nacque il ${dateWords} del ${d.birth.year}.`);
   return out;
 }
+
+/** Air quality words from the European index (0-20 excellent ... above 100 extremely poor). */
+export const airWord = (aqi: number, lang: Lang) => {
+  const it = lang === "it";
+  return aqi <= 20 ? (it ? "ottima" : "excellent") : aqi <= 40 ? (it ? "buona" : "good") : aqi <= 60 ? (it ? "discreta" : "fair") : aqi <= 80 ? (it ? "scadente" : "poor") : aqi <= 100 ? (it ? "molto scadente" : "very poor") : it ? "pessima" : "extremely poor";
+};
+export const uvWord = (uv: number, lang: Lang) => {
+  const it = lang === "it";
+  return uv < 3 ? (it ? "basso" : "low") : uv < 6 ? (it ? "moderato" : "moderate") : uv < 8 ? (it ? "alto" : "high") : it ? "molto alto" : "very high";
+};
+export const pollenWord = (n: number, lang: Lang) => {
+  const it = lang === "it";
+  return n < 1 ? (it ? "assenti" : "none") : n < 20 ? (it ? "bassi" : "low") : n < 90 ? (it ? "medi" : "moderate") : it ? "alti" : "high";
+};

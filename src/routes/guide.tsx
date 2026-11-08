@@ -6,7 +6,8 @@ import { MapPin, RotateCcw, Search } from "lucide-react";
 import { toast } from "sonner";
 import { Conversation, ConversationContent, ConversationScrollButton } from "@/components/ai-elements/conversation";
 import { Message, MessageContent, MessageResponse } from "@/components/ai-elements/message";
-import { PromptInput, PromptInputFooter, PromptInputSubmit, PromptInputTextarea } from "@/components/ai-elements/prompt-input";
+import { PromptInput, PromptInputFooter, PromptInputProvider, PromptInputSubmit, PromptInputTextarea } from "@/components/ai-elements/prompt-input";
+import { VoiceInputButton } from "@/components/VoiceInputButton";
 import { Shimmer } from "@/components/ai-elements/shimmer";
 import { Tool, ToolContent, ToolHeader, ToolInput, ToolOutput } from "@/components/ai-elements/tool";
 import { BottomNav } from "@/components/BottomNav";
@@ -136,12 +137,15 @@ function GuidePage() {
         <ConversationScrollButton />
       </Conversation>
 
-      <PromptInput onSubmit={(msg) => ask(msg.text ?? "")} className="mt-3">
-        <PromptInputTextarea placeholder={t("guide.placeholder")} />
-        <PromptInputFooter className="justify-end">
-          <PromptInputSubmit status={status} onStop={stop} />
-        </PromptInputFooter>
-      </PromptInput></>}
+      <PromptInputProvider>
+        <PromptInput onSubmit={(msg) => ask(msg.text ?? "")} className="mt-3">
+          <PromptInputTextarea placeholder={t("guide.placeholder")} />
+          <PromptInputFooter className="justify-between">
+            <VoiceInputButton />
+            <PromptInputSubmit status={status} onStop={stop} />
+          </PromptInputFooter>
+        </PromptInput>
+      </PromptInputProvider></>}
       <BottomNav />
     </main>
   );

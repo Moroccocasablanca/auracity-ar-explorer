@@ -1,7 +1,9 @@
 // Narration. Natural voices only: recorded stories first (instant), then our server voice (Google). There is no robot or
 // phone voice at all: if nothing natural is available the app stays quiet. Who speaks is decided by `voice-persona.ts`.
 import { type Lang } from "@/lib/i18n";
-import { speechText, splitSentences, type Speakable } from "@/services/voice/text-speech";
+import { chunkForServer, shortFirst, speechText, type Speakable } from "@/services/voice/text-speech";
+
+export { chunkForServer };
 import { vlog } from "@/services/voice/voice-log";
 import { cachedJson } from "@/utils/cache";
 import { resolveCached } from "@/utils/assetCache";
@@ -16,6 +18,8 @@ function rate() {
 }
 
 let current: HTMLAudioElement | null = null;
+/** Changes every time speech is stopped or a new narration starts: anything still waiting for the network from an older request sees it and stays silent (no voice on top of another voice). */
+let epoch = 0;
 
 // ---------------------------------------------------------------- audio unlock (iPhone only plays after a tap)
 let shared: HTMLAudioElement | null = null;
@@ -46,20 +50,6 @@ const SERVER_LANGS = new Set<Lang>(["it", "en", "fr", "de", "es", "ar", "ro", "s
 let serverOffUntil = 0;
 let serverRun = 0; // changes every time speech starts or stops, so an old chain of clips stops by itself
 
-/** Cuts a long text at sentence ends into pieces the server can voice in one go (it accepts up to 700 characters). */
-export function chunkForServer(text: string, max = 600): string[] {
-  const out: string[] = [];
-  let cur = "";
-  for (const s of splitSentences(text)) {
-    if (cur && (cur + " " + s).length > max) {
-      out.push(cur);
-      cur = s;
-    } else cur = cur ? `${cur} ${s}` : s;
-  }
-  if (cur) out.push(cur);
-  return out.flatMap((c) => (c.length <= max + 80 ? [c] : c.match(new RegExp(`.{1,${max}}(\\s|$)`, "g")) ?? [c]));
-}
-
 async function serverClip(text: string, kind: VoiceKind, lang: Lang): Promise<string | null> {
   try {
     const res = await fetch("/api/tts", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ text, voice: kind, lang }) });
@@ -78,6 +68,7 @@ async function serverClip(text: string, kind: VoiceKind, lang: Lang): Promise<st
 /** Starts one clip on the unlocked audio element (or a new one). `started` says whether the phone allowed it, `ended` when it is over. */
 function startClip(url: string): { started: Promise<boolean>; ended: Promise<boolean> } {
   const a = shared && unlocked ? shared : new Audio();
+  if (current && current !== a) { current.pause(); current.onended = null; }
   a.onended = null;
   a.onerror = null;
   a.src = url;
@@ -87,14 +78,14 @@ function startClip(url: string): { started: Promise<boolean>; ended: Promise<boo
     a.onended = () => resolve(true);
     a.onerror = () => resolve(false);
   });
-  const started = a.play().then(() => true, () => false);
+  const started = a.play().then(() => { if (typeof window !== "undefined") window.dispatchEvent(new Event("aura-voice-start")); return true; }, () => false);
   return { started, ended };
 }
 
 /** Natural voice, in pieces: the next piece is prepared while the current one plays, so there are no pauses. */
 async function speakFromServer(text: string, kind: VoiceKind, lang: Lang, onEnd?: () => void): Promise<boolean> {
   if (Date.now() < serverOffUntil || !SERVER_LANGS.has(lang)) return false;
-  const parts = chunkForServer(text);
+  const parts = shortFirst(chunkForServer(text));
   if (!parts.length) return false;
   const my = ++serverRun;
   const first = await serverClip(parts[0]!, kind, lang);
@@ -121,6 +112,11 @@ async function speakFromServer(text: string, kind: VoiceKind, lang: Lang, onEnd?
 
 /** The voice that fits the profile: server (natural) first, the phone's own voice only if that fails. */
 export async function speakNatural(raw: string, lang: Lang, onEnd?: () => void, persona?: Persona, venueVoice?: "female" | "male") {
+  stopSpeaking();
+  await speakNaturalInner(raw, lang, onEnd, persona, venueVoice);
+}
+
+async function speakNaturalInner(raw: string, lang: Lang, onEnd?: () => void, persona?: Persona, venueVoice?: "female" | "male") {
   const text = speechText(raw, lang);
   const { kind } = personaVoice(persona, venueVoice);
   if (await speakFromServer(text, kind, lang, onEnd)) return;
@@ -144,8 +140,10 @@ export async function narrate(request: VoiceRequest, text: Speakable, lang: Lang
   const { persona, full, lang: textLang, ...req } = request;
   lang = textLang ?? lang;
   stopSpeaking();
+  const my = epoch;
   if (req.source === "history" && lang === "it") {
     const url = await bundledClip(req.nodeId, Boolean(full));
+    if (my !== epoch) return; // another button was pressed meanwhile: only the latest one speaks
     if (url) {
       vlog("voce registrata nell'app");
       serverRun++;
@@ -157,6 +155,7 @@ export async function narrate(request: VoiceRequest, text: Speakable, lang: Lang
     }
   }
   // Messages left by visitors always speak with the young voice.
+  if (my !== epoch) return;
   void speakAny(text, lang, onEnd, persona ?? (req.source === "message" ? VoicePersona.HUNT_DYNAMIC : undefined));
 }
 
@@ -164,11 +163,12 @@ let segRun = 0;
 
 /** Reads pieces in their own languages one after the other (e.g. an Italian place name inside an English sentence). */
 export async function speakSegments(segs: { text: string; lang: Lang }[], onEnd?: () => void, persona?: Persona, venueVoice?: "female" | "male") {
+  stopSpeaking();
   const my = ++segRun;
   for (const seg of segs) {
     if (my !== segRun) return;
     if (!seg.text.trim()) continue;
-    await new Promise<void>((resolve) => void speakNatural(seg.text, seg.lang, resolve, persona, venueVoice));
+    await new Promise<void>((resolve) => void speakNaturalInner(seg.text, seg.lang, resolve, persona, venueVoice));
   }
   if (my === segRun) onEnd?.();
 }
@@ -176,7 +176,17 @@ export async function speakSegments(segs: { text: string; lang: Lang }[], onEnd?
 export const speakAny = (x: Speakable, lang: Lang, onEnd?: () => void, persona?: Persona, venueVoice?: "female" | "male") =>
   typeof x === "string" ? speakNatural(x, lang, onEnd, persona, venueVoice) : speakSegments(x, onEnd, persona, venueVoice);
 
+/** Speaks with the natural voice; if it cannot be made right now (quota used up, no network) `backup` runs instead (e.g. a recorded clip). */
+export function speakOrBackup(x: Speakable, lang: Lang, backup: () => void, onEnd?: () => void, persona?: Persona) {
+  let done = false;
+  const fail = () => { if (done) return; done = true; backup(); };
+  if (typeof window !== "undefined") window.addEventListener("aura-voice-unavailable", fail, { once: true });
+  const finish = () => { window.removeEventListener("aura-voice-unavailable", fail); if (!done) { done = true; onEnd?.(); } };
+  void speakAny(x, lang, finish, persona);
+}
+
 export function stopSpeaking() {
+  epoch++;
   segRun++;
   serverRun++;
   if (current) {

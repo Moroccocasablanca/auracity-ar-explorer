@@ -121,6 +121,31 @@ export function useFlash(venueId: string) {
   return promo;
 }
 
+/** Every venue with a flash offer running right now -> minutes left (the map draws a beam of light above them). */
+export function useFlashVenues(): Record<string, number> {
+  const [map, setMap] = useState<Record<string, number>>({});
+  useEffect(() => {
+    const read = () => {
+      const next: Record<string, number> = {};
+      for (const id of venuesWithPromo()) {
+        const p = activePromo(id);
+        if (p) next[id] = p.minutesLeft;
+      }
+      setMap((prev) => (JSON.stringify(prev) === JSON.stringify(next) ? prev : next));
+    };
+    read();
+    window.addEventListener(EVENT, read);
+    window.addEventListener("storage", read);
+    const id = window.setInterval(read, 15_000);
+    return () => {
+      window.removeEventListener(EVENT, read);
+      window.removeEventListener("storage", read);
+      window.clearInterval(id);
+    };
+  }, []);
+  return map;
+}
+
 export type StatKey = keyof Omit<MerchantDashboard, "venueId">;
 export function bump(venueId: string, key: StatKey) {
   const all = readStats();

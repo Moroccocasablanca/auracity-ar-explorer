@@ -8,9 +8,13 @@ import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 import { mcpPlugin } from "@lovable.dev/mcp-js/stacks/tanstack/vite";
 
 export default defineConfig({
+  // Smaller downloads on our own hosting (Render, Docker): the build writes gzip/brotli copies of every asset next to it.
+  nitro: { compressPublicAssets: true, routeRules: { "/**": { headers: { "cache-control": "no-cache" } }, "/assets/**": { headers: { "cache-control": "public, max-age=31536000, immutable" } } } } as never,
   // Pre-bundle these up front so the dev server never re-optimizes mid-session
   // (a late re-optimization can load a second React copy and blank the screen).
   vite: {
+    // One id per build, shared by phone code and server: when they differ the phone knows a new version is out.
+    define: { __AURA_BUILD__: JSON.stringify(Date.now().toString(36)) },
     optimizeDeps: { include: ["sonner", "lucide-react", "maplibre-gl", "supercluster"] },
     // Lets the owner open the local dev server from a phone through a temporary Cloudflare tunnel.
     server: { allowedHosts: [".trycloudflare.com"] },

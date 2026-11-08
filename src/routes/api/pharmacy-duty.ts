@@ -3,7 +3,9 @@
 // The result is kept on disk, so every visit afterwards is instant. Needs GEMINI_API_KEY (locally ~/.auracity-gemini-key).
 import { createFileRoute } from "@tanstack/react-router";
 
-const MODELS = ["gemini-3.5-flash-lite", "gemini-3.1-flash-lite"];
+// Two DIFFERENT readings must agree. Models are often "busy" (503) or retired (404): try them in turn, with one retry each,
+// until two have answered, so one busy model no longer leaves the app without a pharmacy for an hour.
+const MODELS = ["gemini-3.1-flash-lite", "gemini-3.5-flash-lite", "gemini-3.8-flash", "gemini-3.5-flash", "gemini-3.8-flash-lite"];
 const ASL = "https://www.aslcn2.it";
 const UA = "AURACITY-pilot/1.0 (+https://github.com/Moroccocasablanca/auracity-ar-explorer)";
 
@@ -83,7 +85,14 @@ async function refresh(key: string, fs: typeof import("node:fs"), file: string) 
     for (const url of await discoverPdfs()) {
       const buf = Buffer.from(await (await fetch(url, { headers: { "user-agent": UA } })).arrayBuffer());
       const pdf = buf.toString("base64");
-      const [a, b] = await Promise.all(MODELS.map((m) => askModel(key, m, pdf, month)));
+      const readings: Row[][] = [];
+      for (const m of MODELS) {
+        if (readings.length >= 2) break;
+        let r = await askModel(key, m, pdf, month);
+        if (!r || r.length < 20) { await new Promise((ok) => setTimeout(ok, 4000)); r = await askModel(key, m, pdf, month); }
+        if (r && r.length >= 20) readings.push(r);
+      }
+      const [a, b] = readings;
       if (!a || !b || a.length < 20 || b.length < 20) continue; // this PDF does not cover the month (or a model was busy)
       const rows = agree(a, b);
       if (rows.filter((r) => r.night || r.day).length < 15) continue;
@@ -110,7 +119,7 @@ export const Route = createFileRoute("/api/pharmacy-duty")({
         if (!key) {
           try { key = fs.readFileSync(path.join(os.homedir(), ".auracity-gemini-key"), "utf8").replace(/\s/g, ""); } catch { /* no local key */ }
         }
-        const dir = path.join(process.cwd(), ".daily-cache");
+        const dir = path.join(process.env["DATA_DIR"] ?? process.cwd(), ".daily-cache");
         fs.mkdirSync(dir, { recursive: true });
         const file = path.join(dir, "pharmacy-duty.json");
         const today = romeDate();
@@ -123,7 +132,7 @@ export const Route = createFileRoute("/api/pharmacy-duty")({
         if (t && (t.day || t.night)) {
           return Response.json({ status: "ok", today: t, yesterday: y ?? null, source: cache.months[today.slice(0, 7)]!.pdf, calendar: `${ASL}/?s=turni+guardia+farmaceutica` }, { headers });
         }
-        const retryAfter = cache.failedAt ? cache.failedAt + 3600_000 : 0;
+        const retryAfter = cache.failedAt ? cache.failedAt + 15 * 60_000 : 0; // a failed reading is tried again after 15 minutes
         if (key && !running && Date.now() > retryAfter) {
           running = refresh(key, fs, file).finally(() => { running = null; });
         }

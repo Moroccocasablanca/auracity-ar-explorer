@@ -37,7 +37,7 @@ export function AdminTools() {
   const [menuText, setMenuText] = useState("");
   const [reviews, setReviews] = useState(false);
   const [classesText, setClassesText] = useState("");
-  const [voice, setVoice] = useState<"female" | "male">("female");
+  const [voice, setVoice] = useState<"female" | "male">("male");
   const [menu3d, setMenu3d] = useState(false);
   const [photos, setPhotos] = useState<Record<string, string>>({}); // the owner's own dish photos, by dish name
   const [flashText, setFlashText] = useState("");
@@ -64,7 +64,7 @@ export function AdminTools() {
     setPhotos(Object.fromEntries((c.menu ?? []).filter((m) => m.img).map((m) => [m.name, m.img as string])));
     setReviews(Boolean(c.reviews?.length));
     setClassesText(classesToText(c.classes));
-    setVoice(c.voice ?? "female");
+    setVoice(c.voice ?? "male");
     setMenu3d(Boolean(c.has3DMenu));
   };
   useEffect(() => {

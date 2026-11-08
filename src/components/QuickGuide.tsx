@@ -20,6 +20,8 @@ import { useToday, weatherWord } from "@/lib/live";
 import { ACTIVITIES, ACTIVITY_META, classesNow } from "@/lib/activities";
 import { getVenueContent } from "@/lib/venue-content";
 import { DutyLine, useClock } from "@/components/DutyCard";
+import { buildTour } from "@/lib/tour";
+import { Footprints } from "lucide-react";
 
 const card = "rounded-2xl border border-border bg-card/60 p-4";
 
@@ -61,6 +63,8 @@ export function QuickGuide() {
           <span className="flex-1">{active ? t("guide.q.nogps") : t("guide.q.locate")}</span>
         </button>
       )}
+
+      <TourCard />
 
       {today && (
         <div className={card}>
@@ -148,6 +152,22 @@ export function QuickGuide() {
 
       <section>
         <h2 className="flex items-center gap-2 text-lg font-bold"><Phone className="size-5" /> {t("guide.q.useful")}</h2>
+        <ul className="mt-2 grid grid-cols-2 gap-2">
+          {[
+            { n: "112", label: t("sos.112"), tone: "bg-red-600 text-white" },
+            { n: "116117", label: t("sos.116117"), tone: "bg-primary text-primary-foreground" },
+            { n: "114", label: t("sos.114"), tone: "bg-primary text-primary-foreground" },
+            { n: "1522", label: t("sos.1522"), tone: "bg-primary text-primary-foreground" },
+            { n: "0172438111", label: t("sos.comune"), tone: "border border-border" },
+          ].map((x) => (
+            <li key={x.n}>
+              <a href={`tel:${x.n}`} className={`flex h-full items-center gap-2 rounded-2xl px-3 py-2.5 ${x.tone}`}>
+                <Phone className="size-4 shrink-0" />
+                <span className="min-w-0 leading-tight"><span className="block text-sm font-bold">{x.n === "0172438111" ? "0172 438111" : x.n}</span><span className="block truncate text-[0.65rem] opacity-90">{x.label}</span></span>
+              </a>
+            </li>
+          ))}
+        </ul>
         <ul className="mt-2 space-y-2">
           {useful.map(({ s, d }) => (
             <li key={s.id} className={`${card} flex items-center gap-3`}>
@@ -166,5 +186,24 @@ export function QuickGuide() {
         </ul>
       </section>
     </div>
+  );
+}
+
+/** Entry to the guided walk: how many monuments and how long, from where you are. */
+function TourCard() {
+  const { t } = useI18n();
+  const { pos } = useLocation();
+  const { data: nodes = [] } = useQuery(nodesQuery);
+  const tour = useMemo(() => buildTour(nodes.filter((n) => n.kind === "monument"), pos ?? BRA_CENTER), [nodes, pos]);
+  if (!tour.stops.length) return null;
+  return (
+    <Link to="/tour" className="flex items-center gap-3 rounded-2xl border border-primary/60 bg-primary/15 px-4 py-4 transition active:scale-[.98]">
+      <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground"><Footprints className="size-5" /></span>
+      <span className="min-w-0 flex-1">
+        <span className="block font-semibold">{t("tour.card")}</span>
+        <span className="block text-sm text-muted-foreground">{t("tour.card.sub", { n: tour.stops.length, min: tour.minutes })}</span>
+      </span>
+      <span aria-hidden className="text-xl">›</span>
+    </Link>
   );
 }

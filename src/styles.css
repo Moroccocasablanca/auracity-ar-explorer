@@ -502,7 +502,7 @@ button:not(:disabled):active { transform: scale(.96); }
 
 /* Performance: no blur on dozens of markers (very heavy on phones); lower-priority icons step aside when they overlap. */
 .aura-label { background: color-mix(in oklab, var(--card) 96%, transparent); box-shadow: 0 4px 10px rgb(0 0 0 / .3); }
-.aura-mk.aura-mk-off { opacity: 0; pointer-events: none; }
+.aura-mk.aura-mk-off { opacity: 0 !important; pointer-events: none !important; visibility: hidden; } /* !important: the map writes its own inline opacity on every marker, which used to win and keep tidied markers visible */
 
 /* ===== Service cards (pool, pharmacy...): high contrast, big readable text, solid buttons ===== */
 .aura-popup .aura-pop-ico { grid-row: 1 / span 4; grid-column: 1; width: 96px; height: 96px; border-radius: 22px; display: flex; align-items: center; justify-content: center; background: linear-gradient(150deg, color-mix(in oklab, var(--pin) 70%, #fff), var(--pin)); box-shadow: 0 10px 22px color-mix(in oklab, var(--pin) 45%, transparent), inset 0 1px 0 rgb(255 255 255 / .5); }
@@ -550,3 +550,95 @@ button:not(:disabled):active { transform: scale(.96); }
 .aura-svc-duty .aura-label { display: flex !important; }
 @keyframes aura-duty { 50% { box-shadow: 0 0 0 9px rgb(22 163 74 / 0), 0 6px 14px rgb(0 0 0 / .35); } }
 @media (prefers-reduced-motion: reduce) { .aura-svc-duty .aura-svc-badge { animation: none; } }
+
+/* ---- Flash offer: a beam of light rises from the venue to the sky, with the minutes left ---- */
+.aura-mk.aura-flash::before {
+  content: ""; position: absolute; left: 50%; bottom: 70%; width: 16px; height: 230px; transform: translateX(-50%);
+  border-radius: 10px 10px 4px 4px; pointer-events: none; z-index: -1;
+  background:
+    repeating-linear-gradient(to top, rgba(255, 255, 255, .0) 0 14px, rgba(255, 255, 255, .55) 14px 18px),
+    linear-gradient(to top, rgba(255, 214, 10, .95), rgba(255, 150, 0, .55) 38%, rgba(255, 220, 120, 0) 100%);
+  background-size: 100% 36px, 100% 100%;
+  filter: drop-shadow(0 0 8px rgba(255, 200, 0, .9));
+  -webkit-mask-image: linear-gradient(to top, #000 55%, transparent);
+  mask-image: linear-gradient(to top, #000 55%, transparent);
+  animation: aura-beam-rise 1.1s linear infinite, aura-beam-pulse 1.8s ease-in-out infinite;
+}
+.aura-mk.aura-flash::after {
+  content: "\26A1 " attr(data-flash) "\2032"; position: absolute; right: -14px; top: -12px; z-index: 3; pointer-events: none;
+  background: #ffd60a; color: #1a1300; font: 800 11px/1 system-ui, sans-serif; padding: 4px 7px; border-radius: 999px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .45), 0 0 0 2px #fff; white-space: nowrap;
+}
+.aura-mk.aura-flash > :not(.aura-label) { filter: drop-shadow(0 0 10px rgba(255, 205, 0, .95)); }
+@keyframes aura-beam-rise { to { background-position: 0 -36px, 0 0; } }
+@keyframes aura-beam-pulse { 0%, 100% { opacity: .78; transform: translateX(-50%) scaleX(1); } 50% { opacity: 1; transform: translateX(-50%) scaleX(1.35); } }
+@media (prefers-reduced-motion: reduce) { .aura-mk.aura-flash::before { animation: none; } }
+.aura-pop-flash { margin: 0 0 6px; padding: 7px 10px; border-radius: 10px; background: linear-gradient(90deg, #ffd60a, #ff9f0a); color: #1a1300; font-weight: 800; font-size: 13px; line-height: 1.25; }
+
+/* On the phone a field with small text makes the browser zoom the whole page when you touch it, and it does not zoom back (the app looks "zoomed", corners cut).
+   16 px or more stops that. Double-tap zoom is off too. */
+@media (pointer: coarse) {
+  input, textarea, select { font-size: max(16px, 1em) !important; }
+  html { touch-action: manipulation; -webkit-text-size-adjust: 100%; }
+}
+
+/* the page never stretches from its edges (the app must not feel like a website) */
+html, body { overscroll-behavior: none; touch-action: manipulation; -webkit-text-size-adjust: 100%; }
+.cat-sheet { transform-origin: top center; animation: cat-pop .22s cubic-bezier(.2,1.3,.4,1) both; }
+.cat-sheet > button { animation: cat-tile .28s cubic-bezier(.2,1.3,.4,1) both; animation-delay: calc(var(--i, 0) * 28ms); }
+@keyframes cat-pop { from { opacity: 0; transform: translateY(-8px) scale(.96); } to { opacity: 1; transform: none; } }
+@keyframes cat-tile { from { opacity: 0; transform: scale(.7); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .cat-sheet, .cat-sheet > button { animation: none; } }
+
+/* spatial dock: liquid drop + light that follows the finger */
+.aura-drop { background: radial-gradient(120% 140% at 50% 0%, oklch(0.85 0.12 200 / .55), oklch(0.7 0.15 250 / .25)); box-shadow: 0 0 18px oklch(0.8 0.14 210 / .55), inset 0 1px 0 oklch(1 0 0 / .35); transition: transform .62s cubic-bezier(.3,1.65,.45,1); animation: none; }
+.aura-dock-shine { opacity: var(--glow, 0); transition: opacity .3s; background: radial-gradient(90px 90px at var(--mx, 50%) var(--my, 50%), oklch(1 0 0 / .28), transparent 70%); }
+.magnet-dock { transform-style: preserve-3d; -webkit-user-select: none; user-select: none; }
+.magnet-dock > a, .magnet-dock > button { will-change: transform; }
+@media (prefers-reduced-motion: reduce) { .aura-drop { transition: none; } }
+
+/* ---- space UI: planets on a ring (top) and floating crystals (bottom) ---- */
+.aura-orb { background: radial-gradient(circle at 32% 26%, oklch(0.95 0.06 230), oklch(0.62 0.16 262) 55%, oklch(0.32 0.12 285)); box-shadow: inset 0 -6px 12px oklch(0 0 0 / .35), 0 6px 18px oklch(0.55 0.18 262 / .55); }
+.aura-orb.is-on, .aura-orbit-btn .aura-orb { background: radial-gradient(circle at 32% 26%, #fff, oklch(0.86 0.13 205) 50%, oklch(0.62 0.15 235)); box-shadow: inset 0 -5px 10px oklch(0.4 0.1 235 / .4), 0 0 22px oklch(0.85 0.14 205 / .85); }
+.aura-orbit-glow { background: radial-gradient(circle, oklch(0.85 0.14 205 / .35), transparent 70%); animation: aura-pulse 2.4s ease-in-out infinite; }
+.aura-orbit-hint { animation: aura-pulse 2s ease-in-out infinite; }
+@keyframes aura-pulse { 0%,100% { transform: scale(.85); opacity: .5; } 50% { transform: scale(1.15); opacity: 1; } }
+.aura-nav::before { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; background: linear-gradient(to top, oklch(0.16 0.04 280 / .92), oklch(0.16 0.04 280 / .55) 60%, transparent); }
+.aura-crystal { background: linear-gradient(145deg, oklch(0.42 0.05 265 / .85), oklch(0.24 0.05 275 / .9)); border: 1px solid oklch(1 0 0 / .22); box-shadow: inset 0 1px 0 oklch(1 0 0 / .35), 0 8px 20px oklch(0 0 0 / .45); backdrop-filter: blur(8px); animation: aura-float 3.6s ease-in-out infinite; animation-delay: var(--d); }
+.aura-crystal.is-on { background: linear-gradient(145deg, oklch(0.55 0.1 215), oklch(0.36 0.09 245)); border-color: oklch(0.85 0.12 205 / .9); box-shadow: inset 0 1px 0 oklch(1 0 0 / .5), 0 0 22px oklch(0.8 0.14 205 / .75), 0 10px 24px oklch(0 0 0 / .5); }
+@keyframes aura-float { 0%,100% { translate: 0 0; } 50% { translate: 0 -4px; } }
+.aura-sat { position: absolute; inset: -7px; border-radius: 9999px; animation: aura-spin 2.8s linear infinite; pointer-events: none; }
+.aura-sat::after { content: ""; position: absolute; top: 0; left: 50%; width: 6px; height: 6px; margin-left: -3px; border-radius: 9999px; background: #fff; box-shadow: 0 0 10px 2px #fff; }
+@keyframes aura-spin { to { transform: rotate(360deg); } }
+.aura-burst { position: absolute; inset: 0; border-radius: 1.1rem; border: 2px solid #fff; pointer-events: none; animation: aura-burst .7s ease-out forwards; }
+@keyframes aura-burst { from { transform: scale(1); opacity: .9; } to { transform: scale(2.6); opacity: 0; } }
+.aura-tools > * { animation: aura-float 3.4s ease-in-out infinite; }
+.aura-tools > *:nth-child(2n) { animation-delay: .5s; }
+.aura-tools > *:nth-child(3n) { animation-delay: 1s; }
+@media (prefers-reduced-motion: reduce) { .aura-crystal, .aura-sat, .aura-tools > *, .aura-orbit-glow, .aura-orbit-hint { animation: none; } }
+.aura-orbit-ring { border: 1.5px solid oklch(0.85 0.14 205 / .55); box-shadow: 0 0 14px oklch(0.85 0.14 205 / .55), inset 0 0 12px oklch(0.85 0.14 205 / .25); }
+
+.cat-fan { transform-origin: top center; animation: cat-pop .22s cubic-bezier(.2,1.4,.4,1) both; }
+.cat-pop { animation: cat-tile .3s cubic-bezier(.2,1.6,.4,1) both; animation-delay: calc(var(--i) * 22ms); }
+.aura-tools > * { animation: none !important; }
+.aura-tool { display: flex; width: 2.6rem; height: 2.6rem; align-items: center; justify-content: center; border-radius: 9999px; border: 1px solid oklch(1 0 0 / .2); background: oklch(0.3 0.05 270 / .85); font-size: 1.3rem; line-height: 1; box-shadow: 0 4px 12px oklch(0 0 0 / .4); transition: transform .15s; }
+.aura-tool:active { transform: scale(.88); }
+.aura-tool.is-on { background: oklch(0.5 0.1 215); border-color: oklch(0.85 0.12 205 / .9); }
+
+.aura-tool { background: oklch(0.26 0.04 270 / .9); border-color: oklch(1 0 0 / .14); box-shadow: inset 0 1px 0 oklch(1 0 0 / .12), 0 4px 12px oklch(0 0 0 / .35); }
+.aura-crystal { background: linear-gradient(160deg, oklch(0.34 0.04 270 / .88), oklch(0.2 0.04 275 / .92)); }
+.aura-crystal.is-on { background: linear-gradient(160deg, oklch(0.42 0.08 225), oklch(0.26 0.06 250)); }
+
+/* the two links of the tools row look like the other buttons (the old gold style is gone) */
+.aura-tools a { background: oklch(0.26 0.04 270 / .9) !important; border: 1px solid oklch(1 0 0 / .14) !important; box-shadow: inset 0 1px 0 oklch(1 0 0 / .12), 0 4px 12px oklch(0 0 0 / .35) !important; }
+.aura-tools svg { stroke-width: 1.7; }
+
+/* map pins: clean line icons, white on the category colour (dark on the white service badges) */
+svg.aura-ico-line { color: #fff; fill: none; filter: drop-shadow(0 1px 1.5px rgb(0 0 0 / .35)); }
+.aura-svc-badge svg.aura-ico-line { color: var(--edge, #4c3fb0); filter: none; }
+.aura-badge:has(svg.aura-ico-line) { background: linear-gradient(150deg, color-mix(in oklab, var(--pin) 82%, #fff), var(--pin) 60%, color-mix(in oklab, var(--pin) 85%, #000)); }
+.aura-svc-badge:has(svg.aura-ico-line) { background: #fff; }
+
+/* Effetti: the name of the chosen effect pops in */
+@keyframes fx-name-pop { 0% { opacity: 0; transform: translateY(6px) scale(0.9); } 100% { opacity: 1; transform: none; } }
+.fx-name { animation: fx-name-pop 0.28s cubic-bezier(0.2, 0.9, 0.3, 1.3); }

@@ -16,10 +16,10 @@ import { LanguageSelect } from "@/components/account/LanguageSelect";
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Sign in — AURACITY Bra" },
-      { name: "description", content: "Create a free visitor account or a business account for your bar or restaurant in Bra." },
-      { property: "og:title", content: "Sign in — AURACITY Bra" },
-      { property: "og:description", content: "Free visitor accounts and business accounts for venues in Bra." },
+      { title: "Accedi — AURACITY Bra" },
+      { name: "description", content: "Crea un account gratuito da visitatore o un account per il tuo bar o ristorante a Bra." },
+      { property: "og:title", content: "Accedi — AURACITY Bra" },
+      { property: "og:description", content: "Account gratuiti per i visitatori e account per i locali di Bra." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],

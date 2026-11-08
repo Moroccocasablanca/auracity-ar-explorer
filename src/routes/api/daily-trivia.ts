@@ -22,10 +22,11 @@ function clean(list: Raw[], day: string) {
   return out;
 }
 
-async function generate(key: string, day: string, focus?: { topic: string; band: string }) {
+async function generate(key: string, day: string, focus?: { topic: string; band: string }, avoid: string[] = []) {
+  const avoidText = avoid.length ? `\nNON ripetere né riformulare queste domande già fatte oggi:\n- ${avoid.slice(-40).join("\n- ")}` : "";
   const prompt = focus
-    ? `Oggi è ${day}. Scrivi 10 NUOVE domande a scelta multipla in italiano per un'app di quiz educativa e divertente. Materia: ${focus.topic} (${focus.topic === "english" ? "come si dice in inglese, falsi amici, frasi utili" : focus.topic === "modi" ? "modi di dire italiani" : focus.topic === "locale" ? "Piemonte, Langhe, Bra, cibo e vino" : focus.topic === "patente" ? "codice della strada italiano, segnali e regole" : focus.topic === "diritti" ? "Costituzione, istituzioni e diritti dei cittadini italiani" : focus.topic === "salute" ? "salute, primo soccorso e prevenzione" : focus.topic === "soldi" ? "vita quotidiana degli adulti in Italia: tasse, bollette, contratti, banca, lavoro" : focus.topic === "digitale" ? "sicurezza online, password, truffe, privacy" : "programma scolastico italiano, come nei libri di testo"}). Livello: ${focus.band === "kids" ? "bambini 8-11 anni" : focus.band === "teen" ? "ragazzi delle scuole medie e superiori" : "adulti"}. Ogni domanda su un argomento DIVERSO dentro la materia (non ripetere gli stessi temi). Regole: SOLO fatti certi e verificabili; 4 risposte diverse, la PRIMA è sempre quella giusta; spiegazione di 1-2 frasi che insegna qualcosa; tono chiaro e simpatico. Campi: band="${focus.band}", topic="${focus.topic}".`
-    : `Oggi è ${day}. Scrivi 18 domande a scelta multipla in italiano per un'app di quiz educativa e divertente: 6 per bambini (8-11 anni, "kids"), 6 per ragazzi delle scuole medie e superiori ("teen"), 6 per adulti ("adult").
+    ? `Oggi è ${day}. Scrivi 10 NUOVE domande a scelta multipla in italiano per un'app di quiz educativa e divertente. Materia: ${focus.topic} (${focus.topic === "english" ? "come si dice in inglese, falsi amici, frasi utili" : focus.topic === "modi" ? "modi di dire italiani" : focus.topic === "locale" ? "Piemonte, Langhe, Bra, cibo e vino" : focus.topic === "patente" ? "codice della strada italiano, segnali e regole" : focus.topic === "diritti" ? "Costituzione, istituzioni e diritti dei cittadini italiani" : focus.topic === "salute" ? "salute, primo soccorso e prevenzione" : focus.topic === "soldi" ? "vita quotidiana degli adulti in Italia: tasse, bollette, contratti, banca, lavoro" : focus.topic === "digitale" ? "sicurezza online, password, truffe, privacy" : "programma scolastico italiano, come nei libri di testo"}). Livello: ${focus.band === "kids" ? "bambini 8-11 anni" : focus.band === "teen" ? "ragazzi delle scuole medie e superiori" : "adulti"}. Ogni domanda su un argomento DIVERSO dentro la materia (non ripetere gli stessi temi). Regole: SOLO fatti certi e verificabili; 4 risposte diverse, la PRIMA è sempre quella giusta; spiegazione di 1-2 frasi che insegna qualcosa; tono chiaro e simpatico. Campi: band="${focus.band}", topic="${focus.topic}".${avoidText}`
+    : `Oggi è ${day}. Scrivi 24 domande a scelta multipla in italiano per un'app di quiz educativa e divertente: 8 per bambini (8-11 anni, "kids"), 8 per ragazzi delle scuole medie e superiori ("teen"), 8 per adulti ("adult").
 Varia le materie tra: ${TOPICS.join(", ")} (english = come si dice in inglese, falsi amici, frasi utili; modi = modi di dire italiani; locale = Piemonte, Langhe, Bra, cibo e vino).
 Regole: SOLO fatti certi e verificabili (niente dubbi, niente notizie recenti); 4 risposte diverse, la PRIMA è sempre quella giusta; spiegazione di 1-2 frasi che insegna qualcosa; tono chiaro e simpatico; nessuna domanda che dipende dalla data odierna.`;
   for (const model of MODELS) {
@@ -72,12 +73,15 @@ export const Route = createFileRoute("/api/daily-trivia")({
         const path = await import("node:path");
         const os = await import("node:os");
         const day = new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Rome" });
-        const dir = path.join(process.cwd(), ".daily-cache");
+        const dir = path.join(process.env["DATA_DIR"] ?? process.cwd(), ".daily-cache");
         const url = new URL(request.url);
         const topic = url.searchParams.get("topic") ?? "";
         const band = url.searchParams.get("band") ?? "";
         const focus = TOPICS.includes(topic) && ["kids", "teen", "adult"].includes(band) ? { topic, band } : undefined;
-        const file = path.join(dir, focus ? `trivia-${day}-${band}-${topic}.json` : `trivia-${day}.json`);
+        // batch 0 is the first set of the day; higher batches are NEW sets that never repeat the earlier ones (asked when the player runs out)
+        const batch = Math.min(Math.max(Number(url.searchParams.get("batch") ?? 0) || 0, 0), 30);
+        const base = focus ? `trivia-${day}-${band}-${topic}` : `trivia-${day}`;
+        const file = path.join(dir, batch ? `${base}-b${batch}.json` : `${base}.json`);
         if (fs.existsSync(file)) return new Response(fs.readFileSync(file), { headers: { "content-type": "application/json", "cache-control": "public, max-age=600" } });
         let key = process.env["GEMINI_API_KEY"] ?? "";
         if (!key) {
@@ -85,9 +89,14 @@ export const Route = createFileRoute("/api/daily-trivia")({
         }
         if (!key) return Response.json([], { status: 503 });
         // Writing 18 questions takes a while: answer at once ("not ready yet") and let it finish in the background.
-        const slot = focus ? `${band}-${topic}` : "daily";
+        const slot = `${focus ? `${band}-${topic}` : "daily"}-${batch}`;
         if (!inflight.has(slot)) {
-          inflight.set(slot, generate(key, day, focus)
+          const avoid: string[] = [];
+          for (const f of fs.existsSync(dir) ? fs.readdirSync(dir) : []) {
+            if (!f.startsWith(`${base}.`) && !f.startsWith(`${base}-b`)) continue;
+            try { for (const t of JSON.parse(fs.readFileSync(path.join(dir, f), "utf8")) as { q?: string }[]) if (t.q) avoid.push(t.q); } catch { /* unreadable batch */ }
+          }
+          inflight.set(slot, generate(key, day, focus, avoid)
             .then((list) => {
               if (list.length) {
                 fs.mkdirSync(dir, { recursive: true });

@@ -49,7 +49,14 @@ export default {
     try {
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
-      return await normalizeCatastrophicSsrResponse(response);
+      const out = await normalizeCatastrophicSsrResponse(response);
+      // pages are never kept by the phone (a new version shows at once); the fingerprinted files under /assets are cached by the static server
+      if ((out.headers.get("content-type") ?? "").includes("text/html") && !out.headers.has("cache-control")) {
+        const h = new Headers(out.headers);
+        h.set("cache-control", "no-store");
+        return new Response(out.body, { status: out.status, statusText: out.statusText, headers: h });
+      }
+      return out;
     } catch (error) {
       console.error(error);
       return new Response(renderErrorPage(), {
